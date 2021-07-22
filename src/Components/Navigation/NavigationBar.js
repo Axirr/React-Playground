@@ -5,13 +5,6 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link
-} from "react-router-dom";
-
 class NavigationBar extends Component {
     render() {
         return (
@@ -25,6 +18,7 @@ class NavigationBar extends Component {
                   <Nav.Link href="/">Home</Nav.Link>
                   <NavDropdown title="Projects" id="basic-nav-dropdown">
                     <NavDropdown.Item href="/rps">Rock Paper Scissors</NavDropdown.Item>
+                    <NavDropdown.Item href="/loveletter">Love Letter</NavDropdown.Item>
                   </NavDropdown>
                 </Nav>
               </Navbar.Collapse>

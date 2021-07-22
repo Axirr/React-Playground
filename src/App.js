@@ -3,6 +3,7 @@ import React, {Component} from 'react';
 import NavigationBar from './Components/Navigation/NavigationBar';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import RPS from './Components/RockPaperScissors/RPS';
+import LoveLetter from './Components/LoveLetter/LoveLetter';
 
 class App extends Component {
 
@@ -17,6 +18,9 @@ class App extends Component {
             </Route>
             <Route path="/rps">
               <RPS />
+            </Route>
+            <Route path="/loveletter">
+              <LoveLetter />
             </Route>
           </Switch>
         </BrowserRouter>
