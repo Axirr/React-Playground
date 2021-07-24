@@ -6,9 +6,11 @@ class LoveLetter extends Component {
         drawCard: "none",
         currentTurn: 1,
         //deck: ["guard", "king", "prince", "countess", "cleric"],
-        deck: ["guard", "king", "prince", "countess"],
+        deck: ["guard", "guard", "princess", "prince", "baron", "prince", "guard"],
+        //deck: ["baron", "prince", "guard"],
         playersInGame: [1, 2],
-        isHandMaid: [0, 1]
+        isHandMaiden: [false, false],
+        message: "temp"
     }
 
     componentDidMount() {
@@ -17,6 +19,7 @@ class LoveLetter extends Component {
     
     deal() {
         var shuffledDeck = this.returnShuffledDeck()
+        //var shuffledDeck = this.state.deck
         this.setState( { deck: shuffledDeck }, () => {
             console.log(this.state.deck)
             var deckCopy = [...this.state.deck]
@@ -67,63 +70,197 @@ class LoveLetter extends Component {
         }
 
         var isGameOver = this.state.deck.length == 0 ? true : false
-        let isElim = this.isElimCardEffect(card)
-        if (isElim === false) {
-            this.replaceCard(playerNumber)
-            console.log("Replacing")
-        }
-        console.log("Current draw card is " + this.state.drawCard)
+        this.isElimCardEffect(card)
+        //console.log("Current draw card is " + this.state.drawCard)
         if (isGameOver) {
-            this.setState( {currentTurn: -1})
+            //this.setState( {currentTurn: -1})
             this.evaluateShowdownWin()
             return
         }
-        this.advanceTurn()
     }
 
     isElimCardEffect(card) {
-        window.alert("You are playing a " + card)
+        //window.alert("You are playing a " + card)
+        var handmaidenCopy = this.state.isHandMaiden
+        handmaidenCopy[this.state.currentTurn - 1] = false
         var myTarget = this.getTargetPlayerNumber()
+        console.log("target")
+        console.log(myTarget)
+        var returnBool = false
+        var isDrawCardPlayed = (card === this.state.drawCard)
+        if (isDrawCardPlayed) {
+            var notPlayedCard = this.state.hands[this.state.currentTurn - 1]
+        } else {
+            var notPlayedCard = this.state.drawCard
+        }
         switch(card) {
             case 'princess':
                 this.eliminatePlayer(this.state.currentTurn)
-                return true;
+                this.replaceCard(0)
+                this.advanceTurn()
                 break;
             case 'countess':
-                return false
+                this.normalDrawAndAdvance()
                 break;
             case 'king':
                 var handsCopy = [...this.state.hands]
                 var playerOriginalHand = handsCopy[myTarget - 1]
-                handsCopy[myTarget - 1] = this.state.drawCard
-                this.setState({ hands: handsCopy, drawCard: playerOriginalHand})
-                console.log("BUG: To use same replacement card format, can't setState to draw card or it doesn't happen in time.")
-                return false
+                handsCopy[myTarget - 1] = notPlayedCard
+                handsCopy[this.state.currentTurn - 1] = playerOriginalHand
+                this.setState({ hands: handsCopy}, () => {
+                    if (!isDrawCardPlayed) {
+                        this.replaceCard(this.state.currentTurn)
+                    } else {
+                        this.replaceCard(0)
+                    }
+                    this.advanceTurn()
+                })
                 break;
             case 'prince':
-                // code
-                return false
+                var deckCopy = [...this.state.deck]
+                if (deckCopy.length >= 1) {
+                    var handsCopy = [...this.state.hands]
+                    var discardedCard = handsCopy[myTarget - 1]
+                    if (myTarget === this.state.currentTurn) {
+                        if (discardedCard === "prince") {
+                            var discardedCard = this.state.drawCard
+                        }
+                    }
+                    handsCopy[myTarget - 1] = deckCopy.pop()
+                    console.log(handsCopy)
+                    console.log("Discarded card")
+                    console.log(discardedCard)
+                    this.setState({hands: handsCopy, deck: deckCopy}, () => {
+                        if (myTarget === this.state.currentTurn) {
+                            this.replaceCard(0)
+                        } else {
+                            this.replaceCard(this.state.currentTurn)
+                        }
+                        if (discardedCard === "princess") {
+                            this.eliminatePlayer(myTarget)
+                        } 
+                        this.advanceTurn()
+                    })
+                } else {
+                    console.log("BUG: Implement draw face down card.")
+                }
                 break;
-            case 'handmaid':
-                // code
-                return false
+            case 'handmaiden':
+                var handmaidenCopy = this.state.isHandMaiden
+                handmaidenCopy[this.state.currentTurn - 1] = true
+                console.log("Current handmaiden list")
+                console.log(handmaidenCopy)
+                this.setState( { isHandMaiden: handmaidenCopy }, () => {
+                    if (!isDrawCardPlayed) {
+                        this.replaceCard(this.state.currentTurn)
+                    } else {
+                        this.replaceCard(0)
+                    }
+                    this.advanceTurn()
+                })
                 break;
             case 'baron':
-                // code
-                return false
+                if (isDrawCardPlayed) {
+                    var playerValue = this.getCardValue(this.state.hands[this.state.currentTurn - 1])
+                } else {
+                    var playerValue = this.getCardValue(this.state.drawCard)
+                }
+                var targetValue = this.getCardValue(this.state.hands[myTarget - 1])
+                var playerToEliminate = 0
+                if (playerValue > targetValue) {
+                    playerToEliminate = myTarget
+                } else if (targetValue > playerValue) {
+                    playerToEliminate = this.state.currentTurn
+                }
+                if (playerToEliminate !== 0) {
+                    this.eliminatePlayer(playerToEliminate, () => {
+                        if (!isDrawCardPlayed) {
+                            this.replaceCard(this.state.currentTurn)
+                        } else {
+                            this.replaceCard(0)
+                        }
+                        this.advanceTurn()
+                    })
+                } else {
+                    if (!isDrawCardPlayed) {
+                        this.replaceCard(this.state.currentTurn)
+                    } else {
+                        this.replaceCard(0)
+                    }
+                    this.advanceTurn()
+                }
                 break;
             case 'priest':
-                // code
-                return false
+                this.setState({message: ("Their card is a " + this.state.hands[myTarget - 1])})
+                this.normalDrawAndAdvance()
                 break;
             case 'guard':
-                // code
-                return false
+                var guess = this.getGuardGuess()
+                console.log("Guard guess")
+                console.log(guess)
+                var actualHand = this.state.hands[myTarget - 1]
+                var playerToEliminate = 0
+                if (guess === actualHand) {
+                    playerToEliminate = myTarget
+                } else {
+                    this.setState( {message: "WRONG GUESS"})
+                }
+                if (playerToEliminate !== 0) {
+                    this.eliminatePlayer(playerToEliminate, () => {
+                        this.normalDrawAndAdvance()
+                    })
+                } else {
+                    this.normalDrawAndAdvance()
+                } 
                 break;
             default:
                 console.log("ERROR, unidentified card found")
-                return false
+                console.log(card)
         }
+    }
+
+    getGuardGuess() {
+        var radios = document.getElementsByName("guardGuess")
+        for (var i = 0, length = radios.length; i < length; i++) {
+            if (radios[i].checked) {
+                return radios[i].value
+            }
+        }
+    }
+
+    normalDrawAndAdvance(isDrawCardPlayed) {
+        if (!isDrawCardPlayed) {
+            this.replaceCard(this.state.currentTurn)
+        } else {
+            this.replaceCard(0)
+        }
+        this.advanceTurn()
+    }
+
+    getCardValue(card) {
+        switch(card) {
+            case "princess":
+                return 8
+            case "countess":
+                return 7
+            case "king":
+                return 6
+            case "prince":
+                return 5
+            case "handmaiden":
+                return 4
+            case "baron":
+                return 3
+            case "priest":
+                return 2
+            case "guard":
+                return 1
+            default:
+                console.log("ERROR, unidentified card found")
+                console.log(card)
+                return 0
+        }
+
     }
 
     isValidMove(card) {
@@ -177,12 +314,12 @@ class LoveLetter extends Component {
         }
 
         // Check if handmaiden
-        if (this.state.isHandMaid[myTarget - 1] === 1) {
+        if (this.state.isHandMaiden[myTarget - 1]) {
             if (this.state.playersInGame.length > 2) {
-                window.alert("INVALID MOVE. Cannot target handmaid player.")
+                window.alert("INVALID MOVE. Cannot target handmaiden player.")
                 return false
             } else if (card === "prince") {
-                window.alert("INVALID MOVE. Cannot target handmaid player. Remember, Prince can target self.")
+                window.alert("INVALID MOVE. Cannot target handmaiden player. Remember, Prince can target self.")
                 return false
             }
         }
@@ -212,6 +349,19 @@ class LoveLetter extends Component {
 
     evaluateShowdownWin() {
         console.log("SHOWDOWN!")
+        var maxPlayer = 0
+        var maxValue = 0
+        for (var i = 0; i < this.state.playersInGame.length; i++) {
+            var currentPlayer = this.state.playersInGame[i]
+            console.log(currentPlayer)
+            var cardValue = this.getCardValue(this.state.hands[currentPlayer - 1])
+            if (cardValue > maxValue) {
+                maxPlayer = currentPlayer
+                maxValue = cardValue
+                console.log("New champ")
+            }
+        }
+        window.alert("Player " + maxPlayer + " wins showdown!")
     }
 
     advanceTurn() {
@@ -220,11 +370,13 @@ class LoveLetter extends Component {
         this.setState({ currentTurn: this.state.playersInGame[(currentIndex + 1) % this.state.playersInGame.length] } )
     }
 
-    eliminatePlayer(playerNumber) {
+    eliminatePlayer(playerNumber, handler = () => {}) {
         var copyPlayers = [...this.state.playersInGame]
         let index = copyPlayers.indexOf(playerNumber)
         copyPlayers.splice(index, 1)
-        this.setState( { playersInGame: copyPlayers })
+        this.setState( { playersInGame: copyPlayers }, () => {
+            handler()
+        })
         if (copyPlayers.length == 1) {
             window.alert("Player " + copyPlayers[0] + " wins!")
         }
@@ -244,6 +396,7 @@ class LoveLetter extends Component {
             <div>
                 <p>Current Live Players: { this.state.playersInGame }</p>
                 <p>Current Turn: Player {this.state.currentTurn}</p>
+                <p>{this.state.message}</p>
                 <div>
                     <p>Hand One</p>
                     <button onClick={(() => { this.playerPlayCard(1, this.state.hands[0]) })}>{this.state.hands[0]}</button>
@@ -254,8 +407,18 @@ class LoveLetter extends Component {
                 </div>
                 <div>
                     <p>Target of Card</p>
-                    <input type="radio" value="1" name="target" checked="checked"/>Player 1
+                    <input type="radio" value="1" name="target" checked="defaultChecked"/>Player 1
                     <input type="radio" value="2" name="target" />Player 2
+                </div>
+                <div>
+                    <p>Guess for Guard</p>
+                    <input type="radio" value="priest" name="guardGuess" checked="defaultChecked" />Priest
+                    <input type="radio" value="baron" name="guardGuess" />Baron
+                    <input type="radio" value="handmaiden" name="guardGuess" />Handmaiden
+                    <input type="radio" value="prince" name="guardGuess" />Prince
+                    <input type="radio" value="king" name="guardGuess" />King
+                    <input type="radio" value="countess" name="guardGuess" />Countess
+                    <input type="radio" value="princess" name="guardGuess" />Princess
                 </div>
                 <p>...</p>
                 <p>...</p>
