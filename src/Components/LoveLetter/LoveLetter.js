@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
 import { Container, Col, Row} from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './LoveLetter.module.css'
 
 class LoveLetter extends Component {
     state = {
         hands: ["none", "none", "none", "none"],
         drawCard: "none",
         currentTurn: 1,
-        deck: ["guard", "guard", "guard", "guard", "guard", "guard", "guard", "guard", "priest", "priest", "baron", "baron", "handmaiden",
-        "handmaiden", "prince", "prince", "king", "king", "countess", "princess"],
-        // deck: ["princess", "baron", "priest", "handmaiden", "countess", "prince"],
+        deck: ["guard", "guard", "guard", "guard", "guard", "priest", "priest", "baron", "baron", "handmaiden",
+        "handmaiden", "prince", "prince", "king", "countess", "princess"],
         playersInGame: [1, 2, 3, 4],
         isHandMaiden: [false, false, false, false],
         message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
@@ -466,6 +467,7 @@ class LoveLetter extends Component {
                     <Col>
                     <p>Current Turn: Player {this.state.currentTurn}</p>
                     <div>
+                    <div>
                         Hand One{this.state.isDisplayed[0] && 
                         <button onClick={(() => { this.playerPlayCard(1, this.state.hands[0]) })}>{this.state.hands[0]}</button> }
                     </div> 
@@ -482,6 +484,9 @@ class LoveLetter extends Component {
                         Hand Four{ this.state.isDisplayed[3] && 
                         <button onClick={ () => { this.playerPlayCard(4, this.state.hands[3]) }}>{this.state.hands[3]}</button> }
                     </div> 
+                    Current Draw Card
+                    {this.state.isDisplayed[4] && <button onClick={ () => { this.playCard(this.state.drawCard, 0)}}>{this.state.drawCard}</button> }
+                    </div>
                     <div>
                         Target of Card
                         <input type="radio" value="1" name="target" defaultChecked/>Player 1
@@ -500,8 +505,6 @@ class LoveLetter extends Component {
                         <input type="radio" value="princess" name="guardGuess" />Princess
                     </div>
                     <p>...</p>
-                    Draw Card
-                    {this.state.isDisplayed[4] && <button onClick={ () => { this.playCard(this.state.drawCard, 0)}}>{this.state.drawCard}</button> }
                     <p>Current Live Players: { JSON.stringify(this.state.playersInGame)}</p>
                     <p>Handmaiden Status for Players (in order): { JSON.stringify(this.state.isHandMaiden)}</p>
                     <p>Cards in the deck {this.state.deck.length}</p>
@@ -518,6 +521,16 @@ class LoveLetter extends Component {
                         <p>Message -3: {this.state.message[3]}</p>
                         <p>Message -4: {this.state.message[4]}</p>
                         <p>Message -5: {this.state.message[5]}</p>
+                        <h3 class="bg-primary">If deck runs out, player with the highest value card wins! Or win by being the last remaining player.</h3>
+                        <h4>Reference Card (Name (# in deck)):</h4>
+                        <p>Princess (1): If played/discarded, player is eliminated. (Value: 8)</p>
+                        <p>Countess (1): Must play if your other card is a king or prince. (Value: 7)</p>
+                        <p>King (1): Trade cards with another player. (Value: 6)</p>
+                        <p>Prince (2): Force target to discard their hand. Can target self. (Value: 5)</p>
+                        <p>Handmaiden (2): Player cannot be targeted until their next turn. (Value: 4)</p>
+                        <p>Baron (2): Compare cards with another player. Lower value card player is eliminated. No effect on tie. (Value: 3)</p>
+                        <p>Priest (2): Look at another player's hand card. (Value: 2)</p>
+                        <p>Guard (5): Guess another player's card. If correct, they are eliminated. Cannot guess 'Guard'. (Value: 1)</p>
                     </Col>
                 </Row>
             </Container>
