@@ -6,13 +6,14 @@ class LoveLetter extends Component {
         hands: ["none", "none", "none", "none"],
         drawCard: "none",
         currentTurn: 1,
-        //deck: ["guard", "guard", "guard", "guard", "guard", "guard", "guard", "guard", "priest", "priest", "baron", "baron", "handmaiden",
-        //"handmaiden", "prince", "prince", "king", "king", "countess", "princess"],
-        deck: ["princess", "baron", "priest", "handmaiden", "countess", "prince"],
+        deck: ["guard", "guard", "guard", "guard", "guard", "guard", "guard", "guard", "priest", "priest", "baron", "baron", "handmaiden",
+        "handmaiden", "prince", "prince", "king", "king", "countess", "princess"],
+        // deck: ["princess", "baron", "priest", "handmaiden", "countess", "prince"],
         playersInGame: [1, 2, 3, 4],
         isHandMaiden: [false, false, false, false],
         message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
-        setAsideCard: "none"
+        setAsideCard: "none",
+        isDisplayed: [false, false, false, false, false, false]
     }
 
     componentDidMount() {
@@ -75,11 +76,11 @@ class LoveLetter extends Component {
 
         var isGameOver = this.state.deck.length == 0 ? true : false
         this.isElimCardEffect(card)
-        if (isGameOver) {
-            //this.setState( {currentTurn: -1})
-            this.evaluateShowdownWin()
-            return
-        }
+        // if (isGameOver) {
+        //     //this.setState( {currentTurn: -1})
+        //     this.evaluateShowdownWin()
+        //     return
+        // }
     }
 
     isElimCardEffect(card) {
@@ -109,11 +110,17 @@ class LoveLetter extends Component {
                 case 'king':
                     var handsCopy = [...this.state.hands]
                     var playerOriginalHand = handsCopy[myTarget - 1]
+                    console.log("Here")
+                    console.log(playerOriginalHand)
                     handsCopy[myTarget - 1] = notPlayedCard
+                    console.log(playerOriginalHand)
                     handsCopy[this.state.currentTurn - 1] = playerOriginalHand
                     this.setState({ hands: handsCopy}, () => {
+                        console.log("Is Draw Card")
+                        console.log(isDrawCardPlayed)
                         if (!isDrawCardPlayed) {
-                            this.replaceCard(this.state.currentTurn)
+                            console.log("shouldn't be here")
+                            //this.replaceCard(this.state.currentTurn)
                         } else {
                             this.replaceCard(0)
                         }
@@ -238,7 +245,7 @@ class LoveLetter extends Component {
         for (var i = 0; i < (messageCopy.length - 1); i++) {
             messageCopy[i] = messageCopy[i+1]
         }
-        messageCopy[-1] = newMessage
+        messageCopy[messageCopy.length - 1] = newMessage
         //var newMessages = [this.state.message[1], this.state.message[2], newMessage]
         this.setState( {message: messageCopy}, nextStateChange)
     }
@@ -347,7 +354,6 @@ class LoveLetter extends Component {
                 return false
             }
         }
-        console.log("CHECK IF HANDMAIDEN CHECK WORKS WITH MORE THAN 2 PEOPLE.")
         return true
     }
 
@@ -361,18 +367,31 @@ class LoveLetter extends Component {
         }
         if (playerNumber === 0) {
             this.setState( {drawCard: drawnCard,
-                deck: deckCopy} )
+                deck: deckCopy}, () => {
+                    this.checkIfGameOver()
+                })
         } else {
             var copyHands = [...this.state.hands]
             copyHands[playerNumber - 1] = this.state.drawCard
             this.setState( {hands: copyHands,
                 drawCard: drawnCard,
-                deck: deckCopy} )
+                deck: deckCopy}, () => {
+                    this.checkIfGameOver()
+                })
+        }
+        this.hideAllCards()
+    }
+
+    checkIfGameOver() {
+        if (this.state.deck.length === 0) {
+            this.evaluateShowdownWin()
+            return
         }
     }
 
     evaluateShowdownWin() {
         console.log("SHOWDOWN!")
+        this.showAllCards()
         var maxPlayer = 0
         var maxValue = 0
         for (var i = 0; i < this.state.playersInGame.length; i++) {
@@ -417,6 +436,29 @@ class LoveLetter extends Component {
         console.log(this.state)
     }
 
+    showCurrentPlayerCards() {
+        var displayCopy = this.state.isDisplayed
+        displayCopy[this.state.currentTurn - 1] = true
+        displayCopy[4] = true
+        this.setState({isDisplayed: displayCopy})
+    }
+
+    hideAllCards() {
+        var displayCopy = this.state.isDisplayed
+        for (var i = 0; i < displayCopy.length; i++) {
+            displayCopy[i] = false
+        }
+        this.setState({isDisplayed: displayCopy})
+    }
+
+    showAllCards() {
+        var displayCopy = this.state.isDisplayed
+        for (var i = 0; i < displayCopy.length; i++) {
+            displayCopy[i] = true
+        }
+        this.setState({isDisplayed: displayCopy})
+    }
+
     render() {
         return (
             <Container>
@@ -424,21 +466,22 @@ class LoveLetter extends Component {
                     <Col>
                     <p>Current Turn: Player {this.state.currentTurn}</p>
                     <div>
-                        Hand One
-                        <button onClick={(() => { this.playerPlayCard(1, this.state.hands[0]) })}>{this.state.hands[0]}</button>
-                    </div>
+                        Hand One{this.state.isDisplayed[0] && 
+                        <button onClick={(() => { this.playerPlayCard(1, this.state.hands[0]) })}>{this.state.hands[0]}</button> }
+                    </div> 
                     <div>
-                        Hand Two
-                        <button onClick={ () => { this.playerPlayCard(2, this.state.hands[1]) }}>{this.state.hands[1]}</button>
-                    </div>
+                        Hand Two{this.state.isDisplayed[1] && 
+                        <button onClick={ () => { this.playerPlayCard(2, this.state.hands[1]) }}>{this.state.hands[1]}</button>}
+                    </div> 
+                     
                     <div>
-                        Hand Three
-                        <button onClick={ () => { this.playerPlayCard(3, this.state.hands[2]) }}>{this.state.hands[2]}</button>
-                    </div>
+                        Hand Three{ this.state.isDisplayed[2] &&
+                        <button onClick={ () => { this.playerPlayCard(3, this.state.hands[2]) }}>{this.state.hands[2]}</button> }
+                    </div> 
                     <div>
-                        Hand Four
-                        <button onClick={ () => { this.playerPlayCard(4, this.state.hands[3]) }}>{this.state.hands[3]}</button>
-                    </div>
+                        Hand Four{ this.state.isDisplayed[3] && 
+                        <button onClick={ () => { this.playerPlayCard(4, this.state.hands[3]) }}>{this.state.hands[3]}</button> }
+                    </div> 
                     <div>
                         Target of Card
                         <input type="radio" value="1" name="target" defaultChecked/>Player 1
@@ -457,14 +500,18 @@ class LoveLetter extends Component {
                         <input type="radio" value="princess" name="guardGuess" />Princess
                     </div>
                     <p>...</p>
-                    <button onClick={ () => { this.playCard(this.state.drawCard, 0)}}>{this.state.drawCard}</button>
-                    <p>Current Live Players: { this.state.playersInGame }</p>
+                    Draw Card
+                    {this.state.isDisplayed[4] && <button onClick={ () => { this.playCard(this.state.drawCard, 0)}}>{this.state.drawCard}</button> }
+                    <p>Current Live Players: { JSON.stringify(this.state.playersInGame)}</p>
+                    <p>Handmaiden Status for Players (in order): { JSON.stringify(this.state.isHandMaiden)}</p>
                     <p>Cards in the deck {this.state.deck.length}</p>
                     <p>Debug</p>
-                    <button onClick={ () => { this.printState()}}>Print State</button>
-                    <button onClick={ () => this.deal()}>Deal</button>
+                    <button onClick = {() => { this.showCurrentPlayerCards()}}>Show Current Player Cards</button>
+                    <button onClick={() => { this.hideAllCards()}}>Hide All Cards</button>
+                    <button onClick={() => { this.showAllCards()}}>Show All Cards</button>
                     </Col>
                     <Col>
+                        <h3>Game History</h3>
                         <p>Message  0: {this.state.message[0]}</p>
                         <p>Message -1: {this.state.message[1]}</p>
                         <p>Message -2: {this.state.message[2]}</p>
