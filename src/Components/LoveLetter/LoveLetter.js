@@ -5,12 +5,11 @@ class LoveLetter extends Component {
         hands: ["none", "none"],
         drawCard: "none",
         currentTurn: 1,
-        //deck: ["guard", "king", "prince", "countess", "cleric"],
-        deck: ["guard", "guard", "princess", "prince", "baron", "prince", "guard"],
+        deck: ["guard", "princess", "king", "baron", "prince", "handmaiden", "countess", "priest"],
         //deck: ["baron", "prince", "guard"],
         playersInGame: [1, 2],
         isHandMaiden: [false, false],
-        message: "temp"
+        message: "Default Message."
     }
 
     componentDidMount() {
@@ -100,7 +99,7 @@ class LoveLetter extends Component {
                 this.advanceTurn()
                 break;
             case 'countess':
-                this.normalDrawAndAdvance()
+                this.normalDrawAndAdvance(isDrawCardPlayed)
                 break;
             case 'king':
                 var handsCopy = [...this.state.hands]
@@ -192,7 +191,7 @@ class LoveLetter extends Component {
                 break;
             case 'priest':
                 this.setState({message: ("Their card is a " + this.state.hands[myTarget - 1])})
-                this.normalDrawAndAdvance()
+                this.normalDrawAndAdvance(isDrawCardPlayed)
                 break;
             case 'guard':
                 var guess = this.getGuardGuess()
@@ -207,10 +206,10 @@ class LoveLetter extends Component {
                 }
                 if (playerToEliminate !== 0) {
                     this.eliminatePlayer(playerToEliminate, () => {
-                        this.normalDrawAndAdvance()
+                        this.normalDrawAndAdvance(isDrawCardPlayed)
                     })
                 } else {
-                    this.normalDrawAndAdvance()
+                    this.normalDrawAndAdvance(isDrawCardPlayed)
                 } 
                 break;
             default:
@@ -394,25 +393,23 @@ class LoveLetter extends Component {
     render() {
         return (
             <div>
-                <p>Current Live Players: { this.state.playersInGame }</p>
-                <p>Current Turn: Player {this.state.currentTurn}</p>
                 <p>{this.state.message}</p>
                 <div>
-                    <p>Hand One</p>
+                    Hand One
                     <button onClick={(() => { this.playerPlayCard(1, this.state.hands[0]) })}>{this.state.hands[0]}</button>
                 </div>
                 <div>
-                    <p>Hand Two</p>
+                    Hand Two
                     <button onClick={ () => { this.playerPlayCard(2, this.state.hands[1]) }}>{this.state.hands[1]}</button>
                 </div>
                 <div>
-                    <p>Target of Card</p>
-                    <input type="radio" value="1" name="target" checked="defaultChecked"/>Player 1
+                    Target of Card
+                    <input type="radio" value="1" name="target" defaultChecked/>Player 1
                     <input type="radio" value="2" name="target" />Player 2
                 </div>
                 <div>
-                    <p>Guess for Guard</p>
-                    <input type="radio" value="priest" name="guardGuess" checked="defaultChecked" />Priest
+                    Guess for Guard
+                    <input type="radio" value="priest" name="guardGuess" defaultChecked/>Priest
                     <input type="radio" value="baron" name="guardGuess" />Baron
                     <input type="radio" value="handmaiden" name="guardGuess" />Handmaiden
                     <input type="radio" value="prince" name="guardGuess" />Prince
@@ -421,8 +418,9 @@ class LoveLetter extends Component {
                     <input type="radio" value="princess" name="guardGuess" />Princess
                 </div>
                 <p>...</p>
-                <p>...</p>
                 <button onClick={ () => { this.playCard(this.state.drawCard, 0)}}>{this.state.drawCard}</button>
+                <p>Current Live Players: { this.state.playersInGame }</p>
+                <p>Current Turn: Player {this.state.currentTurn}</p>
                 <p>Debug</p>
                 <button onClick={ () => { this.printState()}}>Print State</button>
                 <button onClick={ () => this.deal()}>Deal</button>
