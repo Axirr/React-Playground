@@ -21,8 +21,8 @@ class LoveLetter extends Component {
     }
     
     deal() {
-        //var shuffledDeck = this.returnShuffledDeck()
-        var shuffledDeck = this.state.deck
+        var shuffledDeck = this.returnShuffledDeck()
+        //var shuffledDeck = this.state.deck
         this.setState( { deck: shuffledDeck }, () => {
             console.log(this.state.deck)
             var deckCopy = [...this.state.deck]
