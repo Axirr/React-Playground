@@ -8,16 +8,16 @@ class LoveLetter extends Component {
         hands: ["none", "none", "none", "none"],
         drawCard: "none",
         currentTurn: 1,
-        // deck: ["guard", "guard", "guard", "guard", "guard", "priest", "priest", "baron", "baron", "handmaiden",
-        // "handmaiden", "prince", "prince", "king", "countess", "princess"],
-        deck: ["guard", "guard", "guard", "guard", "guard", "guard", "guard", "handmaiden"],
+        deck: ["guard", "guard", "guard", "guard", "guard", "priest", "priest", "baron", "baron", "handmaiden",
+        "handmaiden", "prince", "prince", "king", "countess", "princess"],
+        //deck: ["guard", "guard", "guard", "guard", "guard", "guard", "guard", "handmaiden"],
         playersInGame: [1, 2, 3, 4],
         // isHandMaiden: [false, false, false, false],
-        isHandMaiden: [true, true, true, true],
+        isHandMaiden: [false, false, false, false],
         message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
         setAsideCard: "none",
         isDisplayed: [false, false, false, false, false, false],
-        doShuffle: false
+        doShuffle: true
     }
 
     componentDidMount() {
@@ -503,25 +503,25 @@ class LoveLetter extends Component {
                     <Col>
                     <p>Current Turn: Player {this.state.currentTurn}</p>
                     <div>
-                    <div>
-                        Hand One{this.state.isDisplayed[0] && 
-                        <button onClick={(() => { this.playerPlayCard(1, this.state.hands[0]) })}>{this.state.hands[0]}</button> }
-                    </div> 
-                    <div>
-                        Hand Two{this.state.isDisplayed[1] && 
-                        <button onClick={ () => { this.playerPlayCard(2, this.state.hands[1]) }}>{this.state.hands[1]}</button>}
-                    </div> 
-                     
-                    <div>
-                        Hand Three{ this.state.isDisplayed[2] &&
-                        <button onClick={ () => { this.playerPlayCard(3, this.state.hands[2]) }}>{this.state.hands[2]}</button> }
-                    </div> 
-                    <div>
-                        Hand Four{ this.state.isDisplayed[3] && 
-                        <button onClick={ () => { this.playerPlayCard(4, this.state.hands[3]) }}>{this.state.hands[3]}</button> }
-                    </div> 
-                    Current Draw Card
-                    {this.state.isDisplayed[4] && <button onClick={ () => { this.playCard(this.state.drawCard, 0)}}>{this.state.drawCard}</button> }
+                        Current Draw Card
+                        {this.state.isDisplayed[4] && <button onClick={ () => { this.playCard(this.state.drawCard, 0)}}>{this.state.drawCard}</button> }
+                        <div>
+                            Hand One{this.state.isDisplayed[0] && 
+                            <button onClick={(() => { this.playerPlayCard(1, this.state.hands[0]) })}>{this.state.hands[0]}</button> }
+                        </div> 
+                        <div>
+                            Hand Two{this.state.isDisplayed[1] && 
+                            <button onClick={ () => { this.playerPlayCard(2, this.state.hands[1]) }}>{this.state.hands[1]}</button>}
+                        </div> 
+                        
+                        <div>
+                            Hand Three{ this.state.isDisplayed[2] &&
+                            <button onClick={ () => { this.playerPlayCard(3, this.state.hands[2]) }}>{this.state.hands[2]}</button> }
+                        </div> 
+                        <div>
+                            Hand Four{ this.state.isDisplayed[3] && 
+                            <button onClick={ () => { this.playerPlayCard(4, this.state.hands[3]) }}>{this.state.hands[3]}</button> }
+                        </div> 
                     </div>
                     <div>
                         Target of Card
@@ -548,7 +548,7 @@ class LoveLetter extends Component {
                     <button onClick = {() => { this.showCurrentPlayerCards()}}>Show Current Player Cards</button>
                     <button onClick={() => { this.hideAllCards()}}>Hide All Cards</button>
                     <button onClick={() => { this.showAllCards()}}>Show All Cards</button>
-                    <button onClick={() => {this.printState()}}>Print State</button>
+                    {/* <button onClick={() => {this.printState()}}>Print State</button> */}
                     </Col>
                     <Col>
                         <h3>Game History</h3>
@@ -558,7 +558,7 @@ class LoveLetter extends Component {
                         <p>Message -3: {this.state.message[3]}</p>
                         <p>Message -4: {this.state.message[4]}</p>
                         <p>Message -5: {this.state.message[5]}</p>
-                        <h3 class="bg-primary">If deck runs out, player with the highest value card wins! Or win by being the last remaining player.</h3>
+                        <h3 className="bg-primary">If deck runs out, player with the highest value card wins! Or win by being the last remaining player.</h3>
                         <h4>Reference Card (Name (# in deck)):</h4>
                         <p>Princess (1): If played/discarded, player is eliminated. (Value: 8)</p>
                         <p>Countess (1): Must play if your other card is a king or prince. (Value: 7)</p>
