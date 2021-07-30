@@ -19,6 +19,7 @@ class LoveLetter extends Component {
         isDisplayed: [false, false, false, false, false, false],
         doShuffle: true
     }
+    
 
     componentDidMount() {
         this.deal()
