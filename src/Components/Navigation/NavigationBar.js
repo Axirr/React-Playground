@@ -19,6 +19,7 @@ class NavigationBar extends Component {
                   <NavDropdown title="Projects" id="basic-nav-dropdown">
                     <NavDropdown.Item href="/rps">Rock Paper Scissors</NavDropdown.Item>
                     <NavDropdown.Item href="/loveletter">Love Letter</NavDropdown.Item>
+                    <NavDropdown.Item href="/shogun">Shogun of Edo</NavDropdown.Item>
                   </NavDropdown>
                 </Nav>
               </Navbar.Collapse>

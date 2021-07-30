@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Container, Col, Row} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './LoveLetter.module.css'
+import { render } from 'react-dom';
+import ReactDOMServer from 'react-dom/server';
 
 class LoveLetter extends Component {
     state = {
@@ -17,36 +19,61 @@ class LoveLetter extends Component {
         message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
         setAsideCard: "none",
         isDisplayed: [false, false, false, false, false, false],
-        doShuffle: true
+        doShuffle: true,
+        useDefaultDeck: true,
+        defaultDeck: ["guard", "guard", "guard", "guard", "guard", "priest", "priest", "baron", "baron", "handmaiden",
+        "handmaiden", "prince", "prince", "king", "countess", "princess"],
+        currentNumberOfPlayers: 4
     }
     
 
     componentDidMount() {
-        this.deal()
+        this.deal(4)
     }
     
-    deal() {
+    deal(numberPlayers) {
+        console.log(ReactDOMServer.renderToStaticMarkup(this.renderHands(4)))
         if (this.state.doShuffle) {
             var shuffledDeck = this.returnShuffledDeck()
         } else {
             var shuffledDeck = this.state.deck
         }
         this.setState( { deck: shuffledDeck }, () => {
-            console.log(this.state.deck)
+            //console.log(this.state.deck)
             var deckCopy = [...this.state.deck]
-            var card1 = deckCopy.pop()
-            var card2 = deckCopy.pop()
-            var card3 = deckCopy.pop()
-            var card4 = deckCopy.pop()
-            var card5 = deckCopy.pop()
-            var card6 = deckCopy.pop()
-            console.log("Set aside card: " + card6)
+            var newHands = [];
+            var isHandMaiden = [];
+            var isDisplayed = ['false','false']
+            var playersInGame = []
+            for (var i = 0; i < numberPlayers; i++) {
+                newHands.push(deckCopy.pop())
+                isHandMaiden.push(false)
+                isDisplayed.push('false')
+                playersInGame.push(i + 1)
+            }
+            var drawCard = deckCopy.pop()
+            var setAsideCard = deckCopy.pop()
+            console.log("Set aside card: " + setAsideCard)
             this.setState( {
-                hands: [card1, card2, card3, card4],
-                drawCard: card5,
-                setAsideCard: card6,
-                deck: deckCopy} )
+                hands: newHands,
+                drawCard: drawCard,
+                currentTurn: 1,
+                deck: deckCopy,
+                playersInGame: playersInGame,
+                isHandMaiden: isHandMaiden,
+                setAsideCard: setAsideCard,
+                isDisplayed: isDisplayed,
+                currentNumberOfPlayers: numberPlayers} )
+            this.hideAllCards()
         })
+    }
+
+    redeal(numberPlayers) {
+        if (this.state.useDefaultDeck) {
+            this.setState( {deck: this.state.defaultDeck}, () => {
+                this.deal(numberPlayers)
+            })
+        }
     }
 
     returnShuffledDeck() {
@@ -101,9 +128,17 @@ class LoveLetter extends Component {
         }
         for (var i = 0; i < this.state.playersInGame.length; i++) {
             var potentialTarget = this.state.playersInGame[i]
+
+            // found valid target
+            console.log("Test 2")
+            console.log(this.state.isHandMaiden[potentialTarget - 1] === false)
+            console.log(potentialTarget !== this.state.currentTurn)
             if (this.state.isHandMaiden[potentialTarget - 1] === false && potentialTarget !== this.state.currentTurn) {
+                console.log("found valid target!")
                 break;
             }
+
+            // Reached end of search, no valid target found
             if (i === (this.state.playersInGame.length - 1)) {
                 onlyHandmaidens = true;
             }
@@ -477,7 +512,7 @@ class LoveLetter extends Component {
     showCurrentPlayerCards() {
         var displayCopy = this.state.isDisplayed
         displayCopy[this.state.currentTurn - 1] = true
-        displayCopy[4] = true
+        displayCopy[this.state.currentNumberOfPlayers] = true
         this.setState({isDisplayed: displayCopy})
     }
 
@@ -497,6 +532,46 @@ class LoveLetter extends Component {
         this.setState({isDisplayed: displayCopy})
     }
 
+    renderHands(playerNumber) {
+        var newPlayers = [];
+        for (var i = 1; i <= playerNumber; i++ ) {
+            newPlayers.push(i)
+        }
+        console.log(newPlayers)
+
+        //SET STATE COLLECTIVELY
+
+        return(
+            <div>
+                {newPlayers.map((number) => {
+                    return(
+                    <div>Hand {number}{this.state.isDisplayed[number - 1] && 
+                    <button onClick={(() => { this.playerPlayCard(number, this.state.hands[number - 1]) })}>{this.state.hands[number - 1]}</button>} 
+                    </div>);
+                })}
+            </div>
+            // <div>
+            //     <div>
+            //         Hand One{this.state.isDisplayed[0] && 
+            //         <button onClick={(() => { this.playerPlayCard(1, this.state.hands[0]) })}>{this.state.hands[0]}</button> }
+            //     </div> 
+            //     <div>
+            //         Hand Two{this.state.isDisplayed[1] && 
+            //         <button onClick={ () => { this.playerPlayCard(2, this.state.hands[1]) }}>{this.state.hands[1]}</button>}
+            //     </div> 
+                
+            //     <div>
+            //         Hand Three{ this.state.isDisplayed[2] &&
+            //         <button onClick={ () => { this.playerPlayCard(3, this.state.hands[2]) }}>{this.state.hands[2]}</button> }
+            //     </div> 
+            //     <div>
+            //         Hand Four{ this.state.isDisplayed[3] && 
+            //         <button onClick={ () => { this.playerPlayCard(4, this.state.hands[3]) }}>{this.state.hands[3]}</button> }
+            //     </div> 
+            // </div>
+        );
+    }
+
     render() {
         return (
             <Container>
@@ -505,24 +580,8 @@ class LoveLetter extends Component {
                     <p>Current Turn: Player {this.state.currentTurn}</p>
                     <div>
                         Current Draw Card
-                        {this.state.isDisplayed[4] && <button onClick={ () => { this.playCard(this.state.drawCard, 0)}}>{this.state.drawCard}</button> }
-                        <div>
-                            Hand One{this.state.isDisplayed[0] && 
-                            <button onClick={(() => { this.playerPlayCard(1, this.state.hands[0]) })}>{this.state.hands[0]}</button> }
-                        </div> 
-                        <div>
-                            Hand Two{this.state.isDisplayed[1] && 
-                            <button onClick={ () => { this.playerPlayCard(2, this.state.hands[1]) }}>{this.state.hands[1]}</button>}
-                        </div> 
-                        
-                        <div>
-                            Hand Three{ this.state.isDisplayed[2] &&
-                            <button onClick={ () => { this.playerPlayCard(3, this.state.hands[2]) }}>{this.state.hands[2]}</button> }
-                        </div> 
-                        <div>
-                            Hand Four{ this.state.isDisplayed[3] && 
-                            <button onClick={ () => { this.playerPlayCard(4, this.state.hands[3]) }}>{this.state.hands[3]}</button> }
-                        </div> 
+                        {this.state.isDisplayed[this.state.currentNumberOfPlayers] && <button onClick={ () => { this.playCard(this.state.drawCard, 0)}}>{this.state.drawCard}</button> }
+                        {this.renderHands(this.state.currentNumberOfPlayers)}
                     </div>
                     <div>
                         Target of Card
@@ -549,7 +608,12 @@ class LoveLetter extends Component {
                     <button onClick = {() => { this.showCurrentPlayerCards()}}>Show Current Player Cards</button>
                     <button onClick={() => { this.hideAllCards()}}>Hide All Cards</button>
                     <button onClick={() => { this.showAllCards()}}>Show All Cards</button>
-                    {/* <button onClick={() => {this.printState()}}>Print State</button> */}
+                    <button onClick={() => {this.printState()}}>Print State</button>
+                    <p>...</p>
+                    <p>Choose Player Number and Restart Game</p>
+                    <button onClick={() => {this.redeal(2)} }>2</button>
+                    <button onClick={() => {this.redeal(3)} }>3</button>
+                    <button onClick={() => {this.redeal(4)} }>4</button>
                     </Col>
                     <Col>
                         <h3>Game History</h3>

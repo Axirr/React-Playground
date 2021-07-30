@@ -4,6 +4,7 @@ import NavigationBar from './Components/Navigation/NavigationBar';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import RPS from './Components/RockPaperScissors/RPS';
 import LoveLetter from './Components/LoveLetter/LoveLetter';
+import Shogun from './Components/Shogun/Shogun'
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 class App extends Component {
@@ -22,6 +23,9 @@ class App extends Component {
             </Route>
             <Route path="/loveletter">
               <LoveLetter />
+            </Route>
+            <Route path="/shogun">
+              <Shogun />
             </Route>
           </Switch>
         </BrowserRouter>
