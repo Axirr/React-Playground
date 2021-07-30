@@ -100,6 +100,7 @@ class LoveLetter extends Component {
     }
 
     playCard(card, playerNumber) {
+        this.removeSelfHandmaiden(() => {
         if (this.state.currentTurn === -1 ) {
             window.alert("Game is over")
             return
@@ -119,6 +120,7 @@ class LoveLetter extends Component {
         } else {
             this.isElimCardEffect(card)
         }
+        })
     }
 
     isOnlyHandmaidenTargets(card) {
@@ -130,11 +132,7 @@ class LoveLetter extends Component {
             var potentialTarget = this.state.playersInGame[i]
 
             // found valid target
-            console.log("Test 2")
-            console.log(this.state.isHandMaiden[potentialTarget - 1] === false)
-            console.log(potentialTarget !== this.state.currentTurn)
             if (this.state.isHandMaiden[potentialTarget - 1] === false && potentialTarget !== this.state.currentTurn) {
-                console.log("found valid target!")
                 break;
             }
 
@@ -165,8 +163,9 @@ class LoveLetter extends Component {
                 switch(card) {
                     case 'princess':
                         this.eliminatePlayer(this.state.currentTurn, () => {
-                            this.replaceCard(0)
-                            this.advanceTurn()
+                            this.replaceCard(0, () => {
+                                this.advanceTurn()
+                            })
                         })
                         break;
                     case 'countess':
@@ -186,10 +185,12 @@ class LoveLetter extends Component {
                             if (!isDrawCardPlayed) {
                                 console.log("shouldn't be here")
                                 //this.replaceCard(this.state.currentTurn)
+                                this.advanceTurn()
                             } else {
-                                this.replaceCard(0)
+                                this.replaceCard(0, () => {
+                                    this.advanceTurn()
+                                })
                             }
-                            this.advanceTurn()
                         })
                         break;
                     case 'prince':
@@ -306,14 +307,14 @@ class LoveLetter extends Component {
         })
     }
 
-    updateMessage(newMessage, nextStateChange = () => {}) {
+    updateMessage(newMessage, handler = () => {}) {
         var messageCopy = this.state.message
         for (var i = 0; i < (messageCopy.length - 1); i++) {
             messageCopy[i] = messageCopy[i+1]
         }
         messageCopy[messageCopy.length - 1] = newMessage
         //var newMessages = [this.state.message[1], this.state.message[2], newMessage]
-        this.setState( {message: messageCopy}, nextStateChange)
+        this.setState( {message: messageCopy}, handler)
     }
 
     getGuardGuess() {
@@ -425,7 +426,7 @@ class LoveLetter extends Component {
         return true
     }
 
-    replaceCard(playerNumber) {
+    replaceCard(playerNumber, handler = () => {}) {
         var deckCopy = [...this.state.deck]
         if (deckCopy.length == 0) {
             var drawnCard = "none"
@@ -445,6 +446,7 @@ class LoveLetter extends Component {
                 drawCard: drawnCard,
                 deck: deckCopy}, () => {
                     this.checkIfGameOver()
+                    handler()
                 })
         }
         this.hideAllCards()
@@ -488,8 +490,27 @@ class LoveLetter extends Component {
 
     advanceTurn() {
         var currentIndex = this.state.playersInGame.indexOf(this.state.currentTurn)
-        console.log(currentIndex)
-        this.setState({ currentTurn: this.state.playersInGame[(currentIndex + 1) % this.state.playersInGame.length] } )
+        if (currentIndex === -1) {
+            var nextClosestPlayer = 1
+            for (var i = this.state.currentTurn + 1; i < this.state.playersInGame.length; i++) {
+                var playerToCheck = i % this.state.currentNumberOfPlayers;
+                console.log("Player to Check")
+                console.log(playerToCheck)
+                if (this.state.playersInGame.indexOf(playerToCheck) !== -1) {
+                    nextClosestPlayer = playerToCheck
+                    console.log("break point")
+                    console.log(nextClosestPlayer)
+                    break
+                }
+                if (i === (this.state.playersInGame.length - 1)) {
+                    console.log("ERROR, NEXT PLAYER NOT FOUND")
+                }
+            }
+            this.setState({ currentTurn: nextClosestPlayer})
+        } else {
+            console.log(currentIndex)
+            this.setState({ currentTurn: this.state.playersInGame[(currentIndex + 1) % this.state.playersInGame.length] } )
+        }
     }
 
     eliminatePlayer(playerNumber, handler = () => {}) {
@@ -499,7 +520,7 @@ class LoveLetter extends Component {
         this.setState( { playersInGame: copyPlayers }, () => {
             this.updateMessage("Player " + playerNumber + " was eliminated.", handler())
         })
-        if (copyPlayers.length == 1) {
+        if (copyPlayers.length === 1) {
             window.alert("Player " + copyPlayers[0] + " wins!")
         }
     }
@@ -550,25 +571,6 @@ class LoveLetter extends Component {
                     </div>);
                 })}
             </div>
-            // <div>
-            //     <div>
-            //         Hand One{this.state.isDisplayed[0] && 
-            //         <button onClick={(() => { this.playerPlayCard(1, this.state.hands[0]) })}>{this.state.hands[0]}</button> }
-            //     </div> 
-            //     <div>
-            //         Hand Two{this.state.isDisplayed[1] && 
-            //         <button onClick={ () => { this.playerPlayCard(2, this.state.hands[1]) }}>{this.state.hands[1]}</button>}
-            //     </div> 
-                
-            //     <div>
-            //         Hand Three{ this.state.isDisplayed[2] &&
-            //         <button onClick={ () => { this.playerPlayCard(3, this.state.hands[2]) }}>{this.state.hands[2]}</button> }
-            //     </div> 
-            //     <div>
-            //         Hand Four{ this.state.isDisplayed[3] && 
-            //         <button onClick={ () => { this.playerPlayCard(4, this.state.hands[3]) }}>{this.state.hands[3]}</button> }
-            //     </div> 
-            // </div>
         );
     }
 
@@ -610,10 +612,10 @@ class LoveLetter extends Component {
                     <button onClick={() => { this.showAllCards()}}>Show All Cards</button>
                     <button onClick={() => {this.printState()}}>Print State</button>
                     <p>...</p>
-                    <p>Choose Player Number and Restart Game</p>
-                    <button onClick={() => {this.redeal(2)} }>2</button>
-                    <button onClick={() => {this.redeal(3)} }>3</button>
-                    <button onClick={() => {this.redeal(4)} }>4</button>
+                    <p>Choose Number of Players and Restart Game</p>
+                    <button onClick={() => {this.redeal(2)} }>2 Players</button>
+                    <button onClick={() => {this.redeal(3)} }>3 Players</button>
+                    <button onClick={() => {this.redeal(4)} }>4 Players</button>
                     </Col>
                     <Col>
                         <h3>Game History</h3>
