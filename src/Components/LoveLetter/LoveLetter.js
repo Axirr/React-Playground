@@ -12,9 +12,9 @@ class LoveLetter extends Component {
         currentTurn: 1,
         deck: ["guard", "guard", "guard", "guard", "guard", "priest", "priest", "baron", "baron", "handmaiden",
         "handmaiden", "prince", "prince", "king", "countess", "princess"],
-        //deck: ["guard", "guard", "guard", "guard", "guard", "guard", "guard", "handmaiden"],
+        //deck: ["guard", "guard", "guard","guard","guard","guard","guard", "princess"],
+        //deck: ["guard","guard","guard", "guard", "guard", "guard", "princess", "baron", "guard", "countess"],
         playersInGame: [1, 2, 3, 4],
-        // isHandMaiden: [false, false, false, false],
         isHandMaiden: [false, false, false, false],
         message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
         setAsideCard: "none",
@@ -23,7 +23,7 @@ class LoveLetter extends Component {
         useDefaultDeck: true,
         defaultDeck: ["guard", "guard", "guard", "guard", "guard", "priest", "priest", "baron", "baron", "handmaiden",
         "handmaiden", "prince", "prince", "king", "countess", "princess"],
-        currentNumberOfPlayers: 4
+        totalNumberOfPlayers: 4
     }
     
 
@@ -32,14 +32,12 @@ class LoveLetter extends Component {
     }
     
     deal(numberPlayers) {
-        console.log(ReactDOMServer.renderToStaticMarkup(this.renderHands(4)))
         if (this.state.doShuffle) {
             var shuffledDeck = this.returnShuffledDeck()
         } else {
             var shuffledDeck = this.state.deck
         }
         this.setState( { deck: shuffledDeck }, () => {
-            //console.log(this.state.deck)
             var deckCopy = [...this.state.deck]
             var newHands = [];
             var isHandMaiden = [];
@@ -63,7 +61,7 @@ class LoveLetter extends Component {
                 isHandMaiden: isHandMaiden,
                 setAsideCard: setAsideCard,
                 isDisplayed: isDisplayed,
-                currentNumberOfPlayers: numberPlayers} )
+                totalNumberOfPlayers: numberPlayers} )
             this.hideAllCards()
         })
     }
@@ -174,18 +172,13 @@ class LoveLetter extends Component {
                     case 'king':
                         var handsCopy = [...this.state.hands]
                         var playerOriginalHand = handsCopy[myTarget - 1]
-                        console.log("Here")
-                        console.log(playerOriginalHand)
                         handsCopy[myTarget - 1] = notPlayedCard
-                        console.log(playerOriginalHand)
                         handsCopy[this.state.currentTurn - 1] = playerOriginalHand
                         this.setState({ hands: handsCopy}, () => {
-                            console.log("Is Draw Card")
-                            console.log(isDrawCardPlayed)
                             if (!isDrawCardPlayed) {
-                                console.log("shouldn't be here")
-                                //this.replaceCard(this.state.currentTurn)
-                                this.advanceTurn()
+                                this.replaceCard(0, () => {
+                                    this.advanceTurn()
+                                })
                             } else {
                                 this.replaceCard(0, () => {
                                     this.advanceTurn()
@@ -207,33 +200,26 @@ class LoveLetter extends Component {
                         } else {
                             handsCopy[myTarget - 1] = this.state.setAsideCard
                         }
-                        console.log(handsCopy)
-                        console.log("Discarded card")
-                        console.log(discardedCard)
                         this.setState({hands: handsCopy, deck: deckCopy}, () => {
                             if (myTarget === this.state.currentTurn) {
-                                this.replaceCard(0)
+                                this.replaceCard(0, this.advanceTurn())
                             } else {
-                                this.replaceCard(this.state.currentTurn)
+                                this.replaceCard(this.state.currentTurn, this.advanceTurn())
                             }
                             if (discardedCard === "princess") {
-                                this.eliminatePlayer(myTarget)
+                                this.eliminatePlayer(myTarget, this.advanceTurn())
                             } 
-                            this.advanceTurn()
                         })
                         break;
                     case 'handmaiden':
                         var handmaidenCopy = this.state.isHandMaiden
                         handmaidenCopy[this.state.currentTurn - 1] = true
-                        console.log("Current handmaiden list")
-                        console.log(handmaidenCopy)
                         this.setState( { isHandMaiden: handmaidenCopy }, () => {
                             if (!isDrawCardPlayed) {
-                                this.replaceCard(this.state.currentTurn)
+                                this.replaceCard(this.state.currentTurn, this.advanceTurn())
                             } else {
-                                this.replaceCard(0)
+                                this.replaceCard(0, this.advanceTurn())
                             }
-                            this.advanceTurn()
                         })
                         break;
                     case 'baron':
@@ -256,26 +242,22 @@ class LoveLetter extends Component {
                             if (playerToEliminate !== 0) {
                                 this.eliminatePlayer(playerToEliminate, () => {
                                     if (!isDrawCardPlayed) {
-                                        this.replaceCard(this.state.currentTurn)
+                                        this.replaceCard(this.state.currentTurn, this.advanceTurn())
                                     } else {
-                                        this.replaceCard(0)
+                                        this.replaceCard(0, this.advanceTurn())
                                     }
-                                    this.advanceTurn()
                                 })
                             } else {
                                 if (!isDrawCardPlayed) {
-                                    this.replaceCard(this.state.currentTurn)
+                                    this.replaceCard(this.state.currentTurn, this.advanceTurn())
                                 } else {
-                                    this.replaceCard(0)
+                                    this.replaceCard(0, this.advanceTurn())
                                 }
-                                this.advanceTurn()
                             }
                         })
                         break;
                     case 'priest':
                         window.alert("Player " + myTarget + " has a " + this.state.hands[myTarget - 1])
-                        //this.updateMessage("Their card is a " + this.state.hands[myTarget - 1], this.normalDrawAndAdvance(isDrawCardPlayed))
-                        //this.setState({message: ("Their card is a " + this.state.hands[myTarget - 1])})
                         this.normalDrawAndAdvance(isDrawCardPlayed)
                         break;
                     case 'guard':
@@ -308,12 +290,12 @@ class LoveLetter extends Component {
     }
 
     updateMessage(newMessage, handler = () => {}) {
+        console.log("Updating message")
         var messageCopy = this.state.message
         for (var i = 0; i < (messageCopy.length - 1); i++) {
             messageCopy[i] = messageCopy[i+1]
         }
         messageCopy[messageCopy.length - 1] = newMessage
-        //var newMessages = [this.state.message[1], this.state.message[2], newMessage]
         this.setState( {message: messageCopy}, handler)
     }
 
@@ -328,11 +310,10 @@ class LoveLetter extends Component {
 
     normalDrawAndAdvance(isDrawCardPlayed) {
         if (!isDrawCardPlayed) {
-            this.replaceCard(this.state.currentTurn)
+            this.replaceCard(this.state.currentTurn, this.advanceTurn())
         } else {
-            this.replaceCard(0)
+            this.replaceCard(0, this.advanceTurn())
         }
-        this.advanceTurn()
     }
 
     getCardValue(card) {
@@ -375,7 +356,6 @@ class LoveLetter extends Component {
 
         // Valid target check
         if (['king', 'guard', 'prince', 'baron', 'priest', 'guard'].indexOf(card) !== -1) {
-            console.log("checking valid target")
             if (!this.isValidTarget(card)) {
                 return false
             }
@@ -432,12 +412,12 @@ class LoveLetter extends Component {
             var drawnCard = "none"
         } else {
             var drawnCard = deckCopy.pop()
-            console.log(drawnCard)
         }
         if (playerNumber === 0) {
             this.setState( {drawCard: drawnCard,
                 deck: deckCopy}, () => {
                     this.checkIfGameOver()
+                    handler()
                 })
         } else {
             var copyHands = [...this.state.hands]
@@ -461,19 +441,16 @@ class LoveLetter extends Component {
 
     evaluateShowdownWin() {
         console.log("SHOWDOWN!")
-        console.log("BUG: Deal with tie.")
         this.showAllCards()
         var maxPlayer = 0
         var maxValue = 0
         var isTie = false
         for (var i = 0; i < this.state.playersInGame.length; i++) {
             var currentPlayer = this.state.playersInGame[i]
-            console.log(currentPlayer)
             var cardValue = this.getCardValue(this.state.hands[currentPlayer - 1])
             if (cardValue > maxValue) {
                 maxPlayer = currentPlayer
                 maxValue = cardValue
-                console.log("New champ")
                 isTie = false
             } else if (cardValue === maxValue) {
                 isTie = true
@@ -489,26 +466,31 @@ class LoveLetter extends Component {
     }
 
     advanceTurn() {
+        console.log("Turn advancing.")
         var currentIndex = this.state.playersInGame.indexOf(this.state.currentTurn)
         if (currentIndex === -1) {
-            var nextClosestPlayer = 1
-            for (var i = this.state.currentTurn + 1; i < this.state.playersInGame.length; i++) {
-                var playerToCheck = i % this.state.currentNumberOfPlayers;
-                console.log("Player to Check")
-                console.log(playerToCheck)
-                if (this.state.playersInGame.indexOf(playerToCheck) !== -1) {
-                    nextClosestPlayer = playerToCheck
-                    console.log("break point")
-                    console.log(nextClosestPlayer)
-                    break
+            var potentialPlayers = []
+            for (var i = 1; i < this.state.totalNumberOfPlayers; i++) {
+                var player = i + this.state.currentTurn 
+                if (player <= this.state.totalNumberOfPlayers) {
+                    potentialPlayers.push(player)
+                } else {
+                    potentialPlayers.push(player % this.state.totalNumberOfPlayers)
                 }
-                if (i === (this.state.playersInGame.length - 1)) {
-                    console.log("ERROR, NEXT PLAYER NOT FOUND")
+            }
+            console.log("Ordered player list")
+            console.log(potentialPlayers)
+            var nextClosestPlayer = this.state.playersInGame[0]
+            for (var i = 0; i < potentialPlayers.length; i++) {
+                if (this.state.playersInGame.indexOf(potentialPlayers[i]) !== -1) {
+                    console.log("Next player is " + potentialPlayers[i])
+                    nextClosestPlayer = potentialPlayers[i]
+                    break
                 }
             }
             this.setState({ currentTurn: nextClosestPlayer})
         } else {
-            console.log(currentIndex)
+            console.log("Player was found. Is that weird?")
             this.setState({ currentTurn: this.state.playersInGame[(currentIndex + 1) % this.state.playersInGame.length] } )
         }
     }
@@ -533,7 +515,7 @@ class LoveLetter extends Component {
     showCurrentPlayerCards() {
         var displayCopy = this.state.isDisplayed
         displayCopy[this.state.currentTurn - 1] = true
-        displayCopy[this.state.currentNumberOfPlayers] = true
+        displayCopy[this.state.totalNumberOfPlayers] = true
         this.setState({isDisplayed: displayCopy})
     }
 
@@ -558,7 +540,6 @@ class LoveLetter extends Component {
         for (var i = 1; i <= playerNumber; i++ ) {
             newPlayers.push(i)
         }
-        console.log(newPlayers)
 
         //SET STATE COLLECTIVELY
 
@@ -582,8 +563,8 @@ class LoveLetter extends Component {
                     <p>Current Turn: Player {this.state.currentTurn}</p>
                     <div>
                         Current Draw Card
-                        {this.state.isDisplayed[this.state.currentNumberOfPlayers] && <button onClick={ () => { this.playCard(this.state.drawCard, 0)}}>{this.state.drawCard}</button> }
-                        {this.renderHands(this.state.currentNumberOfPlayers)}
+                        {this.state.isDisplayed[this.state.totalNumberOfPlayers] && <button onClick={ () => { this.playCard(this.state.drawCard, 0)}}>{this.state.drawCard}</button> }
+                        {this.renderHands(this.state.totalNumberOfPlayers)}
                     </div>
                     <div>
                         Target of Card
