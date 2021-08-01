@@ -12,18 +12,19 @@ class LoveLetter extends Component {
         currentTurn: 1,
         deck: ["guard", "guard", "guard", "guard", "guard", "priest", "priest", "baron", "baron", "handmaiden",
         "handmaiden", "prince", "prince", "king", "countess", "princess"],
-        //deck: ["guard", "guard", "guard","guard","guard","guard","guard", "princess"],
-        //deck: ["guard","guard","guard", "guard", "guard", "guard", "princess", "baron", "guard", "countess"],
         playersInGame: [1, 2, 3, 4],
         isHandMaiden: [false, false, false, false],
         message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
         setAsideCard: "none",
         isDisplayed: [false, false, false, false, false, false],
-        doShuffle: true,
         useDefaultDeck: true,
         defaultDeck: ["guard", "guard", "guard", "guard", "guard", "priest", "priest", "baron", "baron", "handmaiden",
         "handmaiden", "prince", "prince", "king", "countess", "princess"],
         totalNumberOfPlayers: 4
+    }
+
+    constructor(props) {
+        super(props)
     }
     
 
@@ -32,7 +33,15 @@ class LoveLetter extends Component {
     }
     
     deal(numberPlayers) {
-        if (this.state.doShuffle) {
+        var newDeck = []
+        if (!this.props.deck) {
+            newDeck = ["guard", "guard", "guard", "guard", "guard", "priest", "priest", "baron", "baron", "handmaiden",
+        "handmaiden", "prince", "prince", "king", "countess", "princess"]
+        } else {
+            newDeck = this.props.deck
+        }
+        this.setState( {deck: newDeck}, () => {
+        if (this.props.doShuffle) {
             var shuffledDeck = this.returnShuffledDeck()
         } else {
             var shuffledDeck = this.state.deck
@@ -64,6 +73,7 @@ class LoveLetter extends Component {
                 totalNumberOfPlayers: numberPlayers} )
             this.hideAllCards()
         })
+    })
     }
 
     redeal(numberPlayers) {

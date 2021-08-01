@@ -1,0 +1,37 @@
+/// <reference types="cypress" />
+
+describe('example to-do app', () => {
+  beforeEach(() => {
+    cy.visit('localhost:3000/lovelettertest')
+  })
+
+  it('show hands button works', () => {
+    cy.contains("Show All").click()
+    cy.contains("handmaiden")
+    cy.contains("guard")
+    cy.contains("king")
+    cy.contains("baron")
+    cy.contains("princess")
+    cy.contains("handmaiden").click()
+    cy.contains("[true,false,false,false]")
+    cy.contains("Show Current").click()
+    cy.contains("priest")
+    cy.contains("king")
+    cy.contains("baron").should('not.exist')
+    cy.get('[type="radio"]').check('3')
+    cy.contains("king").click()
+    cy.contains("Show Current").click()
+    cy.contains("priest")
+    cy.get('[type="radio"]').check('2')
+    cy.get('[type="radio"]').check('baron')
+    cy.contains("guard").click()
+    cy.contains("[1,3,4]")
+    cy.contains("Show Current").click()
+    cy.contains("princess").click()
+    cy.contains("[1,3]")
+    cy.contains("Show Current").click()
+    cy.get('[type="radio"]').check('3')
+    cy.get('[type="radio"]').check('priest')
+    cy.contains("guard").click()
+  })
+})
