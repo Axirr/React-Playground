@@ -1,11 +1,104 @@
 /// <reference types="cypress" />
 
-describe('example to-do app', () => {
+describe('Shogun of Edo app', () => {
   beforeEach(() => {
-    cy.visit('localhost:3000/shoguntest')
+  })
+
+  it("test basic heal", () => {
+    cy.visit('localhost:3000/shoguntest2')
+    cy.get("#spoofClaw").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofClaw").click()
+    cy.get("#spoofHeart").click()
+    cy.contains("Player 2Score: 0Health: 10Energy: 0")
+  })
+
+  it("test no heal tokyo", () => {
+    cy.visit('localhost:3000/shoguntest2')
+    cy.get("#spoofClaw").click()
+    cy.get("#spoofClaw").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofHeart").click()
+    cy.contains("Player 1Score: 2Health: 9Energy: 0")
+  })
+
+  it("test win by elimination", () => {
+    cy.visit('localhost:3000/shoguntest1')
+    const stub = cy.stub()  
+    cy.on ('window:alert', stub)
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoof6Claw").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoof6Claw").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoof6Claw").click().then(
+      () => {
+        expect(stub.getCall(0)).to.be.calledWith('Player 3 wins!')
+      }
+    )
+
+  })
+
+  it("test win with tokyo points", () => {
+    cy.visit('localhost:3000/shoguntest1')
+    const stub = cy.stub()  
+    cy.on ('window:alert', stub)
+    cy.get("#spoofNone").click()
+    cy.get("#spoofClaw").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click().then(
+      () => {
+        expect(stub.getCall(0)).to.be.calledWith('Player 2 wins!')
+      }
+    )
   })
 
   it('test roll saving', () => {
+    cy.visit('localhost:3000/shoguntest2')
     cy.get("#roll").click()
     cy.get("#dice0").should('have.class', 'btn-danger').click()
     cy.get("#dice0").should('have.class', 'btn-success')
@@ -18,4 +111,55 @@ describe('example to-do app', () => {
       })
     })
   })
+
+  it('test roll decrement and reset', () => {
+    cy.visit('localhost:3000/shoguntest1')
+    cy.contains("Remaining Rolls: 3")
+    cy.get("#roll").click()
+    cy.contains("Remaining Rolls: 2")
+    cy.get("#roll").click()
+    cy.contains("Remaining Rolls: 1")
+    cy.get("#roll").click()
+    cy.contains("Remaining Rolls: 0")
+    cy.get("#roll").click()
+    cy.contains("Remaining Rolls: 0")
+    cy.get("#resolveRoll").click()
+    cy.contains("Remaining Rolls: 3")
+  })
+
+  it('test win with rolls', () => {
+    cy.visit('localhost:3000/shoguntest1')
+    const stub = cy.stub()  
+    cy.on ('window:alert', stub)
+    cy.get("#spoof3").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoof3").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoof3").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoof3").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoof3").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoof3").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()
+    cy.get("#spoofNone").click()      
+    cy.get("#spoof3").click().then(
+      () => {
+        expect(stub.getCall(0)).to.be.calledWith('Player 1 wins!')
+      }
+    )
+  })
+
 })

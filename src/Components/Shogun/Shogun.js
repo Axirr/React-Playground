@@ -4,6 +4,14 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 class Shogun extends Component {
 
+    constructor(props) {
+        super(props)
+    }
+
+    winPoints = 20
+    startHealth = 5
+    withSpoof = false
+
     localState = {
         dice: ["none", "none", "none", "none", "none", "none"],
         saved: [false, false, false, false, false, false],
@@ -16,7 +24,7 @@ class Shogun extends Component {
         message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
         doShuffle: false,
         points: [0,0,0,0],
-        health: [10,10,10,10],
+        health: [this.startHealth,this.startHealth,this.startHealth,this.startHealth],
         energy: [0,0,0,0],
         tokyo: 0,
         bayTokyo: 0,
@@ -35,7 +43,7 @@ class Shogun extends Component {
         message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
         doShuffle: false,
         points: [0,0,0,0],
-        health: [10,10,10,10],
+        health: [this.startHealth,this.startHealth,this.startHealth,this.startHealth],
         energy: [0,0,0,0],
         tokyo: 0,
         bayTokyo: 0,
@@ -43,7 +51,16 @@ class Shogun extends Component {
     }
 
     componentDidMount() {
-        this.setup(4)
+        console.log(this.props.initialData)
+        if (!this.props.initialData) {
+            this.setup(4)
+        } else {
+            this.localState = this.props.initialData
+            this.rerenderState()
+        }
+        if (this.props.withSpoof) {
+            this.withSpoof = this.props.withSpoof
+        }
     }
 
     setup(numberPlayers) {
@@ -53,7 +70,7 @@ class Shogun extends Component {
         var newPlayers = []
         var newDeck = ["guard", "guard", "guard", "guard", "guard", "priest", "priest", "baron", "baron", "handmaiden",
         "handmaiden", "prince", "prince", "king", "countess", "princess"]
-        if (this.state.doShuffle) {
+        if (this.localState.doShuffle) {
             console.log("Shuffling")
             newDeck = this.returnShuffledDeck(newDeck)
         } else {
@@ -67,7 +84,7 @@ class Shogun extends Component {
             newPlayers.push(i + 1)
             newHands.push([])
             newPoints.push(0)
-            newHealth.push(10)
+            newHealth.push(this.startHealth)
             newEnergy.push(0)
         }
         this.setState({
@@ -127,34 +144,57 @@ class Shogun extends Component {
     advanceTurn() {
         console.log("Turn advancing.")
         let nextClosestPlayer;
-        var currentIndex = this.state.playersInGame.indexOf(this.state.currentTurn)
+        var currentIndex = this.localState.playersInGame.indexOf(this.state.currentTurn)
         if (currentIndex === -1) {
             var potentialPlayers = []
-            for (var i = 1; i < this.state.totalNumberOfPlayers; i++) {
-                var player = i + this.state.currentTurn 
-                if (player <= this.state.totalNumberOfPlayers) {
+            for (var i = 1; i < this.localState.totalNumberOfPlayers; i++) {
+                var player = i + this.localState.currentTurn 
+                if (player <= this.localState.totalNumberOfPlayers) {
                     potentialPlayers.push(player)
                 } else {
-                    potentialPlayers.push(player % this.state.totalNumberOfPlayers)
+                    potentialPlayers.push(player % this.localState.totalNumberOfPlayers)
                 }
             }
             console.log("Ordered player list")
             console.log(potentialPlayers)
-            nextClosestPlayer = this.state.playersInGame[0]
+            nextClosestPlayer = this.localState.playersInGame[0]
             for (var i = 0; i < potentialPlayers.length; i++) {
-                if (this.state.playersInGame.indexOf(potentialPlayers[i]) !== -1) {
+                if (this.localState.playersInGame.indexOf(potentialPlayers[i]) !== -1) {
                     console.log("Next player is " + potentialPlayers[i])
                     nextClosestPlayer = potentialPlayers[i]
                     break
                 }
             }
-            // this.setState({ currentTurn: nextClosestPlayer})
         } else {
-            console.log("Player was found. Is that weird?")
-            nextClosestPlayer = this.state.playersInGame[(currentIndex + 1) % this.state.playersInGame.length] 
+            nextClosestPlayer = this.localState.playersInGame[(currentIndex + 1) % this.state.playersInGame.length] 
         }
         this.localState['currentTurn'] = nextClosestPlayer
         this.resetRolls()
+        this.startTurnProcedures()
+    }
+
+    startTurnProcedures() {
+        if (this.inTokyo(this.localState.currentTurn)) {
+            this.updateMessage("Player " + this.localState.currentTurn + " gets 2 points for starting in Tokyo.")
+            this.addPoints(this.localState.currentTurn, 2)
+        }
+        this.rerenderState()
+    }
+
+    addPoints(player, newPoints) {
+        this.localState.points[player - 1] += newPoints
+        this.checkPointsWin()
+    }
+
+    checkPointsWin() {
+        for (let i = 0; i < this.localState.playersInGame.length; i++) {
+            let playerToCheck = this.localState.playersInGame[i]
+            if (this.localState.points[playerToCheck - 1] >= this.winPoints) {
+                window.alert("Player " + playerToCheck + " wins!")
+                this.rerenderState()
+                break;
+            }
+        }
     }
 
     resetRolls() {
@@ -177,35 +217,109 @@ class Shogun extends Component {
         var pointsToAdd = 0;
         var energyToAdd = 0;
         var healthToAdd = 0;
-        var count = this.count(this.state.dice, '1')
+        var damage = 0;
+        var count = this.count(this.localState.dice, '1')
         if (count >= 3) pointsToAdd += count - 2
-        count = this.count(this.state.dice, '2')
+        count = this.count(this.localState.dice, '2')
         if (count >= 3) pointsToAdd += count - 1
-        count = this.count(this.state.dice, '3')
+        count = this.count(this.localState.dice, '3')
         if (count >= 3) pointsToAdd += count 
-        count = this.count(this.state.dice, 'energy')
+        count = this.count(this.localState.dice, 'energy')
         energyToAdd += count
-        count = this.count(this.state.dice, 'heart')
-        if (!this.inTokyo(this.state.currentTurn)) healthToAdd = count
+        count = this.count(this.localState.dice, 'heart')
+        if (!this.inTokyo(this.localState.currentTurn)) healthToAdd = count
+        count = this.count(this.localState.dice, 'claw')
+        damage += count
+        this.addPoints(this.localState.currentTurn, pointsToAdd)
+        // this.localState.points[this.localState.currentTurn - 1] += pointsToAdd
+        this.localState.energy[this.localState.currentTurn - 1] += energyToAdd
+        this.localState.health[this.localState.currentTurn - 1] = Math.min(this.localState.health[this.localState.currentTurn - 1] + healthToAdd, 10)
         console.log("points to add")
         console.log(pointsToAdd)
         console.log("energy to add")
         console.log(energyToAdd)
         console.log("health to add")
         console.log(healthToAdd)
+        console.log("damage to deal")
+        console.log(damage)
+        this.updateMessage("Player " + this.localState.currentTurn + " earns " + pointsToAdd + " points, " + energyToAdd + " energy, " + healthToAdd 
+        + " health, and deals " + damage + " damage.")
+        this.attack(damage)
+        this.checkElim()
+        if (damage > 0) {
+            if (this.localState.tokyo === 0) {
+                this.localState.tokyo = this.localState.currentTurn
+                this.updateMessage("Player " + this.localState.currentTurn + " goes into Tokyo.")
+            }
+            // Fix for both and yield
+        }
         this.advanceTurn()
         this.rerenderState()
     }
 
-    rerenderState() {
-        this.setState(this.localState)
+    checkElim() {
+        let playersToElim = []
+        for (let i = 0; i < this.localState.playersInGame.length; i++) {
+            let playerToCheck = this.localState.playersInGame[i]
+            if (this.localState.health[playerToCheck - 1] <= 0) {
+                playersToElim.push(playerToCheck)
+                console.log("Player " + playerToCheck + " dies.")
+            } else {
+                console.log("Player " + playerToCheck + " survives.")
+            }
+        }
+        for (let i = 0; i < playersToElim.length; i++) {
+            this.eliminatePlayer(playersToElim[i])
+        }
+        if (this.localState.playersInGame.length === 1) {
+            window.alert("Player " + this.localState.playersInGame[0] + " wins!")
+        }
+    }
+
+    eliminatePlayer(player) {
+        const playerIndex = this.localState.playersInGame.indexOf(player)
+        this.localState.playersInGame.splice(playerIndex, 1)
+        if (this.inTokyo(player)) {
+            this.removeFromTokyo(player)
+        }
+        this.updateMessage("Player " + player + " is eliminated!")
+    }
+
+    removeFromTokyo(player) {
+        if (this.localState.tokyo === player) {
+            this.localState.tokyo = 0
+        } else if (this.localState.bayTokyo === player) {
+            this.localState.bayTokyo = 0
+        }
+    }
+
+    attack(damage) {
+        let damageBool = true
+        if (this.inTokyo(this.localState.currentTurn)) {
+            damageBool = false
+            console.log("Looking for not in Tokyo")
+        }
+        let playersToDamage = []
+        for (let i = 0; i < this.localState.playersInGame.length; i++) {
+            if (this.inTokyo(this.localState.playersInGame[i]) == damageBool) {
+                console.log("Player " + this.localState.playersInGame[i])
+                playersToDamage.push(this.localState.playersInGame[i])
+            }
+        }
+        for (let i = 0; i < playersToDamage.length; i++) {
+            this.localState.health[playersToDamage[i] - 1] -= damage
+        }
+    }
+
+    rerenderState(handler = () => {}) {
+        this.setState(this.localState, handler)
     }
 
     inTokyo(playerNumber) {
-        if (this.state.playersInGame.length <= 4) {
-            if (playerNumber !== this.state.tokyo) return false
+        if (this.localState.playersInGame.length <= 4) {
+            if (playerNumber !== this.localState.tokyo) return false
         } else {
-            if (playerNumber !== this.state.tokyo && playerNumber !== this.state.bayTokyo) return false
+            if (playerNumber !== this.localState.tokyo && playerNumber !== this.localState.bayTokyo) return false
         }
         return true
     }
@@ -270,9 +384,9 @@ class Shogun extends Component {
             <div>
                 {this.state.playersInGame.map((number) => {
                     return(<div>Player {number}
-                    Score: {this.state.points[number - 1]}
-                    Health: {this.state.health[number - 1]}
-                    Energy: {this.state.energy[number - 1]}
+                    Score: {this.localState.points[number - 1]}
+                    Health: {this.localState.health[number - 1]}
+                    Energy: {this.localState.energy[number - 1]}
                     </div>)
                 })}
             </div>
@@ -287,6 +401,13 @@ class Shogun extends Component {
         }
         messageCopy[messageCopy.length - 1] = newMessage
         this.localState['message'] = messageCopy
+    }
+
+    spoofDice(diceArray) {
+        this.localState.dice = diceArray
+        this.rerenderState(() => {
+            this.resolveRoll()
+        })
     }
 
     printState() {
@@ -311,14 +432,27 @@ class Shogun extends Component {
                             <button id="dice4" class={this.state.saved[4] ? "btn-success" : "btn-danger"} onClick={() => {this.toggleSave(4)}}>{this.state.dice[4]}</button>
                             <button id="dice5" class={this.state.saved[5] ? "btn-success" : "btn-danger"} onClick={() => {this.toggleSave(5)}}>{this.state.dice[5]}</button>
                             {this.renderScoreBoards()}
-                            <p>Current Turn: {this.state.currentTurn}</p>
+                            <p>Current Turn: Player {this.state.currentTurn}</p>
                             <p>Remaining Rolls: {this.state.remainingRolls}</p>
+                            <p>In Tokyo: {this.state.tokyo}</p>
                             <button id="roll" onClick={() => {this.roll()}}>Roll</button>
-                            <button onClick={() => {this.resolveRoll()}}>Lock-in Roll</button>
+                            <button id="resolveRoll" onClick={() => {this.resolveRoll()}}>Lock-in Roll</button>
+                            <p>Players in game: {JSON.stringify(this.state.playersInGame)}</p>
                             <p>Change player numbers and restart game.</p>
                             <button onClick={() => {this.setup(2)}}>2 Players</button>
                             <button onClick={() => {this.printState()}}>Print State</button>
                             <button onClick={() => this.printLocalState()}>Print Local State</button>
+                            <div>
+                                {this.withSpoof && 
+                                <div>
+                                <button id="spoof3" onClick={() => this.spoofDice(["3","3","3","1","2","2"])}>Spoof Dice 333</button>
+                                <button id="spoofClaw" onClick={() => this.spoofDice(["claw","3","3","1","2","2"])}>Spoof Dice One Claw</button>
+                                <button id="spoofNone" onClick={() => this.spoofDice(["1","1","2","2","3","3"])}>Spoof Dice One Claw</button>
+                                <button id="spoof6Claw" onClick={() => this.spoofDice(["claw","claw","claw","claw","claw","claw"])}>Spoof Dice One Claw</button>
+                                <button id="spoofHeart" onClick={() => this.spoofDice(["heart","1","1","2","2","3"])}>Spoof Dice One Claw</button>
+                                </div>
+    }
+                            </div>
                         </Col>
                         <Col>
                             <h3>Game History</h3>
