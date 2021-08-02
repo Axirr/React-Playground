@@ -5,7 +5,7 @@ describe('example to-do app', () => {
     cy.visit('localhost:3000/lovelettertest')
   })
 
-  it('show hands button works', () => {
+  it('test game run with handmaiden, guard, king, baron, princess use', () => {
     cy.contains("Show All").click()
     cy.contains("handmaiden")
     cy.contains("guard")

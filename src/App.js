@@ -31,6 +31,9 @@ class App extends Component {
             <Route path="/shogun">
               <Shogun />
             </Route>
+            <Route path="/shoguntest">
+              <Shogun />
+            </Route>
           </Switch>
         </BrowserRouter>
       </div>
