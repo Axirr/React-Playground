@@ -20,6 +20,15 @@ describe('Shogun of Edo app', () => {
 
   })
 
+  it("player gains 1 point when go into Tokyo on yield", () => {
+    cy.visit('localhost:3000/shoguntest1')
+    cy.get("#spoofClaw").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofClaw").click()
+    cy.get("#yieldTokyo").click()
+    cy.contains("Player 2Score: 1Health: 10Energy: 0")
+  })
+
   it("player dies in tokyo and killer takes over", () => {
     cy.visit('localhost:3000/shoguntest1')
     cy.get("#spoofClaw").click()

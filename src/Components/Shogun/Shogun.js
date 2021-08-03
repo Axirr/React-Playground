@@ -8,12 +8,13 @@ class Shogun extends Component {
         super(props)
     }
 
-    winPoints = 20
-    startHealth = 10
+    winPoints = 8
+    startHealth = 3
     startEnergy = 0
     withSpoof = false
     canBuy = false
     canYield = false
+    buttonPhase = 0
 
     cards = [
         {'name': 'Apartment Building', 'cost': 5, 'type': 'discard', 'ability': '+ 3[Star]'},
@@ -75,6 +76,8 @@ class Shogun extends Component {
 
     setup(numberPlayers) {
         this.canBuy = false
+        this.canYield = false
+        this.buttonPhase = 0
         var newDice = ["none", "none", "none", "none", "none", "none"]
         var newSaved = [false, false, false, false, false, false]
         var newHands = []
@@ -189,6 +192,7 @@ class Shogun extends Component {
             this.updateMessage("Player " + this.localState.currentTurn + " gets 2 points for starting in Tokyo.")
             this.addPoints(this.localState.currentTurn, 2)
         }
+        this.buttonPhase = 0
         this.rerenderState()
         this.canBuy = false
         this.canYield = false
@@ -274,11 +278,22 @@ class Shogun extends Component {
         }
         this.canBuy = true
         this.rerenderState()
+        if (this.canYield) {
+            this.buttonPhase = 1
+        } else {
+            this.buttonPhase = 2
+        }
     }
 
     enterTokyo(player) {
         this.localState.tokyo = player
         this.updateMessage("Player " + this.localState.currentTurn + " goes into Tokyo.")
+        this.addPoints(player, 1)
+    }
+
+    enterBayTokyo(player) {
+        this.localState.bayTokyo = player
+        this.updateMessage("Player " + this.localState.currentTurn + " goes into Tokyo Bay.")
         this.addPoints(player, 1)
     }
 
@@ -513,15 +528,17 @@ class Shogun extends Component {
                     console.log("inside")
                     // Possibly can remove inside checks
                     if (this.localState.tokyo !== this.localState.currentTurn) {
-                        console.log("Yielding Tokyo")
-                        this.localState.tokyo = this.localState.currentTurn
+                        this.updateMessage("Player " + this.localState.tokyo + " is yielding Tokyo.")
+                        this.enterTokyo(this.localState.currentTurn)
+                        // this.localState.tokyo = this.localState.currentTurn
                     } else {
                         window.alert("Can't yield Tokyo on own turn")
                     }
                 } else if (location === 'bay') {
                     if (this.localState.bayTokyo !== this.localState.currentTurn) {
-                        console.log("Yielding Tokyo Bay")
-                        this.localState.bayTokyo = this.localState.currentTurn
+                        this.updateMessage("Player " + this.localState.bayTokyo + " is yielding Tokyo Bay.")
+                        this.enterBayTokyo(this.localState.currentTurn)
+                        // this.localState.bayTokyo = this.localState.currentTurn
                     } else {
                         window.alert("Can't yield Tokyo on own turn")
                     }
@@ -560,20 +577,20 @@ class Shogun extends Component {
                             <p>In Tokyo: {this.state.tokyo}</p>
                             {(this.state.playersInGame.length > 4) && <p>In Tokyo Bay: {this.state.bayTokyo}</p>}
                             <div>
-                                <button id="roll" onClick={() => {this.roll()}}>Roll</button>
+                                <button id="roll" class={(this.buttonPhase === 0) ? "btn-success" : "btn-danger"} onClick={() => {this.roll()}}>Roll</button>
                             </div>
-                            <button id="resolveRoll" onClick={() => {this.resolveRoll()}}>Lock-in Roll</button>
+                            <button id="resolveRoll" class={(this.buttonPhase === 0) ? "btn-success" : "btn-danger"} onClick={() => {this.resolveRoll()}}>Lock-in Roll</button>
                             <div>
-                            <button id="yieldTokyo" onClick={() => {this.yieldTokyo('tokyo')}}>Yield Tokyo</button>
-                            {(this.state.playersInGame.length > 4) && <button id="yieldBay" onClick={() => {this.yieldTokyo('bay')}}>Yield Tokyo Bay</button>}
-                            <button id="doneYielding" onClick={() => {this.canYield = false}}>Done Yielding</button>
+                            <button id="yieldTokyo" class={(this.buttonPhase === 1) ? "btn-success" : "btn-danger"} onClick={() => {this.yieldTokyo('tokyo')}}>Yield Tokyo</button>
+                            {(this.state.playersInGame.length > 4) && <button id="yieldBay" class={(this.buttonPhase === 1) ? "btn-success" : "btn-danger"} onClick={() => {this.yieldTokyo('bay')}}>Yield Tokyo Bay</button>}
+                            <button id="doneYielding" class={(this.buttonPhase === 1) ? "btn-success" : "btn-danger"} onClick={() => {this.canYield = false; this.buttonPhase = 2; this.rerenderState()}}>Done Yielding</button>
                             </div>
                             <div>
-                                <button id="buy0" onClick={() => {this.buy(0)}}>{this.localState.deck[0] ? this.localState.deck[0]['name'] : 'none'}</button>
-                                <button id="buy1" onClick={() => {this.buy(1)}}>{this.localState.deck[1] ? this.localState.deck[1]['name'] : 'none'}</button>
-                                <button id="buy2" onClick={() => {this.buy(2)}}>{this.localState.deck[2] ? this.localState.deck[2]['name'] : 'none'}</button>
+                                <button id="buy0" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(0)}}>{this.localState.deck[0] ? this.localState.deck[0]['name'] : 'none'}</button>
+                                <button id="buy1" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(1)}}>{this.localState.deck[1] ? this.localState.deck[1]['name'] : 'none'}</button>
+                                <button id="buy2" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(2)}}>{this.localState.deck[2] ? this.localState.deck[2]['name'] : 'none'}</button>
                             </div>
-                            <button id="doneBuying" onClick={() => {this.buy(-1)}}>Done Buying</button>
+                            <button id="doneBuying" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(-1)}}>Done Buying</button>
                             <p>Players in game: {JSON.stringify(this.state.playersInGame)}</p>
                             <p>Change player numbers and restart game.</p>
                             <button onClick={() => {this.setup(2)}}>2 Players</button>
