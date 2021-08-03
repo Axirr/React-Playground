@@ -10,7 +10,18 @@ class Shogun extends Component {
 
     winPoints = 20
     startHealth = 5
+    startEnergy = 8
     withSpoof = false
+    canBuy = false
+
+    cards = [
+        {'name': 'Apartment Building', 'cost': 5, 'type': 'discard', 'ability': '+ 3[Star]'},
+        {'name': 'Commuter Train', 'cost': 4, 'type': 'discard', 'ability': '+ 2[Star]'},
+        {'name': 'Corner Store', 'cost': 3, 'type': 'discard', 'ability': '+ 1[Star]'},
+        {'name': 'Apartment Building', 'cost': 5, 'type': 'discard', 'ability': '+ 3[Star]'},
+        {'name': 'Apartment Building', 'cost': 5, 'type': 'discard', 'ability': '+ 3[Star]'},
+        {'name': 'Apartment Building', 'cost': 5, 'type': 'discard', 'ability': '+ 3[Star]'},
+    ]
 
     localState = {
         dice: ["none", "none", "none", "none", "none", "none"],
@@ -19,8 +30,7 @@ class Shogun extends Component {
         currentTurn: 1,
         hands: [[],[],[],[]],
         buyCards: ["none", "none", "none"],
-        deck: ["guard", "guard", "guard", "guard", "guard", "priest", "priest", "baron", "baron", "handmaiden",
-        "handmaiden", "prince", "prince", "king", "countess", "princess"],
+        deck: this.cards,
         message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
         doShuffle: false,
         points: [0,0,0,0],
@@ -28,7 +38,7 @@ class Shogun extends Component {
         energy: [0,0,0,0],
         tokyo: 0,
         bayTokyo: 0,
-        remainingRolls: 3
+        remainingRolls: 3,
     }
 
     state = {
@@ -38,8 +48,7 @@ class Shogun extends Component {
         currentTurn: 1,
         hands: [[],[],[],[]],
         buyCards: ["none", "none", "none"],
-        deck: ["guard", "guard", "guard", "guard", "guard", "priest", "priest", "baron", "baron", "handmaiden",
-        "handmaiden", "prince", "prince", "king", "countess", "princess"],
+        deck: this.cards,
         message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
         doShuffle: false,
         points: [0,0,0,0],
@@ -47,7 +56,7 @@ class Shogun extends Component {
         energy: [0,0,0,0],
         tokyo: 0,
         bayTokyo: 0,
-        remainingRolls: 3
+        remainingRolls: 3,
     }
 
     componentDidMount() {
@@ -64,12 +73,12 @@ class Shogun extends Component {
     }
 
     setup(numberPlayers) {
+        this.canBuy = false
         var newDice = ["none", "none", "none", "none", "none", "none"]
         var newSaved = [false, false, false, false, false, false]
         var newHands = []
         var newPlayers = []
-        var newDeck = ["guard", "guard", "guard", "guard", "guard", "priest", "priest", "baron", "baron", "handmaiden",
-        "handmaiden", "prince", "prince", "king", "countess", "princess"]
+        var newDeck = this.localState.deck
         if (this.localState.doShuffle) {
             console.log("Shuffling")
             newDeck = this.returnShuffledDeck(newDeck)
@@ -85,7 +94,7 @@ class Shogun extends Component {
             newHands.push([])
             newPoints.push(0)
             newHealth.push(this.startHealth)
-            newEnergy.push(0)
+            newEnergy.push(this.startEnergy)
         }
         this.setState({
             dice: newDice,
@@ -179,6 +188,7 @@ class Shogun extends Component {
             this.addPoints(this.localState.currentTurn, 2)
         }
         this.rerenderState()
+        this.canBuy = false
     }
 
     addPoints(player, newPoints) {
@@ -231,7 +241,6 @@ class Shogun extends Component {
         count = this.count(this.localState.dice, 'claw')
         damage += count
         this.addPoints(this.localState.currentTurn, pointsToAdd)
-        // this.localState.points[this.localState.currentTurn - 1] += pointsToAdd
         this.localState.energy[this.localState.currentTurn - 1] += energyToAdd
         this.localState.health[this.localState.currentTurn - 1] = Math.min(this.localState.health[this.localState.currentTurn - 1] + healthToAdd, 10)
         console.log("points to add")
@@ -253,7 +262,7 @@ class Shogun extends Component {
             }
             // Fix for both and yield
         }
-        this.advanceTurn()
+        this.canBuy = true
         this.rerenderState()
     }
 
@@ -410,6 +419,58 @@ class Shogun extends Component {
         })
     }
 
+    buy(cardNumber) {
+        if (this.localState.deck.length - 1 < cardNumber) {
+            window.alert("Cannot buy card " + (cardNumber + 1) + " because it doesn't exist.")
+            return
+        }
+        if (this.canBuy) {
+            if (cardNumber === -1) {
+                console.log("No buy")
+                this.advanceTurn()
+                this.rerenderState()
+                return
+            } else {
+                const boughtCard = this.localState.deck[cardNumber]
+                if (boughtCard['cost'] > this.localState.energy[this.localState.currentTurn - 1]) {
+                    window.alert('Not enough money to buy.')
+                    return
+                } else {
+                    this.localState.energy[this.localState.currentTurn - 1] -= boughtCard['cost']
+                    this.localState.deck.splice(cardNumber, 1)
+                    if (boughtCard['type'] === 'discard') {
+                        this.discardCardEffect(boughtCard)
+                    } else {
+                        window.alert('Implement keep cards.')
+                    }
+                    this.rerenderState()
+                }
+            }
+        } else {
+            window.alert("Cannot buy until you resolve your roll.")
+        }
+    }
+
+    discardCardEffect(card) {
+        switch (card['name']) {
+            case 'Apartment Building':
+                this.updateMessage("Player " + this.localState.currentTurn + " earns 3 points from card.")
+                this.addPoints(this.localState.currentTurn, 3)
+                break;
+            case 'Commuter Train':
+                this.updateMessage("Player " + this.localState.currentTurn + " earns 2 points from card.")
+                this.addPoints(this.localState.currentTurn, 2)
+                break;
+            case 'Corner Store':
+                this.updateMessage("Player " + this.localState.currentTurn + " earns 1 points from card.")
+                this.addPoints(this.localState.currentTurn, 1)
+                break;
+            default:
+                window.alert("ERROR: Unrecognized card.")
+
+        }
+    }
+
     printState() {
         console.log(this.state)
     }
@@ -435,8 +496,16 @@ class Shogun extends Component {
                             <p>Current Turn: Player {this.state.currentTurn}</p>
                             <p>Remaining Rolls: {this.state.remainingRolls}</p>
                             <p>In Tokyo: {this.state.tokyo}</p>
-                            <button id="roll" onClick={() => {this.roll()}}>Roll</button>
+                            <div>
+                                <button id="roll" onClick={() => {this.roll()}}>Roll</button>
+                            </div>
                             <button id="resolveRoll" onClick={() => {this.resolveRoll()}}>Lock-in Roll</button>
+                            <div>
+                                <button id="buy0" onClick={() => {this.buy(0)}}>{this.localState.deck[0] ? this.localState.deck[0]['name'] : 'none'}</button>
+                                <button id="buy1" onClick={() => {this.buy(1)}}>{this.localState.deck[1] ? this.localState.deck[1]['name'] : 'none'}</button>
+                                <button id="buy2" onClick={() => {this.buy(2)}}>{this.localState.deck[2] ? this.localState.deck[2]['name'] : 'none'}</button>
+                            </div>
+                            <button id="doneBuying" onClick={() => {this.buy(-1)}}>Done Buying</button>
                             <p>Players in game: {JSON.stringify(this.state.playersInGame)}</p>
                             <p>Change player numbers and restart game.</p>
                             <button onClick={() => {this.setup(2)}}>2 Players</button>
@@ -447,9 +516,10 @@ class Shogun extends Component {
                                 <div>
                                 <button id="spoof3" onClick={() => this.spoofDice(["3","3","3","1","2","2"])}>Spoof Dice 333</button>
                                 <button id="spoofClaw" onClick={() => this.spoofDice(["claw","3","3","1","2","2"])}>Spoof Dice One Claw</button>
-                                <button id="spoofNone" onClick={() => this.spoofDice(["1","1","2","2","3","3"])}>Spoof Dice One Claw</button>
-                                <button id="spoof6Claw" onClick={() => this.spoofDice(["claw","claw","claw","claw","claw","claw"])}>Spoof Dice One Claw</button>
-                                <button id="spoofHeart" onClick={() => this.spoofDice(["heart","1","1","2","2","3"])}>Spoof Dice One Claw</button>
+                                <button id="spoofNone" onClick={() => this.spoofDice(["1","1","2","2","3","3"])}>Spoof None</button>
+                                <button id="spoof6Claw" onClick={() => this.spoofDice(["claw","claw","claw","claw","claw","claw"])}>Spoof Six Claw</button>
+                                <button id="spoofHeart" onClick={() => this.spoofDice(["heart","1","1","2","2","3"])}>Spoof Heart</button>
+                                <button id="spoof6Energy" onClick={() => this.spoofDice(["energy","energy","energy","energy","energy","energy"])}>Spoof 6 Energy</button>
                                 </div>
     }
                             </div>
