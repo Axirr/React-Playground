@@ -8,8 +8,8 @@ class Shogun extends Component {
         super(props)
     }
 
-    winPoints = 8
-    startHealth = 3
+    winPoints = 20
+    startHealth = 10
     startEnergy = 0
     withSpoof = false
     canBuy = false
@@ -17,6 +17,9 @@ class Shogun extends Component {
     buttonPhase = 0
 
     cards = [
+        {'name': 'Friend of Children', 'cost':	3, 'type': 'keep', 'ability':	'When you gain energy, gain an additional energy.'},
+        {'name': 'Acid Attack', 'cost':	6, 'type': 'keep', 'ability':	"Deal one extra damage (even when you don't attack)"},
+        {'name': 'Alien Metabolism', 'cost':	3, 'type': 'keep', 'ability':	'Buying cards costs you 1 less energy'},
         {'name': 'Apartment Building', 'cost': 5, 'type': 'discard', 'ability': '+ 3[Star]'},
         {'name': 'Commuter Train', 'cost': 4, 'type': 'discard', 'ability': '+ 2[Star]'},
         {'name': 'Corner Store', 'cost': 3, 'type': 'discard', 'ability': '+ 1[Star]'},
@@ -249,16 +252,8 @@ class Shogun extends Component {
         count = this.count(this.localState.dice, 'claw')
         damage += count
         this.addPoints(this.localState.currentTurn, pointsToAdd)
-        this.localState.energy[this.localState.currentTurn - 1] += energyToAdd
+        this.addEnergy(this.localState.currentTurn, energyToAdd)
         this.localState.health[this.localState.currentTurn - 1] = Math.min(this.localState.health[this.localState.currentTurn - 1] + healthToAdd, 10)
-        console.log("points to add")
-        console.log(pointsToAdd)
-        console.log("energy to add")
-        console.log(energyToAdd)
-        console.log("health to add")
-        console.log(healthToAdd)
-        console.log("damage to deal")
-        console.log(damage)
         this.updateMessage("Player " + this.localState.currentTurn + " earns " + pointsToAdd + " points, " + energyToAdd + " energy, " + healthToAdd 
         + " health, and deals " + damage + " damage.")
         this.attack(damage)
@@ -283,6 +278,26 @@ class Shogun extends Component {
         } else {
             this.buttonPhase = 2
         }
+    }
+
+    addEnergy(player, energyToAdd) {
+        if (this.hasCard(player, "Friend of Children")) energyToAdd += 1
+        this.localState.energy[player - 1] += energyToAdd
+    }
+
+    hasCard(player, cardName) {
+        const playerHand = this.localState.hands[player - 1]
+        console.log("Player hand")
+        console.log(playerHand)
+        for (let i = 0; i < playerHand.length; i++) {
+            console.log(playerHand[i]['name'])
+            if (playerHand[i]['name'] === cardName) {
+                console.log("card " + cardName + " found")
+                return true
+            }
+        }
+        console.log("card " + cardName + " not found")
+        return false
     }
 
     enterTokyo(player) {
@@ -347,6 +362,7 @@ class Shogun extends Component {
 
     attack(damage) {
         let damageBool = true
+        if (this.hasCard(this.localState.currentTurn, "Acid Attack")) damage += 1
         if (this.inTokyo(this.localState.currentTurn)) {
             damageBool = false
             console.log("Looking for not in Tokyo")
@@ -479,16 +495,19 @@ class Shogun extends Component {
                 return
             } else {
                 const boughtCard = this.localState.deck[cardNumber]
-                if (boughtCard['cost'] > this.localState.energy[this.localState.currentTurn - 1]) {
+                let boughtCardModifiedCost = this.getModifiedCost(this.localState.currentTurn, boughtCard['cost'])
+                if (boughtCardModifiedCost > this.localState.energy[this.localState.currentTurn - 1]) {
                     window.alert('Not enough money to buy.')
                     return
                 } else {
-                    this.localState.energy[this.localState.currentTurn - 1] -= boughtCard['cost']
+                    this.localState.energy[this.localState.currentTurn - 1] -= boughtCardModifiedCost
                     this.localState.deck.splice(cardNumber, 1)
                     if (boughtCard['type'] === 'discard') {
                         this.discardCardEffect(boughtCard)
                     } else {
-                        window.alert('Implement keep cards.')
+                        console.log(boughtCard)
+                        this.localState.hands[this.localState.currentTurn - 1].push(boughtCard)
+                        console.log(this.localState.hands)
                     }
                     this.rerenderState()
                 }
@@ -496,6 +515,14 @@ class Shogun extends Component {
         } else {
             window.alert("Cannot buy until you resolve your roll.")
         }
+    }
+
+    getModifiedCost(player, originalCost) {
+        let returnCost = originalCost
+        if (this.hasCard(player, "Alien Metabolism")) {
+            returnCost -= 1
+        }
+        return returnCost
     }
 
     discardCardEffect(card) {
@@ -550,6 +577,18 @@ class Shogun extends Component {
         this.rerenderState()
     }
 
+    renderPlayerHands() {
+        return(
+            <div>
+                {this.state.playersInGame.map((number) => {
+                    return(<div>
+                        Player {number} Hand: {JSON.stringify(this.state.hands[number - 1])}
+                    </div>)
+                })}
+            </div>
+        )
+    }
+
     printState() {
         console.log(this.state)
     }
@@ -586,12 +625,19 @@ class Shogun extends Component {
                             <button id="doneYielding" class={(this.buttonPhase === 1) ? "btn-success" : "btn-danger"} onClick={() => {this.canYield = false; this.buttonPhase = 2; this.rerenderState()}}>Done Yielding</button>
                             </div>
                             <div>
-                                <button id="buy0" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(0)}}>{this.localState.deck[0] ? this.localState.deck[0]['name'] : 'none'}</button>
-                                <button id="buy1" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(1)}}>{this.localState.deck[1] ? this.localState.deck[1]['name'] : 'none'}</button>
-                                <button id="buy2" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(2)}}>{this.localState.deck[2] ? this.localState.deck[2]['name'] : 'none'}</button>
+                                <div>
+                                <button id="buy0" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(0)}}>{this.localState.deck[0] ? this.localState.deck[0]['name'] + " Cost: " + this.localState.deck[0]['cost'] + " Ability: " + this.localState.deck[0]['ability'] : 'none'}</button>
+                                </div>
+                                <div>
+                                <button id="buy1" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(1)}}>{this.localState.deck[1] ? this.localState.deck[1]['name'] + " Cost: " + this.localState.deck[1]['cost'] + " Ability: " + this.localState.deck[1]['ability'] : 'none'}</button>
+                                </div>
+                                <div>
+                                <button id="buy2" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(2)}}>{this.localState.deck[2] ? this.localState.deck[2]['name'] + " Cost: " + this.localState.deck[2]['cost'] + " Ability: " + this.localState.deck[2]['ability'] : 'none'}</button>
+                                </div>
                             </div>
                             <button id="doneBuying" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(-1)}}>Done Buying</button>
                             <p>Players in game: {JSON.stringify(this.state.playersInGame)}</p>
+                            {this.renderPlayerHands()}
                             <p>Change player numbers and restart game.</p>
                             <button onClick={() => {this.setup(2)}}>2 Players</button>
                             <button onClick={() => {this.setup(5)}}>5 Players</button>

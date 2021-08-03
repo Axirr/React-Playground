@@ -20,6 +20,52 @@ describe('Shogun of Edo app', () => {
 
   })
 
+  it("test keep card, alien metabolism", () => {
+    cy.visit('localhost:3000/shoguntestbuy2')
+    cy.get("#spoof6Energy").click()
+    cy.get("#buy2").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#buy0").click()
+    cy.contains("Player 1Score: 0Health: 10Energy: 1")
+  })
+
+  it("test keep card, acid attack", () => {
+    cy.visit('localhost:3000/shoguntestbuy2')
+    cy.get("#spoof6Energy").click()
+    cy.get("#buy1").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofClaw").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofClaw").click()
+    cy.contains("Player 2Score: 1Health: 8Energy: 0")
+  })
+
+  it("test keep card, friend of children", () => {
+    cy.visit('localhost:3000/shoguntestbuy2')
+    cy.get("#spoof6Energy").click()
+    cy.get("#buy0").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoof6Energy").click()
+    cy.contains("Player 1Score: 0Health: 10Energy: 10")
+  })
+
   it("player gains 1 point when go into Tokyo on yield", () => {
     cy.visit('localhost:3000/shoguntest1')
     cy.get("#spoofClaw").click()
