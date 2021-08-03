@@ -4,6 +4,69 @@ describe('Shogun of Edo app', () => {
   beforeEach(() => {
   })
 
+  it("", () => {
+
+  })
+
+  it("5 player, both yield, only replaces one", () => {
+
+  })
+
+  it("5 player game, player goes into tokyo bay when tokyo occupied and tries to yield immediately, fails", () => {
+
+  })
+
+  it("tests 5th player eliminate, yield tokyo bay disappears", () => {
+
+  })
+
+  it("player dies in tokyo and killer takes over", () => {
+    cy.visit('localhost:3000/shoguntest1')
+    cy.get("#spoofClaw").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoof6Claw").click()
+    cy.get("#doneYielding").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoof6Claw").click()
+    cy.contains("Tokyo: 3")
+  })
+
+  it("normal enter tokyo earn 1 point", () => {
+    cy.visit('localhost:3000/shoguntest1')
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofClaw").click()
+    cy.contains("Player 2Score: 1Health: 10Energy: 0")
+  })
+
+  it("test normal yield", () => {
+    cy.visit('localhost:3000/shoguntest1')
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofClaw").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofClaw").click()
+    cy.get("#yieldTokyo").click()
+    cy.contains("Tokyo: 4")
+  })
+
+  it("tests try buy before yield fails", () => {
+    cy.visit('localhost:3000/shoguntest1')
+    const stub = cy.stub()  
+    cy.on ('window:alert', stub)
+    cy.get("#spoofClaw").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofClaw").click()
+    cy.get("#doneBuying").click().then(
+        () => {
+          expect(stub.getCall(0)).to.be.calledWith('Deal with yield before buying.')
+      }
+      )
+  })
+
+
   it("tests normal buying card", () => {
     cy.visit('localhost:3000/shoguntestbuy')
     cy.get("#spoof6Energy").click()
@@ -62,6 +125,7 @@ describe('Shogun of Edo app', () => {
     cy.get("#spoofClaw").click()
     cy.get("#doneBuying").click()
     cy.get("#spoofClaw").click()
+    cy.get("#doneYielding").click()
     cy.get("#doneBuying").click()
     cy.get("#spoofNone").click()
     cy.get("#doneBuying").click()
@@ -69,7 +133,7 @@ describe('Shogun of Edo app', () => {
     cy.get("#doneBuying").click()
     cy.get("#spoofHeart").click()
     cy.get("#doneBuying").click()
-    cy.contains("Player 1Score: 2Health: 9Energy: 0")
+    cy.contains("Player 1Score: 3Health: 9Energy: 0")
   })
 
   it("test win by elimination", () => {

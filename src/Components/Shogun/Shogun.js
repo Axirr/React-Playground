@@ -9,10 +9,11 @@ class Shogun extends Component {
     }
 
     winPoints = 20
-    startHealth = 5
-    startEnergy = 8
+    startHealth = 10
+    startEnergy = 0
     withSpoof = false
     canBuy = false
+    canYield = false
 
     cards = [
         {'name': 'Apartment Building', 'cost': 5, 'type': 'discard', 'ability': '+ 3[Star]'},
@@ -111,6 +112,7 @@ class Shogun extends Component {
             remainingRolls: 3
         }, () => {
             this.localState = JSON.parse(JSON.stringify(this.state))
+            this.rerenderState()
         })
 
     }
@@ -145,7 +147,7 @@ class Shogun extends Component {
             }
         }
         this.localState['dice'] = newDice
-        this.updateMessage("Player " + this.localState.currentTurn + " rolled!")
+        // this.updateMessage("Player " + this.localState.currentTurn + " rolled!")
         this.localState['remainingRolls'] -= 1
         this.rerenderState()
     }
@@ -189,10 +191,12 @@ class Shogun extends Component {
         }
         this.rerenderState()
         this.canBuy = false
+        this.canYield = false
     }
 
     addPoints(player, newPoints) {
         this.localState.points[player - 1] += newPoints
+        this.updateMessage("Player " + player + " earns " + newPoints + " points.")
         this.checkPointsWin()
     }
 
@@ -256,14 +260,30 @@ class Shogun extends Component {
         this.attack(damage)
         this.checkElim()
         if (damage > 0) {
-            if (this.localState.tokyo === 0) {
-                this.localState.tokyo = this.localState.currentTurn
-                this.updateMessage("Player " + this.localState.currentTurn + " goes into Tokyo.")
+            if (this.localState.playersInGame.length <= 4) {
+                if (this.localState.tokyo === 0) {
+                    this.enterTokyo(this.localState.currentTurn)
+                }
+                if (!this.onlyCurrentPlayerInTokyo()) {
+                    this.canYield = true
+                }
+            } else {
+                window.alert("Implement yield for double tokyo")
             }
             // Fix for both and yield
         }
         this.canBuy = true
         this.rerenderState()
+    }
+
+    enterTokyo(player) {
+        this.localState.tokyo = player
+        this.updateMessage("Player " + this.localState.currentTurn + " goes into Tokyo.")
+        this.addPoints(player, 1)
+    }
+
+    onlyCurrentPlayerInTokyo() {
+        return (this.localState.tokyo === this.localState.currentTurn || this.localState.tokyo === 0) && (this.localState.bayTokyo === this.localState.currentTurn || this.localState.bayTokyo === 0)
     }
 
     checkElim() {
@@ -292,6 +312,14 @@ class Shogun extends Component {
             this.removeFromTokyo(player)
         }
         this.updateMessage("Player " + player + " is eliminated!")
+    }
+
+    isTokyoEmpty() {
+        if (this.localState.playersInGame.length <= 4) {
+            return this.localState.tokyo === 0 
+        } else {
+            return (this.localState.tokyo === 0 && this.localState.bayTokyo === 0)
+        }
     }
 
     removeFromTokyo(player) {
@@ -420,6 +448,10 @@ class Shogun extends Component {
     }
 
     buy(cardNumber) {
+        if (this.canYield) {
+            window.alert("Deal with yield before buying.")
+            return
+        }
         if (this.localState.deck.length - 1 < cardNumber) {
             window.alert("Cannot buy card " + (cardNumber + 1) + " because it doesn't exist.")
             return
@@ -471,6 +503,36 @@ class Shogun extends Component {
         }
     }
 
+    yieldTokyo(location) {
+        if(!this.canYield) {
+            window.alert("Can't yield, didn't take damage.")
+            return
+        } else {
+            if (this.localState.currentTurn !== this.localState.tokyo && this.localState.currentTurn !== this.localState.bayTokyo) {
+                if (location === 'tokyo') {
+                    console.log("inside")
+                    // Possibly can remove inside checks
+                    if (this.localState.tokyo !== this.localState.currentTurn) {
+                        console.log("Yielding Tokyo")
+                        this.localState.tokyo = this.localState.currentTurn
+                    } else {
+                        window.alert("Can't yield Tokyo on own turn")
+                    }
+                } else if (location === 'bay') {
+                    if (this.localState.bayTokyo !== this.localState.currentTurn) {
+                        console.log("Yielding Tokyo Bay")
+                        this.localState.bayTokyo = this.localState.currentTurn
+                    } else {
+                        window.alert("Can't yield Tokyo on own turn")
+                    }
+                }
+            } else {
+                window.alert("Can't yield Tokyo on own turn")
+            }
+        }
+        this.rerenderState()
+    }
+
     printState() {
         console.log(this.state)
     }
@@ -496,10 +558,16 @@ class Shogun extends Component {
                             <p>Current Turn: Player {this.state.currentTurn}</p>
                             <p>Remaining Rolls: {this.state.remainingRolls}</p>
                             <p>In Tokyo: {this.state.tokyo}</p>
+                            {(this.state.playersInGame.length > 4) && <p>In Tokyo Bay: {this.state.bayTokyo}</p>}
                             <div>
                                 <button id="roll" onClick={() => {this.roll()}}>Roll</button>
                             </div>
                             <button id="resolveRoll" onClick={() => {this.resolveRoll()}}>Lock-in Roll</button>
+                            <div>
+                            <button id="yieldTokyo" onClick={() => {this.yieldTokyo('tokyo')}}>Yield Tokyo</button>
+                            {(this.state.playersInGame.length > 4) && <button id="yieldBay" onClick={() => {this.yieldTokyo('bay')}}>Yield Tokyo Bay</button>}
+                            <button id="doneYielding" onClick={() => {this.canYield = false}}>Done Yielding</button>
+                            </div>
                             <div>
                                 <button id="buy0" onClick={() => {this.buy(0)}}>{this.localState.deck[0] ? this.localState.deck[0]['name'] : 'none'}</button>
                                 <button id="buy1" onClick={() => {this.buy(1)}}>{this.localState.deck[1] ? this.localState.deck[1]['name'] : 'none'}</button>
@@ -509,6 +577,7 @@ class Shogun extends Component {
                             <p>Players in game: {JSON.stringify(this.state.playersInGame)}</p>
                             <p>Change player numbers and restart game.</p>
                             <button onClick={() => {this.setup(2)}}>2 Players</button>
+                            <button onClick={() => {this.setup(5)}}>5 Players</button>
                             <button onClick={() => {this.printState()}}>Print State</button>
                             <button onClick={() => this.printLocalState()}>Print Local State</button>
                             <div>
