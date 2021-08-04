@@ -23,9 +23,8 @@ class Shogun extends Component {
         {'name': 'Apartment Building', 'cost': 5, 'type': 'discard', 'ability': '+ 3[Star]'},
         {'name': 'Commuter Train', 'cost': 4, 'type': 'discard', 'ability': '+ 2[Star]'},
         {'name': 'Corner Store', 'cost': 3, 'type': 'discard', 'ability': '+ 1[Star]'},
-        {'name': 'Apartment Building', 'cost': 5, 'type': 'discard', 'ability': '+ 3[Star]'},
-        {'name': 'Apartment Building', 'cost': 5, 'type': 'discard', 'ability': '+ 3[Star]'},
-        {'name': 'Apartment Building', 'cost': 5, 'type': 'discard', 'ability': '+ 3[Star]'},
+        {'name': 'Complete Destruction', 'cost': 3, 'type': 'keep', 'ability': 'If you roll [1][2][3][Heart][Attack][Energy] gain 9[Star] in addition to the regular results.'},
+        {'name': 'Energy Hoarder', 'cost': 3, 'type': 'keep', 'ability': 'You gain 1[Star] for every 6[Energy] you have at the end of your turn.'},
     ]
 
     localState = {
@@ -37,7 +36,7 @@ class Shogun extends Component {
         buyCards: ["none", "none", "none"],
         deck: this.cards,
         message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
-        doShuffle: false,
+        doShuffle: true,
         points: [0,0,0,0],
         health: [this.startHealth,this.startHealth,this.startHealth,this.startHealth],
         energy: [0,0,0,0],
@@ -55,7 +54,7 @@ class Shogun extends Component {
         buyCards: ["none", "none", "none"],
         deck: this.cards,
         message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
-        doShuffle: false,
+        doShuffle: true,
         points: [0,0,0,0],
         health: [this.startHealth,this.startHealth,this.startHealth,this.startHealth],
         energy: [0,0,0,0],
@@ -65,7 +64,6 @@ class Shogun extends Component {
     }
 
     componentDidMount() {
-        console.log(this.props.initialData)
         if (!this.props.initialData) {
             this.setup(4)
         } else {
@@ -163,7 +161,6 @@ class Shogun extends Component {
     }
 
     advanceTurn() {
-        console.log("Turn advancing.")
         let nextClosestPlayer;
         var currentIndex = this.localState.playersInGame.indexOf(this.state.currentTurn)
         if (currentIndex === -1) {
@@ -176,8 +173,6 @@ class Shogun extends Component {
                     potentialPlayers.push(player % this.localState.totalNumberOfPlayers)
                 }
             }
-            console.log("Ordered player list")
-            console.log(potentialPlayers)
             nextClosestPlayer = this.localState.playersInGame[0]
             for (var i = 0; i < potentialPlayers.length; i++) {
                 if (this.localState.playersInGame.indexOf(potentialPlayers[i]) !== -1) {
@@ -198,6 +193,13 @@ class Shogun extends Component {
         if (this.inTokyo(this.localState.currentTurn)) {
             this.updateMessage("Player " + this.localState.currentTurn + " gets 2 points for starting in Tokyo.")
             this.addPoints(this.localState.currentTurn, 2)
+        }
+        if (this.hasCard(this.localState.currentTurn, "Energy Hoarder")) {
+            this.updateMessage("Energy Hoarder activated.")
+            const energyToAdd = Math.floor(this.localState.energy[this.localState.currentTurn - 1] / 6)
+            console.log("energy" + energyToAdd)
+            this.addEnergy(this.localState.currentTurn, energyToAdd)
+            this.rerenderState()
         }
         this.buttonPhase = 0
         this.rerenderState()
@@ -224,7 +226,7 @@ class Shogun extends Component {
 
     resetRolls() {
         this.localState['remainingRolls'] = 3
-        console.log("Add in cards that change number of rolls")
+        console.log("Add in cards that change number of rolls and change number of dice")
         this.resetDiceState()
     }
 
@@ -279,6 +281,18 @@ class Shogun extends Component {
             }
             // Fix for both and yield
         }
+        // if (this.hasCard(this.localState.currentTurn, "Complete Destruction")) {
+        if (true) {
+            let diceFaces = ['claw','heart','energy', '1','2','3']
+            let diceCounts = diceFaces.map((face) => {
+                return this.count(this.localState.dice, face)
+            })
+            console.log(diceCounts)
+            if (this.count(diceCounts, 1) === 6) {
+                this.updateMessage("Player " + this.localState.currentTurn + " earns 9 points for COMPLETE DESTRUCTION!")
+                this.addPoints(this.localState.currentTurn, 9)
+            }
+        }
         this.canBuy = true
         this.rerenderState()
         if (this.canYield) {
@@ -295,16 +309,11 @@ class Shogun extends Component {
 
     hasCard(player, cardName) {
         const playerHand = this.localState.hands[player - 1]
-        console.log("Player hand")
-        console.log(playerHand)
         for (let i = 0; i < playerHand.length; i++) {
-            console.log(playerHand[i]['name'])
             if (playerHand[i]['name'] === cardName) {
-                console.log("card " + cardName + " found")
                 return true
             }
         }
-        console.log("card " + cardName + " not found")
         return false
     }
 
@@ -330,10 +339,7 @@ class Shogun extends Component {
             let playerToCheck = this.localState.playersInGame[i]
             if (this.localState.health[playerToCheck - 1] <= 0) {
                 playersToElim.push(playerToCheck)
-                console.log("Player " + playerToCheck + " dies.")
-            } else {
-                console.log("Player " + playerToCheck + " survives.")
-            }
+            } 
         }
         for (let i = 0; i < playersToElim.length; i++) {
             this.eliminatePlayer(playersToElim[i])
@@ -375,13 +381,11 @@ class Shogun extends Component {
         if (this.inTokyo(this.localState.currentTurn)) {
             damageBool = false
             attackString = "Outside Tokyo"
-            console.log("Looking for not in Tokyo")
         }
         this.updateMessage("Player " + this.localState.currentTurn + " deals " + damage + " damage to " + attackString + ".")
         let playersToDamage = []
         for (let i = 0; i < this.localState.playersInGame.length; i++) {
             if (this.inTokyo(this.localState.playersInGame[i]) == damageBool) {
-                console.log("Player " + this.localState.playersInGame[i])
                 playersToDamage.push(this.localState.playersInGame[i])
             }
         }
@@ -414,7 +418,6 @@ class Shogun extends Component {
     getRollResult() {
         const numberOfDice = 6
         var rollNumber = Math.floor(Math.random() * numberOfDice)
-        console.log(rollNumber)
         return(this.getNameForRollNumber(rollNumber))
     }
 
@@ -485,7 +488,6 @@ class Shogun extends Component {
     }
 
     updateMessage(newMessage) {
-        console.log("Updating message")
         var messageCopy = this.localState.message
         for (var i = 0; i < (messageCopy.length - 1); i++) {
             messageCopy[i] = messageCopy[i+1]
@@ -512,7 +514,6 @@ class Shogun extends Component {
         }
         if (this.canBuy) {
             if (cardNumber === -1) {
-                console.log("No buy")
                 this.advanceTurn()
                 this.rerenderState()
                 return
@@ -528,9 +529,7 @@ class Shogun extends Component {
                     if (boughtCard['type'] === 'discard') {
                         this.discardCardEffect(boughtCard)
                     } else {
-                        console.log(boughtCard)
                         this.localState.hands[this.localState.currentTurn - 1].push(boughtCard)
-                        console.log(this.localState.hands)
                     }
                     this.rerenderState()
                 }
@@ -579,7 +578,6 @@ class Shogun extends Component {
         } else {
             if (this.localState.currentTurn !== this.localState.tokyo && this.localState.currentTurn !== this.localState.bayTokyo) {
                 if (location === 'tokyo') {
-                    console.log("inside")
                     // Possibly can remove inside checks
                     if (this.localState.tokyo !== this.localState.currentTurn) {
                         this.updateMessage("Player " + this.localState.tokyo + " is yielding Tokyo.")
@@ -605,14 +603,16 @@ class Shogun extends Component {
 
     renderPlayerHands() {
         return(<Container>
-                    <Row>
-                {this.state.playersInGame.map((number) => {
-                    return(
-                        <Col>
-                            Player {number} Hand: {this.renderCards(this.state.hands[number - 1])}
-                        </Col>
-                )})}
-                    </Row>
+                    <div class="border">
+                        <Row>
+                            {this.state.playersInGame.map((number) => {
+                                return(
+                                    <Col>
+                                        Player {number} Hand: {this.renderCards(this.state.hands[number - 1])}
+                                    </Col>
+                            )})}
+                        </Row>
+                    </div>
                 </Container>
         )
     }
@@ -628,6 +628,21 @@ class Shogun extends Component {
                 })}
             </div>
         )
+    }
+
+    clearBuy() {
+        if (this.buttonPhase !== 2) {
+            window.alert("Not buy phase.")
+            return
+        }
+        if (this.localState.energy[this.localState.currentTurn - 1] < 2) {
+            window.alert("Not enough money to clear.")
+            return
+        } else {
+            this.addEnergy(this.localState.currentTurn, -2)
+            this.localState.deck.splice(0, 3)
+            this.rerenderState()
+        }
     }
 
     printState() {
@@ -689,23 +704,25 @@ class Shogun extends Component {
                                 <button id="buy2" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(2)}}>{this.localState.deck[2] ? this.localState.deck[2]['name'] + " Cost: " + this.localState.deck[2]['cost'] + " Ability: " + this.localState.deck[2]['ability'] : 'none'}</button>
                                 </div>
                             </div>
+                            <button id="clearBuy" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.clearBuy()}}>Pay 2 to Clear Buy Cards</button>
                             <button id="doneBuying" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(-1)}}>Done Buying</button>
                             <p>Players in game: {JSON.stringify(this.state.playersInGame)}</p>
                             {this.renderPlayerHands()}
-                            <p>Change player numbers and restart game.</p>
-                            <button onClick={() => {this.setup(2)}}>2 Players</button>
-                            <button onClick={() => {this.setup(5)}}>5 Players</button>
-                            <button onClick={() => {this.printState()}}>Print State</button>
-                            <button onClick={() => this.printLocalState()}>Print Local State</button>
                             <div>
                                 {this.withSpoof && 
                                 <div>
+                                <p>Change player numbers and restart game.</p>
+                                <button onClick={() => {this.setup(2)}}>2 Players</button>
+                                <button onClick={() => {this.setup(5)}}>5 Players</button>
+                                <button onClick={() => {this.printState()}}>Print State</button>
+                                <button onClick={() => this.printLocalState()}>Print Local State</button>
                                 <button id="spoof3" onClick={() => this.spoofDice(["3","3","3","1","2","2"])}>Spoof Dice 333</button>
                                 <button id="spoofClaw" onClick={() => this.spoofDice(["claw","3","3","1","2","2"])}>Spoof Dice One Claw</button>
                                 <button id="spoofNone" onClick={() => this.spoofDice(["1","1","2","2","3","3"])}>Spoof None</button>
                                 <button id="spoof6Claw" onClick={() => this.spoofDice(["claw","claw","claw","claw","claw","claw"])}>Spoof Six Claw</button>
                                 <button id="spoofHeart" onClick={() => this.spoofDice(["heart","1","1","2","2","3"])}>Spoof Heart</button>
                                 <button id="spoof6Energy" onClick={() => this.spoofDice(["energy","energy","energy","energy","energy","energy"])}>Spoof 6 Energy</button>
+                                <button id="spoofCompleteDestruction" onClick={() => this.spoofDice(["energy","claw","heart","1","2","3"])}>Spoof Complete Destruction</button>
                                 </div>
     }
                             </div>

@@ -8,6 +8,28 @@ describe('Shogun of Edo app', () => {
 
   })
 
+  it("attempt clear buy without enough money fail", () => {
+    cy.visit('localhost:3000/shoguntestbuy2')
+    const stub = cy.stub()  
+    cy.on ('window:alert', stub)
+    cy.get("#spoofNone").click()
+    cy.get("#clearBuy").click()
+    cy.get("#doneBuying").click().then(
+        () => {
+          expect(stub.getCall(0)).to.be.calledWith('Not enough money to clear.')
+      }
+      )
+  })
+
+  it("normal clear buy", () => {
+    cy.visit('localhost:3000/shoguntestbuy2')
+    cy.get("#spoof6Energy").click()
+    cy.get("#clearBuy").click()
+    cy.contains("Apartment Building")
+    cy.contains("Commuter Train")
+    cy.contains("Corner Store")
+  })
+
   it("5 player, both yield, only replaces one", () => {
 
   })
@@ -18,6 +40,44 @@ describe('Shogun of Edo app', () => {
 
   it("tests 5th player eliminate, yield tokyo bay disappears", () => {
 
+  })
+
+  it("energy hoarder card test", () => {
+    cy.visit('localhost:3000/shoguntestbuy3')
+    cy.get("#spoof6Energy").click()
+    cy.get("#buy1").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.contains("Player 1Score: 0Health: 10Energy: 3")
+    cy.get("#spoof6Energy").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.contains("Player 1Score: 0Health: 10Energy: 10")
+  })
+
+  it("complete destruction test", () => {
+    cy.visit('localhost:3000/shoguntestbuy3')
+    cy.get("#spoof6Energy").click()
+    cy.get("#buy0").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofCompleteDestruction").click()
+    cy.contains("Player 1 earns 9 points for COMPLETE DESTRUCTION!")
   })
 
   it("test keep card, alien metabolism", () => {

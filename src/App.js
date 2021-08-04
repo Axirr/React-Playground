@@ -106,6 +106,27 @@ class App extends Component {
                 remainingRolls: 3
               }}/>
             </Route>
+            <Route path="/shoguntestbuy3">
+              <Shogun withSpoof='true' initialData={{
+                dice: ["claw", "none", "none", "none", "none", "none"],
+                saved: [false, false, false, false, false, false],
+                playersInGame: [1,2,3,4],
+                currentTurn: 1,
+                hands: [[],[],[],[]],
+                buyCards: ["none", "none", "none"],
+                deck: [{'name': 'Complete Destruction', 'cost': 3, 'type': 'keep', 'ability': 'If you roll [1][2][3][Heart][Attack][Energy] gain 9[Star] in addition to the regular results.'},
+                      {'name': 'Energy Hoarder', 'cost': 3, 'type': 'keep', 'ability': 'You gain 1[Star] for every 6[Energy] you have at the end of your turn.'},
+              ],
+                message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
+                doShuffle: false,
+                points: [0,0,0,0],
+                health: [10,10,10,10],
+                energy: [0,0,0,0],
+                tokyo: 0,
+                bayTokyo: 0,
+                remainingRolls: 3
+              }}/>
+            </Route>
           </Switch>
         </BrowserRouter>
       </div>
