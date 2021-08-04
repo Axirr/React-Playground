@@ -151,6 +151,98 @@ class App extends Component {
                 remainingRolls: 3
               }}/>
             </Route>
+            <Route path="/shoguntestbuy5">
+              <Shogun withSpoof='true' initialData={{
+                dice: ["none", "none", "none", "none", "none", "none"],
+                saved: [false, false, false, false, false, false],
+                playersInGame: [1,2,3,4],
+                currentTurn: 1,
+                hands: [[],[],[],[]],
+                buyCards: ["none", "none", "none"],
+                deck: [
+                {'name': 'Heal', 'cost': 3, 'type': 'discard', 'ability': 'Heal 2 health.'},
+                {'name': 'Herbivore', 'cost': 5, 'type': 'keep', 'ability': "Gain 1 point on your turn if you don't attack anyone."},
+                {'name': 'Gas Refinery', 'cost': 6, 'type': 'discard', 'ability': "Gain 2[Star] and deal 3 damage to all other monsters."},
+              ],
+                message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
+                doShuffle: false,
+                points: [0,0,0,0],
+                health: [10,10,10,10],
+                energy: [0,0,0,0],
+                edo: 0,
+                bayEdo: 0,
+                remainingRolls: 3
+              }}/>
+            </Route>
+            <Route path="/shoguntestbuy6">
+              <Shogun withSpoof='true' initialData={{
+                dice: ["none", "none", "none", "none", "none", "none"],
+                saved: [false, false, false, false, false, false],
+                playersInGame: [1,2,3,4],
+                currentTurn: 1,
+                hands: [[],[],[],[]],
+                buyCards: ["none", "none", "none"],
+                deck: [
+                {'name': 'Gourmet', 'cost': 4, 'type': 'keep', 'ability': "When scoring [1][1][1], score 3"},
+                {'name': 'High Altitude Bombing', 'cost': 4, 'type': 'discard', 'ability': "All monsters (including you) take 3 damage."},
+                {'name': 'Jet Fighters', 'cost': 5, 'type': 'discard', 'ability': "+5[Star] and take 4 damage."},
+              ],
+                message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
+                doShuffle: false,
+                points: [0,0,0,0],
+                health: [10,10,10,10],
+                energy: [0,0,0,0],
+                edo: 0,
+                bayEdo: 0,
+                remainingRolls: 3
+              }}/>
+            </Route>
+            <Route path="/shoguntestbuy7">
+              <Shogun withSpoof='true' initialData={{
+                dice: ["none", "none", "none", "none", "none", "none"],
+                saved: [false, false, false, false, false, false],
+                playersInGame: [1,2,3,4],
+                currentTurn: 1,
+                hands: [[],[],[],[]],
+                buyCards: ["none", "none", "none"],
+                deck: [
+                {'name': 'National Guard', 'cost': 3, 'type': 'discard', 'ability': "+2[Star] and take 2 damage."},
+                {'name': 'Nova Breath', 'cost': 7, 'type': 'keep', 'ability': "Your attacks damage all other players."},
+                {'name': 'Nuclear Power Plant', 'cost': 6, 'type': 'discard', 'ability': "+2[Star] and heal 3 damage."},
+              ],
+                message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
+                doShuffle: false,
+                points: [0,0,0,0],
+                health: [10,10,10,10],
+                energy: [0,0,0,0],
+                edo: 0,
+                bayEdo: 0,
+                remainingRolls: 3
+              }}/>
+            </Route>
+            <Route path="/shoguntestbuy8">
+              <Shogun withSpoof='true' initialData={{
+                dice: ["none", "none", "none", "none", "none", "none"],
+                saved: [false, false, false, false, false, false],
+                playersInGame: [1,2,3,4],
+                currentTurn: 1,
+                hands: [[],[],[],[]],
+                buyCards: ["none", "none", "none"],
+                deck: [
+                {'name': 'Omnivore', 'cost': 4, 'type': 'keep', 'ability': "Can score [1][2][3] for 2 points now. Can still use in other combos."},
+                {'name': 'Regeneration', 'cost': 4, 'type': 'keep', 'ability': "When you heal, heal one extra damage."},
+                {'name': 'Rooting For The Underdog', 'cost': 3, 'type': 'keep', 'ability': "At the end of a turn where you have the fewest points, gain a point."},
+              ],
+                message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
+                doShuffle: false,
+                points: [0,0,0,0],
+                health: [10,10,10,10],
+                energy: [0,0,0,0],
+                edo: 0,
+                bayEdo: 0,
+                remainingRolls: 3
+              }}/>
+            </Route>
           </Switch>
         </BrowserRouter>
       </div>

@@ -8,6 +8,10 @@ describe('Shogun of Edo app', () => {
 
   })
 
+  it("test herbivore", () => {
+
+  })
+
   it("test heal", () => {
 
   })
@@ -18,6 +22,83 @@ describe('Shogun of Edo app', () => {
 
   it("test fire blast", () => {
 
+  })
+
+  it("check killed by jets don't win", () => {
+
+  })
+
+  it("check elimination with addhealth goes negative", () => {
+
+  })
+
+  it("rooting for underdog", () => {
+
+  })
+
+  it("test regneration", () => {
+    cy.visit('localhost:3000/shoguntestbuy8')
+    cy.get("#spoof6Energy").click()
+    cy.get("#buy1").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofClaw").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoof6Claw").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofHeart").click()
+    cy.get("#doneBuying").click()
+    cy.contains("Player 1Score: 0Health: 6Energy: 2")
+  })
+
+  it("test omnivore combo score", () => {
+    cy.visit('localhost:3000/shoguntestbuy8')
+    cy.get("#spoof6Energy").click()
+    cy.get("#buy0").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.contains("Player 1Score: 2Health: 10Energy: 2")
+  })
+
+  it("nova breath test", () => {
+    cy.visit('localhost:3000/shoguntestbuy7')
+    cy.get("#spoof6Energy").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoof6Energy").click()
+    cy.get("#buy1").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofClaw").click()
+      cy.contains("Player 1Score: 1Health: 10Energy: 5")
+      cy.contains("Player 2Score: 0Health: 9Energy: 0")
+      cy.contains("Player 3Score: 0Health: 9Energy: 0")
+      cy.contains("Player 4Score: 0Health: 9Energy: 0")
   })
 
   it("test evacuation orders, some points below 5", () => {

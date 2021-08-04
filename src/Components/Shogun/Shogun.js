@@ -30,6 +30,17 @@ class Shogun extends Component {
         {'name': 'Fire Blast', 'cost': 3, 'type': 'discard', 'ability': 'Deal 2 damage to all other monsters'},
         {'name': 'Giant Brain', 'cost': 5, 'type': 'keep', 'ability': 'Get an extra reroll each turn.'},
         {'name': 'Heal', 'cost': 3, 'type': 'discard', 'ability': 'Heal 2 health.'},
+        {'name': 'Herbivore', 'cost': 5, 'type': 'keep', 'ability': "Gain 1 point on your turn if you don't attack anyone."},
+        {'name': 'Gas Refinery', 'cost': 6, 'type': 'discard', 'ability': "Gain 2[Star] and deal 3 damage to all other monsters."},
+        {'name': 'Gourmet', 'cost': 4, 'type': 'keep', 'ability': "When scoring [1][1][1], score 3"},
+        {'name': 'High Altitude Bombing', 'cost': 4, 'type': 'discard', 'ability': "All monsters (including you) take 3 damage."},
+        {'name': 'Jet Fighters', 'cost': 5, 'type': 'discard', 'ability': "+5[Star] and take 4 damage."},
+        {'name': 'National Guard', 'cost': 3, 'type': 'discard', 'ability': "+2[Star] and take 2 damage."},
+        {'name': 'Nova Breath', 'cost': 7, 'type': 'keep', 'ability': "Your attacks damage all other players."},
+        {'name': 'Nuclear Power Plant', 'cost': 6, 'type': 'discard', 'ability': "+2[Star] and heal 3 damage."},
+        {'name': 'Omnivore', 'cost': 4, 'type': 'keep', 'ability': "Can score [1][2][3] for 2 points once per turn. Can still use dice in other combos."},
+        {'name': 'Regeneration', 'cost': 4, 'type': 'keep', 'ability': "When you heal, heal one extra damage."},
+        {'name': 'Rooting For The Underdog', 'cost': 3, 'type': 'keep', 'ability': "At the end of a turn where you have the fewest points, gain a point."},
     ]
 
     localState = {
@@ -190,7 +201,27 @@ class Shogun extends Component {
             nextClosestPlayer = this.localState.playersInGame[(currentIndex + 1) % this.state.playersInGame.length] 
         }
         this.localState['currentTurn'] = nextClosestPlayer
+        this.rootingForUnderdog()
         this.startTurnProcedures()
+    }
+
+    rootingForUnderdog() {
+        for (let i = 0; i < this.localState.playersInGame.length; i++) {
+            if (this.hasCard(this.localState.playersInGame[i], "Rooting For The Underdog")) {
+                let underdogPoints = this.localState.points[this.localState.playersInGame[i] - 1]
+                for (let j = 0; j < this.localState.playersInGame.length; j++) {
+                    if (this.localState.playersInGame[i] !== this.localState.playersInGame[j]) {
+                        if (this.localState.points[this.localState.playersInGame[j] - 1] <= underdogPoints) {
+                            break
+                        }
+                    }
+                    if (j === (this.localState.playersInGame.length - 1)) {
+                        this.updateMessage("Underdog activated.")
+                        this.addPoints(this.localState.playersInGame[i], 1)
+                    }
+                }
+            }
+        }
     }
 
     startTurnProcedures() {
@@ -213,9 +244,16 @@ class Shogun extends Component {
     }
 
     addPoints(player, newPoints) {
+        if (this.localState.playersInGame.indexOf(player) === -1) {
+            console.log("Can't add points to a dead player.")
+            return
+        }
+        const originalPoints = this.localState.points[player - 1]
         let newPointValue = Math.max(this.localState.points[player - 1] + newPoints,0)
         this.localState.points[player - 1] = newPointValue
-        this.updateMessage("Player " + player + " earns " + newPoints + " points.")
+        if (newPointValue !== originalPoints) {
+            this.updateMessage("Player " + player + " earns " + newPoints + " points.")
+        }
         this.checkPointsWin()
     }
 
@@ -223,8 +261,10 @@ class Shogun extends Component {
         for (let i = 0; i < this.localState.playersInGame.length; i++) {
             let playerToCheck = this.localState.playersInGame[i]
             if (this.localState.points[playerToCheck - 1] >= this.winPoints) {
-                window.alert("Player " + playerToCheck + " wins!")
-                this.rerenderState()
+                if (this.localState.health[playerToCheck - 1] > 0) {
+                    window.alert("Player " + playerToCheck + " wins!")
+                    this.rerenderState()
+                }
                 break;
             }
         }
@@ -259,21 +299,16 @@ class Shogun extends Component {
         var energyToAdd = 0;
         var healthToAdd = 0;
         var damage = 0;
-        var count = this.count(this.localState.dice, '1')
-        if (count >= 3) pointsToAdd += count - 2
-        count = this.count(this.localState.dice, '2')
-        if (count >= 3) pointsToAdd += count - 1
-        count = this.count(this.localState.dice, '3')
-        if (count >= 3) pointsToAdd += count 
-        count = this.count(this.localState.dice, 'energy')
+        pointsToAdd = this.pointsForRoll()
+        var count = this.count(this.localState.dice, 'energy')
         energyToAdd += count
         count = this.count(this.localState.dice, 'heart')
         if (!this.inEdo(this.localState.currentTurn)) healthToAdd = count
         count = this.count(this.localState.dice, 'claw')
         damage += count
-        this.addPoints(this.localState.currentTurn, pointsToAdd)
         this.addEnergy(this.localState.currentTurn, energyToAdd)
-        this.addHealth(this.localState.currentTurn, healthToAdd)
+        this.changeHealth(this.localState.currentTurn, healthToAdd)
+        this.addPoints(this.localState.currentTurn, pointsToAdd)
         // this.updateMessage("Player " + this.localState.currentTurn + " earns " + pointsToAdd + " points, " + energyToAdd + " energy, " + healthToAdd 
         // + " health, and deals " + damage + " damage.")
         this.attack(damage)
@@ -311,12 +346,51 @@ class Shogun extends Component {
         }
     }
 
-    addHealth(player, healthToAdd) {
-        this.updateMessage("Player " + player + "heals for " + healthToAdd)
-        if (this.hasCard(player, "Even Bigger")) {
-            this.localState.health[player - 1] = Math.min(this.localState.health[this.localState.currentTurn - 1] + healthToAdd, 12)
+    pointsForRoll() {
+        let pointsToAdd = 0
+        var count = this.count(this.localState.dice, '1')
+        if (this.hasCard(this.localState.currentTurn, "Gourmet")) {
+            if (count >= 3) pointsToAdd += count 
         } else {
-            this.localState.health[player - 1] = Math.min(this.localState.health[this.localState.currentTurn - 1] + healthToAdd, 10)
+            if (count >= 3) pointsToAdd += count - 2
+        }
+        count = this.count(this.localState.dice, '2')
+        if (count >= 3) pointsToAdd += count - 1
+        count = this.count(this.localState.dice, '3')
+        if (count >= 3) pointsToAdd += count 
+        if (this.hasCard(this.localState.currentTurn, "Omnivore")) {
+            const onesCount = this.count(this.localState.dice, '1')
+            const twosCount = this.count(this.localState.dice, '2')
+            const threesCount = this.count(this.localState.dice, '3')
+            if (onesCount >= 1 && twosCount >= 1 && threesCount >= 1) {
+                this.updateMessage("Omnivore effect activated.")
+                pointsToAdd += 2
+            }
+        }
+        return pointsToAdd
+    }
+
+    changeHealth(player, healthToAdd) {
+        let healString = " heals for "
+        if (healthToAdd < 0) {
+            healString = " is damaged for "
+        }
+        if (Math.abs(healthToAdd) > 0) {
+            this.updateMessage("Player " + player + healString + healthToAdd)
+        }
+        if (this.hasCard(player, "Regeneration")) {
+            if (healthToAdd > 0) {
+                this.updateMessage("Regeneration effect activated.")
+                healthToAdd += 1
+            }
+        }
+        if (this.hasCard(player, "Even Bigger")) {
+            this.localState.health[player - 1] = Math.min(this.localState.health[player - 1] + healthToAdd, 12)
+        } else {
+            this.localState.health[player - 1] = Math.min(this.localState.health[player - 1] + healthToAdd, 10)
+        }
+        if (this.localState.health[player - 1] <= 0) {
+            this.eliminatePlayer(player)
         }
     }
 
@@ -405,12 +479,27 @@ class Shogun extends Component {
             damageBool = false
             attackString = "Outside Edo"
         }
-        this.updateMessage("Player " + this.localState.currentTurn + " deals " + damage + " damage to " + attackString + ".")
-        let playersToDamage = []
-        for (let i = 0; i < this.localState.playersInGame.length; i++) {
-            if (this.inEdo(this.localState.playersInGame[i]) == damageBool) {
-                playersToDamage.push(this.localState.playersInGame[i])
+        if (damage > 0) {
+            this.updateMessage("Player " + this.localState.currentTurn + " deals " + damage + " damage to " + attackString + ".")
+        } else {
+            if (this.hasCard(this.localState.currentTurn, "Herbivore")) {
+                this.updateMessage("Herbivore activated!")
+                this.addPoints(this.localState.currentTurn, 1)
             }
+        }
+        let playersToDamage = []
+        if (this.hasCard(this.localState.currentTurn, "Nova Breath")) {
+            for (let i = 0; i < this.localState.playersInGame.length; i++) {
+                if (this.localState.playersInGame[i] !== this.localState.currentTurn) {
+                    playersToDamage.push(this.localState.playersInGame[i])
+                }
+            }
+        } else {
+            for (let i = 0; i < this.localState.playersInGame.length; i++) {
+                if (this.inEdo(this.localState.playersInGame[i]) == damageBool) {
+                    playersToDamage.push(this.localState.playersInGame[i])
+                }
+        }
         }
         for (let i = 0; i < playersToDamage.length; i++) {
             this.localState.health[playersToDamage[i] - 1] -= damage
@@ -565,7 +654,7 @@ class Shogun extends Component {
 
     keepCardImmediateEffect(card) {
         if (card['name'] === 'Even Bigger') {
-            this.addHealth(this.localState.currentTurn, 2)
+            this.changeHealth(this.localState.currentTurn, 2)
         }
     }
 
@@ -578,6 +667,7 @@ class Shogun extends Component {
     }
 
     discardCardEffect(card) {
+        this.updateMessage(card['name'] + " activated.")
         switch (card['name']) {
             case 'Apartment Building':
                 this.updateMessage("Player " + this.localState.currentTurn + " earns 3 points from card.")
@@ -603,12 +693,38 @@ class Shogun extends Component {
                 this.updateMessage("All players (other than the active player) take 2 damage.")
                 for (let i = 0; i < this.localState.playersInGame.length; i++) {
                     if (this.localState.currentTurn !== this.localState.playersInGame[i]) {
-                        this.addHealth(this.localState.playersInGame[i], -2)
+                        this.changeHealth(this.localState.playersInGame[i], -2)
                     }
                 }
                 break;
             case 'Heal':
-                this.addHealth(this.localState.currentTurn, 2)
+                this.changeHealth(this.localState.currentTurn, 2)
+                break
+            case 'Gas Refinery':
+                this.updateMessage("All players (other than the active player) take 3 damage.")
+                for (let i = 0; i < this.localState.playersInGame.length; i++) {
+                    if (this.localState.currentTurn !== this.localState.playersInGame[i]) {
+                        this.changeHealth(this.localState.playersInGame[i], -3)
+                    }
+                }
+                this.addPoints(this.localState.currentTurn, 2)
+                break
+            case 'High Altitude Bombing':
+                for (let i = 0; i < this.localState.playersInGame.length; i++) {
+                    this.changeHealth(this.localState.playersInGame[i], -3)
+                }
+                break
+            case "Jet Fighters":
+                this.changeHealth(this.localState.currentTurn, -4)
+                this.addPoints(this.localState.currentTurn, 5)
+                break
+            case "National Guard":
+                this.changeHealth(this.localState.currentTurn, -2)
+                this.addPoints(this.localState.currentTurn, 2)
+                break
+            case "Nuclear Power Plant":
+                this.changeHealth(this.localState.currentTurn, 3)
+                this.addPoints(this.localState.currentTurn, 2)
                 break
             default:
                 window.alert("ERROR: Unrecognized card.")
@@ -786,7 +902,7 @@ class Shogun extends Component {
                             <p>Message -4: {this.state.message[4]}</p>
                             <p>Message -5: {this.state.message[5]}</p>
                             <div>
-                                <a href="https://cdn.1j1ju.com/medias/f9/2f/9b-king-of-edo-rulebook.pdf">Shogun of Edo Full Rules</a>
+                                <a href="https://cdn.1j1ju.com/medias/f9/2f/9b-king-of-edo-rulebook.pdf">King of Tokyo Full Rules</a>
                                 <h3>Short Rules</h3>
                                 <div>First to 20 points or last player alive wins!</div>
                                 <div>Roll dice up 3 (default) times, and then resolve when done. Dice can be saved between rolls.</div>
