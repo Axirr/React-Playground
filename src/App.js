@@ -116,6 +116,30 @@ class App extends Component {
                 buyCards: ["none", "none", "none"],
                 deck: [{'name': 'Complete Destruction', 'cost': 3, 'type': 'keep', 'ability': 'If you roll [1][2][3][Heart][Attack][Energy] gain 9[Star] in addition to the regular results.'},
                       {'name': 'Energy Hoarder', 'cost': 3, 'type': 'keep', 'ability': 'You gain 1[Star] for every 6[Energy] you have at the end of your turn.'},
+                      {'name': 'Even Bigger', 'cost': 4, 'type': 'keep', 'ability': 'Your maximum [Heart] is increased by 2. Gain 2[Heart] when you get this card.'},
+              ],
+                message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
+                doShuffle: false,
+                points: [0,0,0,0],
+                health: [10,10,10,10],
+                energy: [0,0,0,0],
+                edo: 0,
+                bayEdo: 0,
+                remainingRolls: 3
+              }}/>
+            </Route>
+            <Route path="/shoguntestbuy4">
+              <Shogun withSpoof='true' initialData={{
+                dice: ["claw", "none", "none", "none", "none", "none"],
+                saved: [false, false, false, false, false, false],
+                playersInGame: [1,2,3,4],
+                currentTurn: 1,
+                hands: [[],[],[],[]],
+                buyCards: ["none", "none", "none"],
+                deck: [
+                {'name': 'Evacuation Orders', 'cost': 7, 'type': 'discard', 'ability': 'All other monsters lose 5[Star]'},
+                {'name': 'Fire Blast', 'cost': 3, 'type': 'discard', 'ability': 'Deal 2 damage to all other monsters'},
+                {'name': 'Giant Brain', 'cost': 5, 'type': 'keep', 'ability': 'Get an extra reroll each turn.'},
               ],
                 message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
                 doShuffle: false,

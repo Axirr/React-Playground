@@ -25,6 +25,11 @@ class Shogun extends Component {
         {'name': 'Corner Store', 'cost': 3, 'type': 'discard', 'ability': '+ 1[Star]'},
         {'name': 'Complete Destruction', 'cost': 3, 'type': 'keep', 'ability': 'If you roll [1][2][3][Heart][Attack][Energy] gain 9[Star] in addition to the regular results.'},
         {'name': 'Energy Hoarder', 'cost': 3, 'type': 'keep', 'ability': 'You gain 1[Star] for every 6[Energy] you have at the end of your turn.'},
+        {'name': 'Even Bigger', 'cost': 4, 'type': 'keep', 'ability': 'Your maximum [Heart] is increased by 2. Gain 2[Heart] when you get this card.'},
+        {'name': 'Evacuation Orders', 'cost': 7, 'type': 'discard', 'ability': 'All other monsters lose 5[Star]'},
+        {'name': 'Fire Blast', 'cost': 3, 'type': 'discard', 'ability': 'Deal 2 damage to all other monsters'},
+        {'name': 'Giant Brain', 'cost': 5, 'type': 'keep', 'ability': 'Get an extra reroll each turn.'},
+        {'name': 'Heal', 'cost': 3, 'type': 'discard', 'ability': 'Heal 2 health.'},
     ]
 
     localState = {
@@ -185,7 +190,6 @@ class Shogun extends Component {
             nextClosestPlayer = this.localState.playersInGame[(currentIndex + 1) % this.state.playersInGame.length] 
         }
         this.localState['currentTurn'] = nextClosestPlayer
-        this.resetRolls()
         this.startTurnProcedures()
     }
 
@@ -201,6 +205,7 @@ class Shogun extends Component {
             this.addEnergy(this.localState.currentTurn, energyToAdd)
             this.rerenderState()
         }
+        this.resetRolls()
         this.buttonPhase = 0
         this.rerenderState()
         this.canBuy = false
@@ -208,7 +213,8 @@ class Shogun extends Component {
     }
 
     addPoints(player, newPoints) {
-        this.localState.points[player - 1] += newPoints
+        let newPointValue = Math.max(this.localState.points[player - 1] + newPoints,0)
+        this.localState.points[player - 1] = newPointValue
         this.updateMessage("Player " + player + " earns " + newPoints + " points.")
         this.checkPointsWin()
     }
@@ -225,7 +231,11 @@ class Shogun extends Component {
     }
 
     resetRolls() {
-        this.localState['remainingRolls'] = 3
+        if (this.hasCard(this.localState.currentTurn, "Giant Brain")) {
+            this.localState['remainingRolls'] = 4
+        } else {
+            this.localState['remainingRolls'] = 3
+        }
         console.log("Add in cards that change number of rolls and change number of dice")
         this.resetDiceState()
     }
@@ -263,7 +273,7 @@ class Shogun extends Component {
         damage += count
         this.addPoints(this.localState.currentTurn, pointsToAdd)
         this.addEnergy(this.localState.currentTurn, energyToAdd)
-        this.localState.health[this.localState.currentTurn - 1] = Math.min(this.localState.health[this.localState.currentTurn - 1] + healthToAdd, 10)
+        this.addHealth(this.localState.currentTurn, healthToAdd)
         // this.updateMessage("Player " + this.localState.currentTurn + " earns " + pointsToAdd + " points, " + energyToAdd + " energy, " + healthToAdd 
         // + " health, and deals " + damage + " damage.")
         this.attack(damage)
@@ -298,6 +308,15 @@ class Shogun extends Component {
             this.buttonPhase = 1
         } else {
             this.buttonPhase = 2
+        }
+    }
+
+    addHealth(player, healthToAdd) {
+        this.updateMessage("Player " + player + "heals for " + healthToAdd)
+        if (this.hasCard(player, "Even Bigger")) {
+            this.localState.health[player - 1] = Math.min(this.localState.health[this.localState.currentTurn - 1] + healthToAdd, 12)
+        } else {
+            this.localState.health[player - 1] = Math.min(this.localState.health[this.localState.currentTurn - 1] + healthToAdd, 10)
         }
     }
 
@@ -534,12 +553,19 @@ class Shogun extends Component {
                         this.discardCardEffect(boughtCard)
                     } else {
                         this.localState.hands[this.localState.currentTurn - 1].push(boughtCard)
+                        this.keepCardImmediateEffect(boughtCard)
                     }
                     this.rerenderState()
                 }
             }
         } else {
             window.alert("Cannot buy until you resolve your roll.")
+        }
+    }
+
+    keepCardImmediateEffect(card) {
+        if (card['name'] === 'Even Bigger') {
+            this.addHealth(this.localState.currentTurn, 2)
         }
     }
 
@@ -565,6 +591,25 @@ class Shogun extends Component {
                 this.updateMessage("Player " + this.localState.currentTurn + " earns 1 points from card.")
                 this.addPoints(this.localState.currentTurn, 1)
                 break;
+            case 'Evacuation Orders':
+                this.updateMessage("All players (other than the active player) lose 5 points.")
+                for (let i = 0; i < this.localState.playersInGame.length; i++) {
+                    if (this.localState.currentTurn !== this.localState.playersInGame[i]) {
+                        this.addPoints(this.localState.playersInGame[i], -5)
+                    }
+                }
+                break;
+            case 'Fire Blast':
+                this.updateMessage("All players (other than the active player) take 2 damage.")
+                for (let i = 0; i < this.localState.playersInGame.length; i++) {
+                    if (this.localState.currentTurn !== this.localState.playersInGame[i]) {
+                        this.addHealth(this.localState.playersInGame[i], -2)
+                    }
+                }
+                break;
+            case 'Heal':
+                this.addHealth(this.localState.currentTurn, 2)
+                break
             default:
                 window.alert("ERROR: Unrecognized card.")
 
@@ -686,7 +731,7 @@ class Shogun extends Component {
                             {this.renderScoreBoards()}
                             <div>Current Turn: Player {this.state.currentTurn}</div>
                             <div>Remaining Rolls: {this.state.remainingRolls}</div>
-                            <div>Player In Edo: {this.state.edo}</div>
+                            <div>Player In Edo: {(this.state.edo === 0) ? "empty" : this.state.edo}</div>
                             {(this.state.playersInGame.length > 4) && <p>Player In Edo Bay: {this.state.bayEdo}</p>}
                             <div>
                                 <button id="roll" class={(this.buttonPhase === 0) ? "btn-success" : "btn-danger"} onClick={() => {this.roll()}}>Roll</button>
@@ -727,6 +772,7 @@ class Shogun extends Component {
                                 <button id="spoofHeart" onClick={() => this.spoofDice(["heart","1","1","2","2","3"])}>Spoof Heart</button>
                                 <button id="spoof6Energy" onClick={() => this.spoofDice(["energy","energy","energy","energy","energy","energy"])}>Spoof 6 Energy</button>
                                 <button id="spoofCompleteDestruction" onClick={() => this.spoofDice(["energy","claw","heart","1","2","3"])}>Spoof Complete Destruction</button>
+                                <button id="spoof3Points3Energy" onClick={() => this.spoofDice(["energy","energy","energy","3","3","3"])}>Spoof Complete Destruction</button>
                                 </div>
     }
                             </div>

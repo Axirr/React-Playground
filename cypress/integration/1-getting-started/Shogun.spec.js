@@ -8,6 +8,69 @@ describe('Shogun of Edo app', () => {
 
   })
 
+  it("test heal", () => {
+
+  })
+
+  it("test giant brain", () => {
+
+  })
+
+  it("test fire blast", () => {
+
+  })
+
+  it("test evacuation orders, some points below 5", () => {
+    cy.visit('localhost:3000/shoguntestbuy4')
+    cy.get("#spoof3").click()
+    cy.get("#doneBuying").click()
+    cy.contains("Player 1Score: 3Health: 10Energy: 0")
+    cy.get("#spoof3").click()
+    cy.get("#doneBuying").click()
+    cy.contains("Player 2Score: 3Health: 10Energy: 0")
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.contains("Player 3Score: 0Health: 10Energy: 0")
+    cy.get("#spoof6Energy").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoof3").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoof3Points3Energy").click()
+    cy.get("#buy0").click()
+    cy.contains("Player 1Score: 1Health: 10Energy: 0")
+    cy.contains("Player 2Score: 0Health: 10Energy: 0")
+    cy.contains("Player 3Score: 0Health: 10Energy: 0")
+    cy.contains("Player 4Score: 3Health: 10Energy: 2")
+  })
+
+  it("even bigger, initial 2 and heal above 10", () => {
+    cy.visit('localhost:3000/shoguntestbuy3')
+    cy.get("#spoof6Energy").click()
+    cy.get("#buy2").click()
+    cy.contains("Player 1Score: 0Health: 12Energy: 2")
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofClaw").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofClaw").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofClaw").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofNone").click()
+    cy.get("#doneBuying").click()
+    cy.get("#spoofHeart").click()
+    cy.contains("Player 1Score: 1Health: 11Energy: 2")
+  })
+
   it("attempt clear buy without enough money fail", () => {
     cy.visit('localhost:3000/shoguntestbuy2')
     const stub = cy.stub()  
