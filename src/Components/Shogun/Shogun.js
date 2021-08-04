@@ -40,8 +40,8 @@ class Shogun extends Component {
         points: [0,0,0,0],
         health: [this.startHealth,this.startHealth,this.startHealth,this.startHealth],
         energy: [0,0,0,0],
-        tokyo: 0,
-        bayTokyo: 0,
+        edo: 0,
+        bayEdo: 0,
         remainingRolls: 3,
     }
 
@@ -58,8 +58,8 @@ class Shogun extends Component {
         points: [0,0,0,0],
         health: [this.startHealth,this.startHealth,this.startHealth,this.startHealth],
         energy: [0,0,0,0],
-        tokyo: 0,
-        bayTokyo: 0,
+        edo: 0,
+        bayEdo: 0,
         remainingRolls: 3,
     }
 
@@ -111,8 +111,8 @@ class Shogun extends Component {
             points: newPoints,
             health: newHealth,
             energy: newEnergy,
-            tokyo: 0,
-            bayTokyo: 0,
+            edo: 0,
+            bayEdo: 0,
             remainingRolls: 3
         }, () => {
             this.localState = JSON.parse(JSON.stringify(this.state))
@@ -190,8 +190,8 @@ class Shogun extends Component {
     }
 
     startTurnProcedures() {
-        if (this.inTokyo(this.localState.currentTurn)) {
-            this.updateMessage("Player " + this.localState.currentTurn + " gets 2 points for starting in Tokyo.")
+        if (this.inEdo(this.localState.currentTurn)) {
+            this.updateMessage("Player " + this.localState.currentTurn + " gets 2 points for starting in Edo.")
             this.addPoints(this.localState.currentTurn, 2)
         }
         if (this.hasCard(this.localState.currentTurn, "Energy Hoarder")) {
@@ -258,7 +258,7 @@ class Shogun extends Component {
         count = this.count(this.localState.dice, 'energy')
         energyToAdd += count
         count = this.count(this.localState.dice, 'heart')
-        if (!this.inTokyo(this.localState.currentTurn)) healthToAdd = count
+        if (!this.inEdo(this.localState.currentTurn)) healthToAdd = count
         count = this.count(this.localState.dice, 'claw')
         damage += count
         this.addPoints(this.localState.currentTurn, pointsToAdd)
@@ -270,19 +270,18 @@ class Shogun extends Component {
         this.checkElim()
         if (damage > 0) {
             if (this.localState.playersInGame.length <= 4) {
-                if (this.localState.tokyo === 0) {
-                    this.enterTokyo(this.localState.currentTurn)
+                if (this.localState.edo === 0) {
+                    this.enterEdo(this.localState.currentTurn)
                 }
-                if (!this.onlyCurrentPlayerInTokyo()) {
+                if (!this.onlyCurrentPlayerInEdo()) {
                     this.canYield = true
                 }
             } else {
-                window.alert("Implement yield for double tokyo")
+                window.alert("Implement yield for double edo")
             }
             // Fix for both and yield
         }
-        // if (this.hasCard(this.localState.currentTurn, "Complete Destruction")) {
-        if (true) {
+        if (this.hasCard(this.localState.currentTurn, "Complete Destruction")) {
             let diceFaces = ['claw','heart','energy', '1','2','3']
             let diceCounts = diceFaces.map((face) => {
                 return this.count(this.localState.dice, face)
@@ -317,20 +316,25 @@ class Shogun extends Component {
         return false
     }
 
-    enterTokyo(player) {
-        this.localState.tokyo = player
-        this.updateMessage("Player " + this.localState.currentTurn + " goes into Tokyo.")
+    enterEdo(player) {
+        this.localState.edo = player
+        this.updateMessage("Player " + this.localState.currentTurn + " goes into Edo.")
         this.addPoints(player, 1)
     }
 
-    enterBayTokyo(player) {
-        this.localState.bayTokyo = player
-        this.updateMessage("Player " + this.localState.currentTurn + " goes into Tokyo Bay.")
+    enterBayEdo(player) {
+        this.localState.bayEdo = player
+        this.updateMessage("Player " + this.localState.currentTurn + " goes into Edo Bay.")
         this.addPoints(player, 1)
     }
 
-    onlyCurrentPlayerInTokyo() {
-        return (this.localState.tokyo === this.localState.currentTurn || this.localState.tokyo === 0) && (this.localState.bayTokyo === this.localState.currentTurn || this.localState.bayTokyo === 0)
+    onlyCurrentPlayerInEdo() {
+        let returnValue = (this.localState.edo === this.localState.currentTurn || this.localState.edo === 0) && (this.localState.bayEdo === this.localState.currentTurn || this.localState.bayEdo === 0)
+        console.log("return value" + returnValue)
+        console.log(this.localState.edo)
+        console.log(this.localState.bayEdo)
+        return returnValue
+        // return (this.localState.edo === this.localState.currentTurn || this.localState.edo === 0) && (this.localState.bayEdo === this.localState.currentTurn || this.localState.bayEdo === 0)
     }
 
     checkElim() {
@@ -352,40 +356,40 @@ class Shogun extends Component {
     eliminatePlayer(player) {
         const playerIndex = this.localState.playersInGame.indexOf(player)
         this.localState.playersInGame.splice(playerIndex, 1)
-        if (this.inTokyo(player)) {
-            this.removeFromTokyo(player)
+        if (this.inEdo(player)) {
+            this.removeFromEdo(player)
         }
         this.updateMessage("Player " + player + " is eliminated!")
     }
 
-    isTokyoEmpty() {
+    isEdoEmpty() {
         if (this.localState.playersInGame.length <= 4) {
-            return this.localState.tokyo === 0 
+            return this.localState.edo === 0 
         } else {
-            return (this.localState.tokyo === 0 && this.localState.bayTokyo === 0)
+            return (this.localState.edo === 0 && this.localState.bayEdo === 0)
         }
     }
 
-    removeFromTokyo(player) {
-        if (this.localState.tokyo === player) {
-            this.localState.tokyo = 0
-        } else if (this.localState.bayTokyo === player) {
-            this.localState.bayTokyo = 0
+    removeFromEdo(player) {
+        if (this.localState.edo === player) {
+            this.localState.edo = 0
+        } else if (this.localState.bayEdo === player) {
+            this.localState.bayEdo = 0
         }
     }
 
     attack(damage) {
         let damageBool = true
-        let attackString = "Tokyo"
+        let attackString = "Edo"
         if (this.hasCard(this.localState.currentTurn, "Acid Attack")) damage += 1
-        if (this.inTokyo(this.localState.currentTurn)) {
+        if (this.inEdo(this.localState.currentTurn)) {
             damageBool = false
-            attackString = "Outside Tokyo"
+            attackString = "Outside Edo"
         }
         this.updateMessage("Player " + this.localState.currentTurn + " deals " + damage + " damage to " + attackString + ".")
         let playersToDamage = []
         for (let i = 0; i < this.localState.playersInGame.length; i++) {
-            if (this.inTokyo(this.localState.playersInGame[i]) == damageBool) {
+            if (this.inEdo(this.localState.playersInGame[i]) == damageBool) {
                 playersToDamage.push(this.localState.playersInGame[i])
             }
         }
@@ -398,11 +402,11 @@ class Shogun extends Component {
         this.setState(this.localState, handler)
     }
 
-    inTokyo(playerNumber) {
+    inEdo(playerNumber) {
         if (this.localState.playersInGame.length <= 4) {
-            if (playerNumber !== this.localState.tokyo) return false
+            if (playerNumber !== this.localState.edo) return false
         } else {
-            if (playerNumber !== this.localState.tokyo && playerNumber !== this.localState.bayTokyo) return false
+            if (playerNumber !== this.localState.edo && playerNumber !== this.localState.bayEdo) return false
         }
         return true
     }
@@ -567,7 +571,7 @@ class Shogun extends Component {
         }
     }
 
-    yieldTokyo(location) {
+    yieldEdo(location) {
         if (this.buttonPhase !== 1) {
             window.alert("Not yield phase.")
             return
@@ -576,26 +580,26 @@ class Shogun extends Component {
             window.alert("Can't yield, didn't take damage.")
             return
         } else {
-            if (this.localState.currentTurn !== this.localState.tokyo && this.localState.currentTurn !== this.localState.bayTokyo) {
-                if (location === 'tokyo') {
+            if (this.localState.currentTurn !== this.localState.edo && this.localState.currentTurn !== this.localState.bayEdo) {
+                if (location === 'edo') {
                     // Possibly can remove inside checks
-                    if (this.localState.tokyo !== this.localState.currentTurn) {
-                        this.updateMessage("Player " + this.localState.tokyo + " is yielding Tokyo.")
-                        this.enterTokyo(this.localState.currentTurn)
-                        // this.localState.tokyo = this.localState.currentTurn
+                    if (this.localState.edo !== this.localState.currentTurn) {
+                        this.updateMessage("Player " + this.localState.edo + " is yielding Edo.")
+                        this.enterEdo(this.localState.currentTurn)
+                        // this.localState.edo = this.localState.currentTurn
                     } else {
-                        window.alert("Can't yield Tokyo on own turn")
+                        window.alert("Can't yield Edo on own turn")
                     }
                 } else if (location === 'bay') {
-                    if (this.localState.bayTokyo !== this.localState.currentTurn) {
-                        this.updateMessage("Player " + this.localState.bayTokyo + " is yielding Tokyo Bay.")
-                        this.enterBayTokyo(this.localState.currentTurn)
+                    if (this.localState.bayEdo !== this.localState.currentTurn) {
+                        this.updateMessage("Player " + this.localState.bayEdo + " is yielding Edo Bay.")
+                        this.enterBayEdo(this.localState.currentTurn)
                     } else {
-                        window.alert("Can't yield Tokyo on own turn")
+                        window.alert("Can't yield Edo on own turn")
                     }
                 }
             } else {
-                window.alert("Can't yield Tokyo on own turn")
+                window.alert("Can't yield Edo on own turn")
             }
         }
         this.rerenderState()
@@ -682,15 +686,15 @@ class Shogun extends Component {
                             {this.renderScoreBoards()}
                             <div>Current Turn: Player {this.state.currentTurn}</div>
                             <div>Remaining Rolls: {this.state.remainingRolls}</div>
-                            <div>In Tokyo: {this.state.tokyo}</div>
-                            {(this.state.playersInGame.length > 4) && <p>In Tokyo Bay: {this.state.bayTokyo}</p>}
+                            <div>Player In Edo: {this.state.edo}</div>
+                            {(this.state.playersInGame.length > 4) && <p>Player In Edo Bay: {this.state.bayEdo}</p>}
                             <div>
                                 <button id="roll" class={(this.buttonPhase === 0) ? "btn-success" : "btn-danger"} onClick={() => {this.roll()}}>Roll</button>
                             </div>
                             <button id="resolveRoll" class={(this.buttonPhase === 0) ? "btn-success" : "btn-danger"} onClick={() => {this.resolveRoll()}}>Lock-in Roll</button>
                             <div>
-                            <button id="yieldTokyo" class={(this.buttonPhase === 1) ? "btn-success" : "btn-danger"} onClick={() => {this.yieldTokyo('tokyo')}}>Yield Tokyo</button>
-                            {(this.state.playersInGame.length > 4) && <button id="yieldBay" class={(this.buttonPhase === 1) ? "btn-success" : "btn-danger"} onClick={() => {this.yieldTokyo('bay')}}>Yield Tokyo Bay</button>}
+                            <button id="yieldEdo" class={(this.buttonPhase === 1) ? "btn-success" : "btn-danger"} onClick={() => {this.yieldEdo('edo')}}>Yield Edo</button>
+                            {(this.state.playersInGame.length > 4) && <button id="yieldBay" class={(this.buttonPhase === 1) ? "btn-success" : "btn-danger"} onClick={() => {this.yieldEdo('bay')}}>Yield Edo Bay</button>}
                             <button id="doneYielding" class={(this.buttonPhase === 1) ? "btn-success" : "btn-danger"} onClick={() => {this.doneYielding()}}>Done Yielding</button>
                             </div>
                             <div>
@@ -736,14 +740,14 @@ class Shogun extends Component {
                             <p>Message -4: {this.state.message[4]}</p>
                             <p>Message -5: {this.state.message[5]}</p>
                             <div>
-                                <a href="https://cdn.1j1ju.com/medias/f9/2f/9b-king-of-tokyo-rulebook.pdf">King of Tokyo Full Rules</a>
+                                <a href="https://cdn.1j1ju.com/medias/f9/2f/9b-king-of-edo-rulebook.pdf">Shogun of Edo Full Rules</a>
                                 <h3>Short Rules</h3>
-                                <div>First to 20 points or last monster alive wins!</div>
+                                <div>First to 20 points or last player alive wins!</div>
                                 <div>Roll dice up 3 (default) times, and then resolve when done. Dice can be saved between rolls.</div>
-                                <div>Triple+ # dice get you points (diceValue + # over triple). Claws attack the area you're not in (Tokyo vs Outside) and put you in Tokyo if unoccupied or occupant yields to you.</div>
-                                <div>Hearts heal, but not in Tokyo. Energy is money to buy cards.</div>
-                                <div>If attacked in Tokyo, have the option to yield. Must press "Done Yielding" to finish phase either way.</div>
-                                <div>Get 1 point when go into Tokyo. Get 2 points if start your turn in Tokyo.</div>
+                                <div>Triple+ # dice get you points (diceValue + # over triple). Claws attack the area you're not in (Edo vs Outside) and put you in Edo if unoccupied or occupant yields to you.</div>
+                                <div>Hearts heal, but not in Edo. Energy is money to buy cards.</div>
+                                <div>If attacked in Edo, have the option to yield. Must press "Done Yielding" to finish phase either way.</div>
+                                <div>Get 1 point when go into Edo. Get 2 points if start your turn in Edo.</div>
                                 <div>Buy cards with energy. Discard cards have an immediate effect. Keep cards have a persistent effect. Click "Done Buying" to end turn.</div>
                             </div>
                         </Col>

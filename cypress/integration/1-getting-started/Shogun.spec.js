@@ -34,11 +34,11 @@ describe('Shogun of Edo app', () => {
 
   })
 
-  it("5 player game, player goes into tokyo bay when tokyo occupied and tries to yield immediately, fails", () => {
+  it("5 player game, player goes into edo bay when edo occupied and tries to yield immediately, fails", () => {
 
   })
 
-  it("tests 5th player eliminate, yield tokyo bay disappears", () => {
+  it("tests 5th player eliminate, yield edo bay disappears", () => {
 
   })
 
@@ -126,16 +126,16 @@ describe('Shogun of Edo app', () => {
     cy.contains("Player 1Score: 0Health: 10Energy: 10")
   })
 
-  it("player gains 1 point when go into Tokyo on yield", () => {
+  it("player gains 1 point when go into Edo on yield", () => {
     cy.visit('localhost:3000/shoguntest1')
     cy.get("#spoofClaw").click()
     cy.get("#doneBuying").click()
     cy.get("#spoofClaw").click()
-    cy.get("#yieldTokyo").click()
+    cy.get("#yieldEdo").click()
     cy.contains("Player 2Score: 1Health: 10Energy: 0")
   })
 
-  it("player dies in tokyo and killer takes over", () => {
+  it("player dies in edo and killer takes over", () => {
     cy.visit('localhost:3000/shoguntest1')
     cy.get("#spoofClaw").click()
     cy.get("#doneBuying").click()
@@ -143,10 +143,10 @@ describe('Shogun of Edo app', () => {
     cy.get("#doneYielding").click()
     cy.get("#doneBuying").click()
     cy.get("#spoof6Claw").click()
-    cy.contains("Tokyo: 3")
+    cy.contains("Edo: 3")
   })
 
-  it("normal enter tokyo earn 1 point", () => {
+  it("normal enter edo earn 1 point", () => {
     cy.visit('localhost:3000/shoguntest1')
     cy.get("#spoofNone").click()
     cy.get("#doneBuying").click()
@@ -163,8 +163,8 @@ describe('Shogun of Edo app', () => {
     cy.get("#spoofClaw").click()
     cy.get("#doneBuying").click()
     cy.get("#spoofClaw").click()
-    cy.get("#yieldTokyo").click()
-    cy.contains("Tokyo: 4")
+    cy.get("#yieldEdo").click()
+    cy.contains("Edo: 4")
   })
 
   it("tests try buy before yield fails", () => {
@@ -235,7 +235,7 @@ describe('Shogun of Edo app', () => {
     cy.contains("Player 2Score: 0Health: 10Energy: 0")
   })
 
-  it("test no heal tokyo", () => {
+  it("test no heal edo", () => {
     cy.visit('localhost:3000/shoguntest2')
     cy.get("#spoofClaw").click()
     cy.get("#doneBuying").click()
@@ -283,7 +283,7 @@ describe('Shogun of Edo app', () => {
 
   })
 
-  it("test win with tokyo points", () => {
+  it("test win with edo points", () => {
     cy.visit('localhost:3000/shoguntest1')
     const stub = cy.stub()  
     cy.on ('window:alert', stub)

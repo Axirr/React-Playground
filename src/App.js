@@ -54,8 +54,8 @@ class App extends Component {
                 points: [0,0,0,0],
                 health: [10,10,10,10],
                 energy: [0,0,0,0],
-                tokyo: 0,
-                bayTokyo: 0,
+                edo: 0,
+                bayEdo: 0,
                 remainingRolls: 3
               }}/>
             </Route>
@@ -76,8 +76,8 @@ class App extends Component {
                 points: [0,0,0,0],
                 health: [10,10,10,10],
                 energy: [0,0,0,0],
-                tokyo: 0,
-                bayTokyo: 0,
+                edo: 0,
+                bayEdo: 0,
                 remainingRolls: 3
               }}/>
             </Route>
@@ -101,8 +101,8 @@ class App extends Component {
                 points: [0,0,0,0],
                 health: [10,10,10,10],
                 energy: [0,0,0,0],
-                tokyo: 0,
-                bayTokyo: 0,
+                edo: 0,
+                bayEdo: 0,
                 remainingRolls: 3
               }}/>
             </Route>
@@ -122,8 +122,8 @@ class App extends Component {
                 points: [0,0,0,0],
                 health: [10,10,10,10],
                 energy: [0,0,0,0],
-                tokyo: 0,
-                bayTokyo: 0,
+                edo: 0,
+                bayEdo: 0,
                 remainingRolls: 3
               }}/>
             </Route>
