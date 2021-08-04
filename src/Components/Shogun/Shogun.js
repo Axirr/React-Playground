@@ -139,6 +139,10 @@ class Shogun extends Component {
     }
 
     roll() {
+        if (this.buttonPhase !== 0) {
+            window.alert("Not the rolling phase right now.")
+            return
+        }
         if (this.localState.remainingRolls <= 0) {
             window.alert("No rolls left!")
             return
@@ -231,6 +235,10 @@ class Shogun extends Component {
 
 
     resolveRoll() {
+        if (this.buttonPhase !== 0) {
+            window.alert("Not the rolling phase right now.")
+            return
+        }
         if (document.getElementById("dice0").innerText === "none") {
             window.alert("Cannot finish turn without rolling.")
             return
@@ -254,8 +262,8 @@ class Shogun extends Component {
         this.addPoints(this.localState.currentTurn, pointsToAdd)
         this.addEnergy(this.localState.currentTurn, energyToAdd)
         this.localState.health[this.localState.currentTurn - 1] = Math.min(this.localState.health[this.localState.currentTurn - 1] + healthToAdd, 10)
-        this.updateMessage("Player " + this.localState.currentTurn + " earns " + pointsToAdd + " points, " + energyToAdd + " energy, " + healthToAdd 
-        + " health, and deals " + damage + " damage.")
+        // this.updateMessage("Player " + this.localState.currentTurn + " earns " + pointsToAdd + " points, " + energyToAdd + " energy, " + healthToAdd 
+        // + " health, and deals " + damage + " damage.")
         this.attack(damage)
         this.checkElim()
         if (damage > 0) {
@@ -362,11 +370,14 @@ class Shogun extends Component {
 
     attack(damage) {
         let damageBool = true
+        let attackString = "Tokyo"
         if (this.hasCard(this.localState.currentTurn, "Acid Attack")) damage += 1
         if (this.inTokyo(this.localState.currentTurn)) {
             damageBool = false
+            attackString = "Outside Tokyo"
             console.log("Looking for not in Tokyo")
         }
+        this.updateMessage("Player " + this.localState.currentTurn + " deals " + damage + " damage to " + attackString + ".")
         let playersToDamage = []
         for (let i = 0; i < this.localState.playersInGame.length; i++) {
             if (this.inTokyo(this.localState.playersInGame[i]) == damageBool) {
@@ -408,6 +419,10 @@ class Shogun extends Component {
     }
 
     toggleSave(diceIndexNumber) {
+        if (this.buttonPhase !== 0) {
+            window.alert("Not the rolling phase right now.")
+            return
+        }
         var index = "dice" + parseInt(diceIndexNumber)
         const button = document.getElementById(index)
         if (button.innerText === "none") {
@@ -450,13 +465,21 @@ class Shogun extends Component {
     renderScoreBoards() {
         return(
             <div>
+                <Container>
+                    <Row>
                 {this.state.playersInGame.map((number) => {
-                    return(<div>Player {number}
-                    Score: {this.localState.points[number - 1]}
-                    Health: {this.localState.health[number - 1]}
-                    Energy: {this.localState.energy[number - 1]}
-                    </div>)
+                    return(
+                        <Col>
+                        <div class={(this.state.currentTurn === number) ? "border border-success" : "border border-danger"}>
+                        <div>Player {number}</div>
+                        <div>Score: {this.localState.points[number - 1]}</div>
+                        <div>Health: {this.localState.health[number - 1]}</div>
+                        <div>Energy: {this.localState.energy[number - 1]}</div>
+                        </div>
+                        </Col>)
                 })}
+                    </Row>
+                </Container>
             </div>
         )
     }
@@ -546,6 +569,10 @@ class Shogun extends Component {
     }
 
     yieldTokyo(location) {
+        if (this.buttonPhase !== 1) {
+            window.alert("Not yield phase.")
+            return
+        }
         if(!this.canYield) {
             window.alert("Can't yield, didn't take damage.")
             return
@@ -565,7 +592,6 @@ class Shogun extends Component {
                     if (this.localState.bayTokyo !== this.localState.currentTurn) {
                         this.updateMessage("Player " + this.localState.bayTokyo + " is yielding Tokyo Bay.")
                         this.enterBayTokyo(this.localState.currentTurn)
-                        // this.localState.bayTokyo = this.localState.currentTurn
                     } else {
                         window.alert("Can't yield Tokyo on own turn")
                     }
@@ -578,11 +604,26 @@ class Shogun extends Component {
     }
 
     renderPlayerHands() {
+        return(<Container>
+                    <Row>
+                {this.state.playersInGame.map((number) => {
+                    return(
+                        <Col>
+                            Player {number} Hand: {this.renderCards(this.state.hands[number - 1])}
+                        </Col>
+                )})}
+                    </Row>
+                </Container>
+        )
+    }
+
+    renderCards(hand) {
         return(
             <div>
-                {this.state.playersInGame.map((number) => {
-                    return(<div>
-                        Player {number} Hand: {JSON.stringify(this.state.hands[number - 1])}
+                {hand.map((card) => {
+                    return(<div class="border">
+                        <div>Name: {card['name']}</div>
+                        <div>Ability: {card['ability']}</div>
                     </div>)
                 })}
             </div>
@@ -597,6 +638,19 @@ class Shogun extends Component {
         console.log(this.localState)
     }
 
+    doneYielding() {
+        if (this.buttonPhase !== 1) {
+            window.alert("Not yield phase.")
+            return
+        }
+        if (this.buttonPhase !== 1) {
+            return
+        }
+        this.canYield = false;
+        this.buttonPhase = 2;
+        this.rerenderState()
+    }
+
     render() {
         return(
             <div>
@@ -604,16 +658,16 @@ class Shogun extends Component {
                     <Row>
                         <Col>
                             <h1>Shogun of Edo</h1>
-                            <button id="dice0" class={this.state.saved[0] ? "btn-success" : "btn-danger"} onClick={() => {this.toggleSave(0)}}>{this.state.dice[0]}</button>
-                            <button id="dice1" class={this.state.saved[1] ? "btn-success" : "btn-danger"} onClick={() => {this.toggleSave(1)}}>{this.state.dice[1]}</button>
-                            <button id="dice2" class={this.state.saved[2] ? "btn-success" : "btn-danger"} onClick={() => {this.toggleSave(2)}}>{this.state.dice[2]}</button>
-                            <button id="dice3" class={this.state.saved[3] ? "btn-success" : "btn-danger"} onClick={() => {this.toggleSave(3)}}>{this.state.dice[3]}</button>
-                            <button id="dice4" class={this.state.saved[4] ? "btn-success" : "btn-danger"} onClick={() => {this.toggleSave(4)}}>{this.state.dice[4]}</button>
-                            <button id="dice5" class={this.state.saved[5] ? "btn-success" : "btn-danger"} onClick={() => {this.toggleSave(5)}}>{this.state.dice[5]}</button>
+                            <button id="dice0" class={this.state.saved[0] ? "btn-secondary" : "btn-warning"} onClick={() => {this.toggleSave(0)}}>{this.state.dice[0]}</button>
+                            <button id="dice1" class={this.state.saved[1] ? "btn-secondary" : "btn-warning"} onClick={() => {this.toggleSave(1)}}>{this.state.dice[1]}</button>
+                            <button id="dice2" class={this.state.saved[2] ? "btn-secondary" : "btn-warning"} onClick={() => {this.toggleSave(2)}}>{this.state.dice[2]}</button>
+                            <button id="dice3" class={this.state.saved[3] ? "btn-secondary" : "btn-warning"} onClick={() => {this.toggleSave(3)}}>{this.state.dice[3]}</button>
+                            <button id="dice4" class={this.state.saved[4] ? "btn-secondary" : "btn-warning"} onClick={() => {this.toggleSave(4)}}>{this.state.dice[4]}</button>
+                            <button id="dice5" class={this.state.saved[5] ? "btn-secondary" : "btn-warning"} onClick={() => {this.toggleSave(5)}}>{this.state.dice[5]}</button>
                             {this.renderScoreBoards()}
-                            <p>Current Turn: Player {this.state.currentTurn}</p>
-                            <p>Remaining Rolls: {this.state.remainingRolls}</p>
-                            <p>In Tokyo: {this.state.tokyo}</p>
+                            <div>Current Turn: Player {this.state.currentTurn}</div>
+                            <div>Remaining Rolls: {this.state.remainingRolls}</div>
+                            <div>In Tokyo: {this.state.tokyo}</div>
                             {(this.state.playersInGame.length > 4) && <p>In Tokyo Bay: {this.state.bayTokyo}</p>}
                             <div>
                                 <button id="roll" class={(this.buttonPhase === 0) ? "btn-success" : "btn-danger"} onClick={() => {this.roll()}}>Roll</button>
@@ -622,7 +676,7 @@ class Shogun extends Component {
                             <div>
                             <button id="yieldTokyo" class={(this.buttonPhase === 1) ? "btn-success" : "btn-danger"} onClick={() => {this.yieldTokyo('tokyo')}}>Yield Tokyo</button>
                             {(this.state.playersInGame.length > 4) && <button id="yieldBay" class={(this.buttonPhase === 1) ? "btn-success" : "btn-danger"} onClick={() => {this.yieldTokyo('bay')}}>Yield Tokyo Bay</button>}
-                            <button id="doneYielding" class={(this.buttonPhase === 1) ? "btn-success" : "btn-danger"} onClick={() => {this.canYield = false; this.buttonPhase = 2; this.rerenderState()}}>Done Yielding</button>
+                            <button id="doneYielding" class={(this.buttonPhase === 1) ? "btn-success" : "btn-danger"} onClick={() => {this.doneYielding()}}>Done Yielding</button>
                             </div>
                             <div>
                                 <div>
@@ -664,6 +718,17 @@ class Shogun extends Component {
                             <p>Message -3: {this.state.message[3]}</p>
                             <p>Message -4: {this.state.message[4]}</p>
                             <p>Message -5: {this.state.message[5]}</p>
+                            <div>
+                                <a href="https://cdn.1j1ju.com/medias/f9/2f/9b-king-of-tokyo-rulebook.pdf">King of Tokyo Full Rules</a>
+                                <h3>Short Rules</h3>
+                                <div>First to 20 points or last monster alive wins!</div>
+                                <div>Roll dice up 3 (default) times, and then resolve when done. Dice can be saved between rolls.</div>
+                                <div>Triple+ # dice get you points (diceValue + # over triple). Claws attack the area you're not in (Tokyo vs Outside) and put you in Tokyo if unoccupied or occupant yields to you.</div>
+                                <div>Hearts heal, but not in Tokyo. Energy is money to buy cards.</div>
+                                <div>If attacked in Tokyo, have the option to yield. Must press "Done Yielding" to finish phase either way.</div>
+                                <div>Get 1 point when go into Tokyo. Get 2 points if start your turn in Tokyo.</div>
+                                <div>Buy cards with energy. Discard cards have an immediate effect. Keep cards have a persistent effect. Click "Done Buying" to end turn.</div>
+                            </div>
                         </Col>
                     </Row>
                 </Container>

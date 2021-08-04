@@ -318,8 +318,8 @@ describe('Shogun of Edo app', () => {
   it('test roll saving', () => {
     cy.visit('localhost:3000/shoguntest2')
     cy.get("#roll").click()
-    cy.get("#dice0").should('have.class', 'btn-danger').click()
-    cy.get("#dice0").should('have.class', 'btn-success')
+    cy.get("#dice0").should('have.class', 'btn-warning').click()
+    cy.get("#dice0").should('have.class', 'btn-secondary')
     cy.get("#dice0").then(($btn) => {
       const txt1 = $btn.text()
       cy.get("#roll").click()
