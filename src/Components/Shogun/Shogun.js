@@ -41,6 +41,17 @@ class Shogun extends Component {
         {'name': 'Omnivore', 'cost': 4, 'type': 'keep', 'ability': "Can score [1][2][3] for 2 points once per turn. Can still use dice in other combos."},
         {'name': 'Regeneration', 'cost': 4, 'type': 'keep', 'ability': "When you heal, heal one extra damage."},
         {'name': 'Rooting For The Underdog', 'cost': 3, 'type': 'keep', 'ability': "At the end of a turn where you have the fewest points, gain a point."},
+        {'name': 'Skyscraper', 'cost': 6, 'type': 'discard', 'ability': "Gain 4[Star]."},
+        {'name': 'Spiked Tail', 'cost': 5, 'type': 'keep', 'ability': "When you attack, do 1 additional damage."},
+        {'name': 'Solar Powered', 'cost': 2, 'type': 'keep', 'ability': "At the end your turn, if you have 0 energy, gain 1 energy."},
+        {'name': 'Tanks', 'cost': 4, 'type': 'discard', 'ability': "+4 Points and take 3 damage."},
+        {'name': 'Urbavore', 'cost': 4, 'type': 'keep', 'ability': "Gain 1 extra point when starting a turn in Edo. Deal 1 extra damage when dealing damage from Tokyo."},
+        {'name': "We're Only Making It Stronger", 'cost': 3, 'type': 'keep', 'ability': "When you lost 2 health, gain 1 energy."},
+        {'name': "Amusement Park", 'cost': 6, 'type': 'discard', 'ability': "+4 Points"},
+        {'name': "Army", 'cost': 2, 'type': 'discard', 'ability': "+1 point and take a damage for every card you have."},
+        {'name': "Cannibalistic", 'cost': 5, 'type': 'keep', 'ability': "When you deal damage, gain 1 point."},
+        {'name': "Reflective Hide", 'cost': 6, 'type': 'keep', 'ability': "If you suffer damage, the monster that dealt it suffers 1 damage."},
+        {'name': "Throw A Tanker", 'cost': 4, 'type': 'keep', 'ability': "On a turn you deal 3 or more damage, gain 2 points."},
     ]
 
     localState = {
@@ -200,9 +211,23 @@ class Shogun extends Component {
         } else {
             nextClosestPlayer = this.localState.playersInGame[(currentIndex + 1) % this.state.playersInGame.length] 
         }
+        this.endTurnSelfProcedures()
         this.localState['currentTurn'] = nextClosestPlayer
-        this.rootingForUnderdog()
+        this.endTurnAllProcedures()
         this.startTurnProcedures()
+    }
+
+    endTurnSelfProcedures() {
+        if (this.hasCard(this.localState.currentTurn, "Solar Powered")) {
+            if (this.localState.energy[this.localState.currentTurn - 1] === 0) {
+                this.updateMessage("Solar Powered activated.")
+                this.addEnergy(this.localState.currentTurn, 1)
+            }
+        }
+    }
+
+    endTurnAllProcedures() {
+        this.rootingForUnderdog()
     }
 
     rootingForUnderdog() {
@@ -226,8 +251,12 @@ class Shogun extends Component {
 
     startTurnProcedures() {
         if (this.inEdo(this.localState.currentTurn)) {
-            this.updateMessage("Player " + this.localState.currentTurn + " gets 2 points for starting in Edo.")
-            this.addPoints(this.localState.currentTurn, 2)
+            let pointsToEarn = 2
+            if (this.hasCard(this.localState.currentTurn, "Urbavore")) {
+                pointsToEarn += 1
+            }
+            this.updateMessage("Player " + this.localState.currentTurn + " gets " + pointsToEarn + " points for starting in Edo.")
+            this.addPoints(this.localState.currentTurn, pointsToEarn)
         }
         if (this.hasCard(this.localState.currentTurn, "Energy Hoarder")) {
             this.updateMessage("Energy Hoarder activated.")
@@ -378,11 +407,9 @@ class Shogun extends Component {
         if (Math.abs(healthToAdd) > 0) {
             this.updateMessage("Player " + player + healString + healthToAdd)
         }
-        if (this.hasCard(player, "Regeneration")) {
-            if (healthToAdd > 0) {
-                this.updateMessage("Regeneration effect activated.")
-                healthToAdd += 1
-            }
+        if (this.hasCard(player, "Regeneration") && healthToAdd > 0) {
+            this.updateMessage("Regeneration effect activated.")
+            healthToAdd += 1
         }
         if (this.hasCard(player, "Even Bigger")) {
             this.localState.health[player - 1] = Math.min(this.localState.health[player - 1] + healthToAdd, 12)
@@ -391,6 +418,10 @@ class Shogun extends Component {
         }
         if (this.localState.health[player - 1] <= 0) {
             this.eliminatePlayer(player)
+        }
+        if (this.hasCard(player, "We're Only Making It Stronger") && healthToAdd <= -2) {
+            this.updateMessage("We're Only Making It Stronger activated.")
+            this.addEnergy(player, 1)
         }
     }
 
@@ -475,12 +506,22 @@ class Shogun extends Component {
         let damageBool = true
         let attackString = "Edo"
         if (this.hasCard(this.localState.currentTurn, "Acid Attack")) damage += 1
+        if (this.hasCard(this.localState.currentTurn, "Spiked Tail") && damage > 0) damage += 1
+        if (this.hasCard(this.localState.currentTurn, "Urbavore") && damage > 0) damage += 1
+        if (damage >= 3 && this.hasCard(this.localState.currentTurn, "Throw A Tanker")) {
+            this.updateMessage("Throw A Tanker activated.")
+            this.addPoints(this.localState.currentTurn, 2)
+        }
         if (this.inEdo(this.localState.currentTurn)) {
             damageBool = false
             attackString = "Outside Edo"
         }
         if (damage > 0) {
             this.updateMessage("Player " + this.localState.currentTurn + " deals " + damage + " damage to " + attackString + ".")
+            if(this.hasCard(this.localState.currentTurn, "Cannibalistic")) {
+                this.updateMessage("Cannibalistic activated.")
+                this.addPoints(this.localState.currentTurn, 1)
+            }
         } else {
             if (this.hasCard(this.localState.currentTurn, "Herbivore")) {
                 this.updateMessage("Herbivore activated!")
@@ -502,7 +543,11 @@ class Shogun extends Component {
         }
         }
         for (let i = 0; i < playersToDamage.length; i++) {
-            this.localState.health[playersToDamage[i] - 1] -= damage
+            this.changeHealth(playersToDamage[i], -damage)
+            if (this.hasCard(playersToDamage[i], "Reflective Hide") && damage > 1) {
+                this.updateMessage("Reflective Hide activated.")
+                this.changeHealth(this.localState.currentTurn, -1)
+            }
         }
     }
 
@@ -616,6 +661,10 @@ class Shogun extends Component {
     }
 
     buy(cardNumber) {
+        if (this.buttonPhase !== 2) {
+            window.alert("Not buy phase.")
+            return
+        }
         if (this.canYield) {
             window.alert("Deal with yield before buying.")
             return
@@ -725,6 +774,22 @@ class Shogun extends Component {
             case "Nuclear Power Plant":
                 this.changeHealth(this.localState.currentTurn, 3)
                 this.addPoints(this.localState.currentTurn, 2)
+                break
+            case "Skyscraper":
+                this.addPoints(this.localState.currentTurn, 4)
+                break
+            case "Tanks":
+                this.changeHealth(this.localState.currentTurn, -3)
+                this.addPoints(this.localState.currentTurn, 4)
+                break
+            case "Amusement Park":
+                this.addPoints(this.localState.currentTurn, 4)
+                break
+            case "Army":
+                const cardNumber = this.localState.hands[this.localState.currentTurn - 1].length
+                console.log("Card number" + cardNumber)
+                this.changeHealth(this.localState.currentTurn, -cardNumber)
+                this.addPoints(this.localState.currentTurn, cardNumber)
                 break
             default:
                 window.alert("ERROR: Unrecognized card.")
@@ -888,7 +953,10 @@ class Shogun extends Component {
                                 <button id="spoofHeart" onClick={() => this.spoofDice(["heart","1","1","2","2","3"])}>Spoof Heart</button>
                                 <button id="spoof6Energy" onClick={() => this.spoofDice(["energy","energy","energy","energy","energy","energy"])}>Spoof 6 Energy</button>
                                 <button id="spoofCompleteDestruction" onClick={() => this.spoofDice(["energy","claw","heart","1","2","3"])}>Spoof Complete Destruction</button>
-                                <button id="spoof3Points3Energy" onClick={() => this.spoofDice(["energy","energy","energy","3","3","3"])}>Spoof Complete Destruction</button>
+                                <button id="spoof3Points3Energy" onClick={() => this.spoofDice(["energy","energy","energy","3","3","3"])}>Spoof 3 Energy, 3 Points</button>
+                                <button id="spoof2Energy" onClick={() => this.spoofDice(["energy","energy","1","1","3","3"])}>Spoof 2 Energy</button>
+                                <button id="spoof5Energy1Claw" onClick={() => this.spoofDice(["energy","energy","energy","energy","energy","claw"])}>Spoof 5 Energy, 1 Claw</button>
+                                <button id="spoof2Claw" onClick={() => this.spoofDice(["claw","claw","1","1","2","2"])}>Spoof 2 Claw</button>
                                 </div>
     }
                             </div>

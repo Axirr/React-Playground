@@ -320,7 +320,7 @@ describe('Shogun of Edo app', () => {
     cy.get("#spoofClaw").click()
     cy.get("#doneBuying").click().then(
         () => {
-          expect(stub.getCall(0)).to.be.calledWith('Deal with yield before buying.')
+          expect(stub.getCall(0)).to.be.calledWith('Not buy phase.')
       }
       )
   })

@@ -243,6 +243,97 @@ class App extends Component {
                 remainingRolls: 3
               }}/>
             </Route>
+            <Route path="/shoguntestbuy9">
+              <Shogun withSpoof='true' initialData={{
+                dice: ["none", "none", "none", "none", "none", "none"],
+                saved: [false, false, false, false, false, false],
+                playersInGame: [1,2,3,4],
+                currentTurn: 1,
+                hands: [[],[],[],[]],
+                buyCards: ["none", "none", "none"],
+                deck: [
+                {'name': 'Skyscraper', 'cost': 6, 'type': 'discard', 'ability': "Gain 4[Star]."},
+                {'name': 'Spiked Tail', 'cost': 5, 'type': 'keep', 'ability': "When you attack, do 1 additional damage."},
+                {'name': 'Solar Powered', 'cost': 2, 'type': 'keep', 'ability': "At the end your turn, if you have 0 energy, gain 1 energy."},
+              ],
+                message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
+                doShuffle: false,
+                points: [0,0,0,0],
+                health: [10,10,10,10],
+                energy: [0,0,0,0],
+                edo: 0,
+                bayEdo: 0,
+                remainingRolls: 3
+              }}/>
+            </Route>
+            <Route path="/shoguntestbuy10">
+              <Shogun withSpoof='true' initialData={{
+                dice: ["none", "none", "none", "none", "none", "none"],
+                saved: [false, false, false, false, false, false],
+                playersInGame: [1,2,3,4],
+                currentTurn: 1,
+                hands: [[],[],[],[]],
+                buyCards: ["none", "none", "none"],
+                deck: [
+                {'name': 'Tanks', 'cost': 4, 'type': 'discard', 'ability': "+4 Points and take 3 damage."},
+                {'name': 'Urbavore', 'cost': 4, 'type': 'keep', 'ability': "Gain 1 extra point when starting a turn in Tokyo. Deal 1 extra damage when dealing damage from Tokyo."},
+                {'name': "We're Only Making It Stronger", 'cost': 3, 'type': 'keep', 'ability': "When you lost 2 health, gain 1 energy."},
+              ],
+                message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
+                doShuffle: false,
+                points: [0,0,0,0],
+                health: [10,10,10,10],
+                energy: [0,0,0,0],
+                edo: 0,
+                bayEdo: 0,
+                remainingRolls: 3
+              }}/>
+            </Route>
+            <Route path="/shoguntestbuy11">
+              <Shogun withSpoof='true' initialData={{
+                dice: ["none", "none", "none", "none", "none", "none"],
+                saved: [false, false, false, false, false, false],
+                playersInGame: [1,2,3,4],
+                currentTurn: 1,
+                hands: [[],[],[],[]],
+                buyCards: ["none", "none", "none"],
+                deck: [
+                {'name': "Amusement Park", 'cost': 6, 'type': 'discard', 'ability': "+4 Points"},
+                {'name': "Army", 'cost': 2, 'type': 'discard', 'ability': "+1 point and take a damage for every card you have."},
+                {'name': "Cannibalistic", 'cost': 5, 'type': 'keep', 'ability': "When you deal damage, gain 1 point."},
+              ],
+                message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
+                doShuffle: false,
+                points: [0,0,0,0],
+                health: [10,10,10,10],
+                energy: [0,0,0,0],
+                edo: 0,
+                bayEdo: 0,
+                remainingRolls: 3
+              }}/>
+            </Route>
+            <Route path="/shoguntestbuy12">
+              <Shogun withSpoof='true' initialData={{
+                dice: ["none", "none", "none", "none", "none", "none"],
+                saved: [false, false, false, false, false, false],
+                playersInGame: [1,2,3,4],
+                currentTurn: 1,
+                hands: [[],[],[],[]],
+                buyCards: ["none", "none", "none"],
+                deck: [
+                {'name': "Reflective Hide", 'cost': 6, 'type': 'keep', 'ability': "If you suffer damage, the monster that dealt it suffers 1 damage."},
+                {'name': "Throw A Tanker", 'cost': 4, 'type': 'keep', 'ability': "On a turn you deal 3 or more damage, gain 2 points."},
+              ],
+                message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
+                doShuffle: false,
+                points: [0,0,0,0],
+                health: [10,10,10,10],
+                energy: [0,0,0,0],
+                edo: 0,
+                bayEdo: 0,
+                remainingRolls: 3
+              }}/>
+            </Route>
           </Switch>
         </BrowserRouter>
       </div>
