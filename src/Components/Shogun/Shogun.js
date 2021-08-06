@@ -9,15 +9,16 @@ class Shogun extends Component {
     }
 
     winPoints = 20
-    startHealth = 10
+    maxHealth = 10
     startEnergy = 0
     withSpoof = false
     canBuy = false
     canYield = false
     buttonPhase = 0
+    maxPlayers = 4
 
     cards = [
-        {'name': 'Friend of Children', 'cost':	3, 'type': 'keep', 'ability':	'When you gain energy, gain an additional energy.'},
+        {'name': 'Friend of Children', 'cost':	3, 'type': 'keep', 'ability':	'when you gain energy, gain an additional energy.'},
         {'name': 'Acid Attack', 'cost':	6, 'type': 'keep', 'ability':	"Deal one extra damage (even when you don't attack)"},
         {'name': 'Alien Metabolism', 'cost':	3, 'type': 'keep', 'ability':	'Buying cards costs you 1 less energy'},
         {'name': 'Apartment Building', 'cost': 5, 'type': 'discard', 'ability': '+ 3[Star]'},
@@ -65,7 +66,7 @@ class Shogun extends Component {
         message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
         doShuffle: true,
         points: [0,0,0,0],
-        health: [this.startHealth,this.startHealth,this.startHealth,this.startHealth],
+        health: [this.maxHealth,this.startHealth,this.startHealth,this.startHealth],
         energy: [0,0,0,0],
         edo: 0,
         bayEdo: 0,
@@ -83,7 +84,7 @@ class Shogun extends Component {
         message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
         doShuffle: true,
         points: [0,0,0,0],
-        health: [this.startHealth,this.startHealth,this.startHealth,this.startHealth],
+        health: [this.maxHealth,this.startHealth,this.startHealth,this.startHealth],
         energy: [0,0,0,0],
         edo: 0,
         bayEdo: 0,
@@ -125,7 +126,7 @@ class Shogun extends Component {
             newPlayers.push(i + 1)
             newHands.push([])
             newPoints.push(0)
-            newHealth.push(this.startHealth)
+            newHealth.push(this.maxHealth)
             newEnergy.push(this.startEnergy)
         }
         this.setState({
@@ -412,9 +413,9 @@ class Shogun extends Component {
             healthToAdd += 1
         }
         if (this.hasCard(player, "Even Bigger")) {
-            this.localState.health[player - 1] = Math.min(this.localState.health[player - 1] + healthToAdd, 12)
+            this.localState.health[player - 1] = Math.min(this.localState.health[player - 1] + healthToAdd, this.maxHealth + 2)
         } else {
-            this.localState.health[player - 1] = Math.min(this.localState.health[player - 1] + healthToAdd, 10)
+            this.localState.health[player - 1] = Math.min(this.localState.health[player - 1] + healthToAdd, this.maxHealth)
         }
         if (this.localState.health[player - 1] <= 0) {
             this.eliminatePlayer(player)
@@ -831,7 +832,7 @@ class Shogun extends Component {
         this.rerenderState()
     }
 
-    renderPlayerHands() {
+    renderHands() {
         return(<Container>
                     <div class="border">
                         <Row>
@@ -896,6 +897,61 @@ class Shogun extends Component {
         this.rerenderState()
     }
 
+    setVictoryPointTarget(points) {
+        const parsedInt = parseInt(points, 10)
+        if(isNaN(parsedInt) || !Number.isInteger(parsedInt)) {
+            window.alert("Must be a valid integer.")
+            return
+        }
+        this.updateMessage("Points to win set to " + parsedInt)
+        this.winPoints = parsedInt
+        this.rerenderState()
+    }
+
+    setMaxHealth(health) {
+        const parsedInt = parseInt(health, 10)
+        if(isNaN(parsedInt) || !Number.isInteger(parsedInt)) {
+            window.alert("Must be a valid integer.")
+            return
+        }
+        this.updateMessage("Max Health set to " + parsedInt)
+        this.maxHealth = parsedInt
+        this.resetHealthsToMax()
+        this.rerenderState()
+    }
+
+    resetHealthsToMax() {
+        for (let i = 0; i < this.localState.health.length; i++) {
+            this.localState.health[i] = Math.min(this.localState.health[i], this.maxHealth)
+        }
+    }
+
+    setMaxPlayers(player) {
+        const parsedInt = parseInt(player, 10)
+        if(isNaN(parsedInt) || !Number.isInteger(parsedInt)) {
+            window.alert("Must be a valid integer.")
+            return
+        }
+        this.updateMessage("Max players set to " + parsedInt)
+        this.maxPlayers = parsedInt
+        this.rerenderState()
+    }
+
+    renderCardInfo(number) {
+        return(
+            <div>
+                {this.localState.deck[number] ? 
+                <div>
+                    <div>{this.localState.deck[number]['name']}</div> 
+                    <div>{" Cost: " + this.localState.deck[number]['cost']}</div>
+                    <div>{" Type: " + this.localState.deck[number]['type']}</div>
+                    <div>{" Ability: " + this.localState.deck[number]['ability'] }</div>
+                </div>
+                : "none:"}
+            </div>
+        )
+    }
+
     render() {
         return(
             <div>
@@ -924,20 +980,35 @@ class Shogun extends Component {
                             <button id="doneYielding" class={(this.buttonPhase === 1) ? "btn-success" : "btn-danger"} onClick={() => {this.doneYielding()}}>Done Yielding</button>
                             </div>
                             <div>
-                                <div>
-                                <button id="buy0" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(0)}}>{this.localState.deck[0] ? this.localState.deck[0]['name'] + " Cost: " + this.localState.deck[0]['cost'] + " Ability: " + this.localState.deck[0]['ability'] : 'none'}</button>
-                                </div>
-                                <div>
-                                <button id="buy1" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(1)}}>{this.localState.deck[1] ? this.localState.deck[1]['name'] + " Cost: " + this.localState.deck[1]['cost'] + " Ability: " + this.localState.deck[1]['ability'] : 'none'}</button>
-                                </div>
-                                <div>
-                                <button id="buy2" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(2)}}>{this.localState.deck[2] ? this.localState.deck[2]['name'] + " Cost: " + this.localState.deck[2]['cost'] + " Ability: " + this.localState.deck[2]['ability'] : 'none'}</button>
-                                </div>
+                                <Row>
+                                    <Col>
+                                        <div class="border border-primary rounded">
+                                            <div>{this.renderCardInfo(0)}</div>
+                                            <button id="buy0" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(0)}}>Buy</button>
+                                        </div>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col>
+                                        <div class="border border-primary">
+                                    <div>{this.renderCardInfo(1)}</div>
+                                    <button id="buy1" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(1)}}>Buy</button>
+                                        </div>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col>
+                                        <div class="border border-primary">
+                                        <div>{this.renderCardInfo(2)}</div>
+                                        <button id="buy2" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(2)}}>Buy</button>
+                                        </div>
+                                    </Col>
+                                </Row>
                             </div>
                             <button id="clearBuy" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.clearBuy()}}>Pay 2 to Clear Buy Cards</button>
                             <button id="doneBuying" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(-1)}}>Done Buying</button>
+                            {this.renderHands()}
                             <p>Players in game: {JSON.stringify(this.state.playersInGame)}</p>
-                            {this.renderPlayerHands()}
                             <div>
                                 {this.withSpoof && 
                                 <div>
@@ -962,23 +1033,44 @@ class Shogun extends Component {
                             </div>
                         </Col>
                         <Col>
-                            <h3>Game History</h3>
-                            <p>Message  0: {this.state.message[0]}</p>
-                            <p>Message -1: {this.state.message[1]}</p>
-                            <p>Message -2: {this.state.message[2]}</p>
-                            <p>Message -3: {this.state.message[3]}</p>
-                            <p>Message -4: {this.state.message[4]}</p>
-                            <p>Message -5: {this.state.message[5]}</p>
+                            <div>
+                                <h3>Game History</h3>
+                                <p>Message  0: {this.state.message[0]}</p>
+                                <p>Message -1: {this.state.message[1]}</p>
+                                <p>Message -2: {this.state.message[2]}</p>
+                                <p>Message -3: {this.state.message[3]}</p>
+                                <p>Message -4: {this.state.message[4]}</p>
+                                <p>Message -5: {this.state.message[5]}</p>
+                            </div>
                             <div>
                                 <a href="https://cdn.1j1ju.com/medias/f9/2f/9b-king-of-edo-rulebook.pdf">King of Tokyo Full Rules</a>
                                 <h3>Short Rules</h3>
-                                <div>First to 20 points or last player alive wins!</div>
+                                <div>First to <b><u>{this.winPoints} points</u></b> or last player alive wins!</div>
                                 <div>Roll dice up 3 (default) times, and then resolve when done. Dice can be saved between rolls.</div>
                                 <div>Triple+ # dice get you points (diceValue + # over triple). Claws attack the area you're not in (Edo vs Outside) and put you in Edo if unoccupied or occupant yields to you.</div>
                                 <div>Hearts heal, but not in Edo. Energy is money to buy cards.</div>
                                 <div>If attacked in Edo, have the option to yield. Must press "Done Yielding" to finish phase either way.</div>
                                 <div>Get 1 point when go into Edo. Get 2 points if start your turn in Edo.</div>
                                 <div>Buy cards with energy. Discard cards have an immediate effect. Keep cards have a persistent effect. Click "Done Buying" to end turn.</div>
+                            </div>
+                            <div>
+                                <div><b>Configure Game</b></div>
+                                <div>
+                                    Play To Victory Points
+                                    <input type="text" id="pointArea"></input>
+                                    <button onClick={() => this.setVictoryPointTarget(document.getElementById("pointArea").value)}>Set Point Target</button>
+                                </div>
+                                <div>
+                                    Max Health:
+                                    <input type="text" id="healthInput"></input>
+                                    <button onClick={() => this.setMaxHealth(document.getElementById("healthInput").value)}>Set Max Health</button>
+                                </div>
+                                <div>
+                                    Number of Players:
+                                    <input type="text" id="playerInput"></input>
+                                    <button onClick={() => this.setMaxPlayers(document.getElementById("playerInput").value)}>Set Max Players</button>
+                                </div>
+                                <button onClick={() => {this.setup(this.maxPlayers)}}>Restart Game With New Settings</button>
                             </div>
                         </Col>
                     </Row>
