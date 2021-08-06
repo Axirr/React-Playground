@@ -24,6 +24,9 @@ class App extends Component {
             <Route path="/loveletter">
               <LoveLetter doShuffle={true}/>
             </Route>
+            <Route path="/loveletterai">
+              <LoveLetter doShuffle={true}/>
+            </Route>
             <Route path="/lovelettertest">
               <LoveLetter deck={["guard", "guard","guard","countess","guard","priest","prince","guard", "princess", "baron", "king", "handmaiden"]} 
               doShuffle={false}/>
