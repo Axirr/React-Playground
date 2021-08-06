@@ -134,6 +134,7 @@ class Shogun extends Component {
             saved: newSaved,
             playersInGame: newPlayers,
             currentTurn: 1,
+            hands: newHands,
             buyCards: buyCards,
             deck: newDeck,
             points: newPoints,
