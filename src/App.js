@@ -4,6 +4,7 @@ import NavigationBar from './Components/Navigation/NavigationBar';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import RPS from './Components/RockPaperScissors/RPS';
 import LoveLetter from './Components/LoveLetter/LoveLetter';
+import LoveLetterAI from './Components/LoveLetter/LoveLetterAI';
 import Shogun from './Components/Shogun/Shogun'
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -25,11 +26,15 @@ class App extends Component {
               <LoveLetter doShuffle={true}/>
             </Route>
             <Route path="/loveletterai">
-              <LoveLetter doShuffle={true}/>
+              <LoveLetterAI doShuffle={true}/>
             </Route>
             <Route path="/lovelettertest">
               <LoveLetter deck={["guard", "guard","guard","countess","guard","priest","prince","guard", "princess", "baron", "king", "handmaiden"]} 
               doShuffle={false}/>
+            </Route>
+            <Route path="/loveletteraitest">
+              <LoveLetterAI deck={["guard", "guard","guard","countess","guard","priest","prince","guard", "princess", "baron", "king", "handmaiden"]} 
+ doShuffle={false}/>
             </Route>
             <Route path="/shogun">
               <Shogun />
