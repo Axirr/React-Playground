@@ -4,6 +4,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './LoveLetter.module.css'
 
 class LoveLetterAI extends Component{
+    isAI = true
+
     localState = {
         hands: ["none", "none", "none", "none"],
         drawCard: "none",
@@ -117,16 +119,22 @@ class LoveLetterAI extends Component{
 
     playerPlayCard(playerNumber, card) {
         if (playerNumber !== this.localState.currentTurn) {
-            window.alert("Not your turn")
+            this.alertWindow("Not your turn")
             return
         }
         this.playCard(card, playerNumber)
     }
 
+    alertWindow(message) {
+        if (!this.isAI || this.localState.currentTurn === 1) {
+            window.alert(message)
+        }
+    }
+
     playCard(card, playerNumber) {
         this.removeSelfHandmaiden()
         if (this.localState.currentTurn === -1 ) {
-            window.alert("Game is over")
+            this.alertWindow("Game is over")
             this.rerenderState()
             return
         }
@@ -185,7 +193,6 @@ class LoveLetterAI extends Component{
         } else {
             var notPlayedCard = this.localState.drawCard
         }
-        console.log("iselim")
         switch(card) {
             case 'princess':
                 this.eliminatePlayer(this.localState.currentTurn)
@@ -215,13 +222,13 @@ class LoveLetterAI extends Component{
                 var discardedCard = handsCopy[myTarget - 1]
                 if (myTarget === this.localState.currentTurn) {
                     if (discardedCard === "prince") {
-                        var discardedCard = this.state.drawCard
+                        var discardedCard = this.localState.drawCard
                     }
                 }
                 if (deckCopy.length >= 1) {
                     handsCopy[myTarget - 1] = deckCopy.pop()
                 } else {
-                    handsCopy[myTarget - 1] = this.state.setAsideCard
+                    handsCopy[myTarget - 1] = this.localState.setAsideCard
                 }
                 this.localState['hands'] = handsCopy
                 if (myTarget === this.localState.currentTurn) {
@@ -269,25 +276,16 @@ class LoveLetterAI extends Component{
                 this.updateMessage(message)
                 if (playerToEliminate !== 0) {
                     this.eliminatePlayer(playerToEliminate)
-                    if (!isDrawCardPlayed) {
-                        this.replaceCard(this.localState.currentTurn)
-                        this.advanceTurn()
-                    } else {
-                        this.replaceCard(0)
-                        this.advanceTurn()
-                    }
-                } else {
-                    if (!isDrawCardPlayed) {
-                        this.replaceCard(this.localState.currentTurn)
-                        this.advanceTurn()
-                    } else {
-                        this.replaceCard(0)
-                        this.advanceTurn()
-                    }
                 }
+                if (!isDrawCardPlayed) {
+                    this.replaceCard(this.localState.currentTurn)
+                } else {
+                    this.replaceCard(0)
+                }
+                    this.advanceTurn()
                 break;
             case 'priest':
-                window.alert("Player " + myTarget + " has a " + this.localState.hands[myTarget - 1])
+                this.alertWindow("Player " + myTarget + " has a " + this.localState.hands[myTarget - 1])
                 this.normalDrawAndAdvance(isDrawCardPlayed)
                 break;
             case 'guard':
@@ -316,7 +314,7 @@ class LoveLetterAI extends Component{
     }
 
     updateMessage(newMessage) {
-        console.log("Updating message")
+        // console.log("Updating message")
         var messageCopy = this.localState.message
         for (var i = 0; i < (messageCopy.length - 1); i++) {
             messageCopy[i] = messageCopy[i+1]
@@ -377,7 +375,7 @@ class LoveLetterAI extends Component{
         if (currentHandCard === "countess" || this.localState.drawCard === "countess") {
             if (card !== "countess") {
                 if ((currentHandCard === "prince") || (currentHandCard === "king") || (this.localState.drawCard === "prince") || (this.localState.drawCard) === "king") {
-                    window.alert("Invalid move. Must play the countess")
+                    this.alertWindow("Invalid move. Must play the countess")
                     return false
                 }
             }
@@ -408,14 +406,14 @@ class LoveLetterAI extends Component{
 
         // Check still in game
         if (this.localState.playersInGame.indexOf(myTarget) === -1) {
-            window.alert("INVALID MOVE. Target not in game.")
+            this.alertWindow("INVALID MOVE. Target not in game.")
             return false
         }
 
         // Check not self unless prince
         if (['king', 'guard', 'baron', 'priest', 'guard'].indexOf(card) !== -1) {
             if (myTarget === this.localState.currentTurn) {
-                window.alert("INVALID MOVE. Cannot target self except with prince.")
+                this.alertWindow("INVALID MOVE. Cannot target self except with prince.")
                 return false
             }
         }
@@ -425,10 +423,10 @@ class LoveLetterAI extends Component{
             return true
         } else if (this.localState.isHandMaiden[myTarget - 1]) {
             if (this.localState.playersInGame.length > 2) {
-                window.alert("INVALID MOVE. Cannot target handmaiden player.")
+                this.alertWindow("INVALID MOVE. Cannot target handmaiden player.")
                 return false
             } else if (card === "prince") {
-                window.alert("INVALID MOVE. Cannot target handmaiden player. Remember, Prince can target self.")
+                this.alertWindow("INVALID MOVE. Cannot target handmaiden player. Remember, Prince can target self.")
                 return false
             }
         }
@@ -442,7 +440,6 @@ class LoveLetterAI extends Component{
         } else {
             var drawnCard = this.localState.deck.pop()
         }
-        console.log("DOES THIS UPDATE DECK?")
         if (playerNumber === 0) {
             this.localState['drawCard'] = drawnCard
             this.checkIfGameOver()
@@ -493,7 +490,7 @@ class LoveLetterAI extends Component{
     }
 
     advanceTurn() {
-        console.log("Turn advancing.")
+        // console.log("Turn advancing.")
         var currentIndex = this.localState.playersInGame.indexOf(this.localState.currentTurn)
         if (currentIndex === -1) {
             var potentialPlayers = []
@@ -520,7 +517,12 @@ class LoveLetterAI extends Component{
         } else {
             console.log("Player was found. Is that weird?")
             this.localState['currentTurn'] = this.localState.playersInGame[(currentIndex + 1) % this.localState.playersInGame.length]  
-            this.rerenderState()
+            this.rerenderState(() => {
+                // if (this.isAI && this.localState.currentTurn !== 1) {
+                //     // this.isAI = false
+                //     this.playTurn(this.localState.currentTurn)
+                // }
+            })
         }
     }
 
@@ -579,11 +581,105 @@ class LoveLetterAI extends Component{
                 {newPlayers.map((number) => {
                     return(
                     <div>Hand {number}{this.state.isDisplayed[number - 1] && 
-                    <button onClick={(() => { this.playerPlayCard(number, this.state.hands[number - 1]) })}>{this.state.hands[number - 1]}</button>} 
+                    <button id={"hand"+number} onClick={(() => { this.playerPlayCard(number, this.localState.hands[number - 1]) })}>{this.localState.hands[number - 1]}</button>} 
                     </div>);
                 })}
             </div>
         );
+    }
+
+    playTurn(player) {
+        // Random choice if not princess
+        const playerIndex = player - 1
+        let playerHand = [this.localState.hands[playerIndex], this.localState.drawCard]
+        let chosenCard;
+        if (playerHand.indexOf("princess") !== -1) {
+            playerHand.splice(playerHand.indexOf("princess"), 1)
+            chosenCard = playerHand[0]
+        } else {
+            chosenCard = playerHand[Math.floor(Math.random() * 2)]
+        }
+
+        // Random valid target
+        let playersCopy = [...this.localState.playersInGame]
+        playersCopy = this.returnShuffledDeck(playersCopy)
+        let playerTarget = playersCopy[0]
+        for (let i = 0; i < playersCopy.length; i++) {
+            if (playersCopy[i] !== player && !this.localState.isHandMaiden[playersCopy[i] - 1]) {
+                playerTarget = playersCopy[i]
+                break
+            }
+        }
+        // console.log("player target")
+        // console.log(playerTarget)
+        this.setTarget(playerTarget)
+
+        this.setRandomGuess()
+
+        this.rerenderState(() => {
+            this.playerPlayCard(this.localState.currentTurn, chosenCard)
+        })
+    }
+
+    setTarget(number) {
+        let radioList = document.getElementsByName("target")
+        // console.log(radioList)
+        // radioList[2]['checked'] = true
+        for (let i = 0; i < radioList.length; i++) {
+            let button = radioList[i]
+            console.log(button["value"])
+            if (Number.parseInt(button["value"]) === number) {
+                // console.log("Found it")
+                button.checked = true;
+                break
+            } 
+        }
+        // console.log(radioList)
+    }
+
+    setRandomGuess(guess) {
+        const randomGuessNumber = Math.floor(Math.random() * 7)
+        let randomGuessString = "priest"
+        switch (randomGuessNumber) {
+            case 0:
+                randomGuessString = "priest"
+                break
+            case 1:
+                randomGuessString = "baron"
+                break
+            case 2:
+                randomGuessString = "handmaiden"
+                break
+            case 3:
+                randomGuessString = "prince"
+                break
+            case 4:
+                randomGuessString = "king"
+                break
+            case 5:
+                randomGuessString = "countess"
+                break
+            case 6:
+                randomGuessString = "princess"
+                break
+            case 7:
+                randomGuessString = "princess"
+                break
+            default:
+                console.log("ERROR: Random guess should not be here.")
+        }
+        let radioList = document.getElementsByName("guardGuess")
+        console.log(radioList)
+        for (let i = 0; i < radioList.length; i++) {
+            let button = radioList[i]
+            console.log(button["value"])
+            if (button["value"] === randomGuessString) {
+                console.log("Found random guess button")
+                button.checked = true;
+                break
+            } 
+        }
+        console.log(radioList)
     }
 
     render() {
@@ -594,7 +690,7 @@ class LoveLetterAI extends Component{
                     <p>Current Turn: Player {this.state.currentTurn}</p>
                     <div>
                         Current Draw Card
-                        {this.state.isDisplayed[this.state.totalNumberOfPlayers] && <button onClick={ () => { this.playCard(this.state.drawCard, 0)}}>{this.state.drawCard}</button> }
+                        {this.state.isDisplayed[this.state.totalNumberOfPlayers] && <button id="drawCard" onClick={ () => { this.playCard(this.state.drawCard, 0)}}>{this.state.drawCard}</button> }
                         {this.renderHands(this.state.totalNumberOfPlayers)}
                     </div>
                     <div>
@@ -615,6 +711,7 @@ class LoveLetterAI extends Component{
                         <input type="radio" value="princess" name="guardGuess" />Princess
                     </div>
                     <p>...</p>
+                    <button onClick={() => {this.playTurn(this.localState.currentTurn)}}>Play AI Turn</button>
                     <p>Current Live Players: { JSON.stringify(this.state.playersInGame)}</p>
                     <p>Handmaiden Status for Players (in order): { JSON.stringify(this.state.isHandMaiden)}</p>
                     <p>Cards in the deck {this.state.deck.length}</p>
