@@ -779,11 +779,11 @@ class LoveLetterAI extends Component{
                     <p>Current Live Players: { JSON.stringify(this.state.playersInGame)}</p>
                     <p>Handmaiden Status for Players (in order): { JSON.stringify(this.state.isHandMaiden)}</p>
                     <p>Cards in the deck {this.state.deck.length}</p>
-                    {this.withDebug ? <div>
-                    <p>Debug</p>
                     <button onClick = {() => { this.showCurrentPlayerCards()}}>Show Current Player Cards</button>
                     <button onClick={() => { this.hideAllCards()}}>Hide All Cards</button>
                     <button onClick={() => { this.showAllCards()}}>Show All Cards</button>
+                    {this.withDebug ? <div>
+                    <p>Debug</p>
                     <button onClick={() => {this.printState()}}>Print State</button>
                     <button onClick={() => {this.rerenderState()}}>Rerender State</button>
                     <p>...</p>
