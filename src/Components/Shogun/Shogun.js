@@ -226,6 +226,13 @@ class Shogun extends Component {
                 this.addEnergy(this.localState.currentTurn, 1)
             }
         }
+        if (this.hasCard(this.localState.currentTurn, "Energy Hoarder") && this.localState.energy[this.localState.currentTurn - 1] >= 6) {
+            this.updateMessage("Energy Hoarder activated.")
+            const energyToAdd = Math.floor(this.localState.energy[this.localState.currentTurn - 1] / 6)
+            console.log("energy" + energyToAdd)
+            this.addEnergy(this.localState.currentTurn, energyToAdd)
+            this.rerenderState()
+        }
     }
 
     endTurnAllProcedures() {
@@ -259,13 +266,6 @@ class Shogun extends Component {
             }
             this.updateMessage("Player " + this.localState.currentTurn + " gets " + pointsToEarn + " points for starting in Edo.")
             this.addPoints(this.localState.currentTurn, pointsToEarn)
-        }
-        if (this.hasCard(this.localState.currentTurn, "Energy Hoarder")) {
-            this.updateMessage("Energy Hoarder activated.")
-            const energyToAdd = Math.floor(this.localState.energy[this.localState.currentTurn - 1] / 6)
-            console.log("energy" + energyToAdd)
-            this.addEnergy(this.localState.currentTurn, energyToAdd)
-            this.rerenderState()
         }
         this.resetRolls()
         this.buttonPhase = 0
@@ -981,6 +981,8 @@ class Shogun extends Component {
                             <button id="doneYielding" class={(this.buttonPhase === 1) ? "btn-success" : "btn-danger"} onClick={() => {this.doneYielding()}}>Done Yielding</button>
                             </div>
                             <div>
+                                <button id="clearBuy" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.clearBuy()}}>Pay 2 to Clear Buy Cards</button>
+                                <button id="doneBuying" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(-1)}}>Done Buying</button>
                                 <Row>
                                     <Col>
                                         <div class="border border-primary rounded">
@@ -1006,8 +1008,6 @@ class Shogun extends Component {
                                     </Col>
                                 </Row>
                             </div>
-                            <button id="clearBuy" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.clearBuy()}}>Pay 2 to Clear Buy Cards</button>
-                            <button id="doneBuying" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(-1)}}>Done Buying</button>
                             {this.renderHands()}
                             <p>Players in game: {JSON.stringify(this.state.playersInGame)}</p>
                             <div>

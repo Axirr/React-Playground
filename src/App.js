@@ -34,7 +34,19 @@ class App extends Component {
             </Route>
             <Route path="/loveletteraitest">
               <LoveLetterAI deck={["guard", "guard","guard","countess","guard","priest","prince","guard", "princess", "baron", "king", "handmaiden"]} 
- doShuffle={false}/>
+ doShuffle={false} debug={true}/>
+            </Route>
+            <Route path="/loveletteraitest2">
+              <LoveLetterAI deck={["guard", "guard","guard","countess","guard","priest","guard","prince", "princess", "baron", "king", "countess"]} 
+ doShuffle={false} debug={true}/>
+            </Route>
+            <Route path="/loveletteraitest3">
+              <LoveLetterAI deck={["guard", "guard","guard","countess","guard","priest","guard","king", "princess", "baron", "king", "countess"]} 
+ doShuffle={false} debug={true}/>
+            </Route>
+            <Route path="/loveletteraitest4">
+              <LoveLetterAI deck={["guard", "guard","guard","countess","guard","priest","guard","king", "princess", "baron", "king", "princess"]} 
+ doShuffle={false} debug={true}/>
             </Route>
             <Route path="/shogun">
               <Shogun />

@@ -2,10 +2,51 @@
 
 describe('example to-do app', () => {
   beforeEach(() => {
-    cy.visit('localhost:3000/loveletteraitest')
+  })
+
+  it("", () => {
+
+  })
+
+  it("check keep higher card when last turn", () => {
+
+  })
+
+  it("check keep high card if last turn", () => {
+    
+  })
+
+  it("check AI don't voluntarily play princess", () => {
+    cy.visit('localhost:3000/loveletteraitest4')
+    cy.get("#playAiTurn").click()
+    cy.contains("Show All").click()
+    cy.contains("priest")
+    cy.contains("king")
+    cy.contains("king")
+    cy.contains("baron")
+    cy.contains("princess")
+  })
+
+  it('check countess forced play AI turn, prince', () => {
+    cy.visit('localhost:3000/loveletteraitest2')
+    cy.get("#playAiTurn").click()
+    cy.contains("Show All").click()
+    cy.contains("princess")
+  })
+
+  it('check countess forced play AI turn, king', () => {
+    cy.visit('localhost:3000/loveletteraitest3')
+    cy.get("#playAiTurn").click()
+    cy.contains("Show All").click()
+    cy.contains("priest")
+    cy.contains("king")
+    cy.contains("king")
+    cy.contains("baron")
+    cy.contains("princess")
   })
 
   it('test game run with handmaiden, guard, king, baron, princess use', () => {
+    cy.visit('localhost:3000/loveletteraitest')
     cy.contains("Show All").click()
     cy.contains("handmaiden")
     cy.contains("guard")
