@@ -76,12 +76,12 @@ class LoveLetterAI extends Component{
         var deckCopy = [...newDeck]
         var newHands = [];
         var isHandMaiden = [];
-        var isDisplayed = ['false','false']
+        var isDisplayed = [false,false]
         var playersInGame = []
         for (var i = 0; i < numberPlayers; i++) {
             newHands.push(deckCopy.pop())
             isHandMaiden.push(false)
-            isDisplayed.push('false')
+            isDisplayed.push(false)
             playersInGame.push(i + 1)
         }
         var drawCard = deckCopy.pop()
@@ -105,9 +105,8 @@ class LoveLetterAI extends Component{
 
     redeal(numberPlayers) {
         if (this.localState.useDefaultDeck) {
-            this.localState['deck'] = this.localState.defaultDeck
+            this.localState['deck'] = [...this.localState.defaultDeck]
             this.deal(numberPlayers)
-            this.rerenderState()
         }
     }
 
@@ -152,12 +151,12 @@ class LoveLetterAI extends Component{
         this.removeSelfHandmaiden()
         if (this.localState.currentTurn === -1 ) {
             this.alertWindow("Game is over")
-            this.rerenderState()
+            // this.rerenderState()
             return
         }
 
         if (!this.isValidMove(card)) {
-            this.rerenderState()
+            // this.rerenderState()
             return
         }
 
@@ -290,7 +289,7 @@ class LoveLetterAI extends Component{
                     var message = "Player " + this.localState.currentTurn + " wins against Player " + myTarget + " in baron comparison."
                 } else if (targetValue > playerValue) {
                     playerToEliminate = this.localState.currentTurn
-                    var message = "Player " + myTarget + " wins against Player " + this.localState.currentTurn + " in baron comparison."
+                    var message = "Player " + this.localState.currentTurn + " loses against Player " + myTarget + " in baron comparison."
                 }
                 this.updateMessage(message)
                 if (playerToEliminate !== 0) {
@@ -341,7 +340,6 @@ class LoveLetterAI extends Component{
         }
         messageCopy[messageCopy.length - 1] = newMessage
         this.localState["message"] = messageCopy
-        // this.rerenderState()
     }
 
     getGuardGuess() {
@@ -360,7 +358,6 @@ class LoveLetterAI extends Component{
             this.replaceCard(0)
         }
         this.advanceTurn()
-        // this.rerenderState()
     }
 
     getCardValue(card) {
@@ -463,14 +460,12 @@ class LoveLetterAI extends Component{
         if (playerNumber === 0) {
             this.localState['drawCard'] = drawnCard
             this.checkIfGameOver()
-            // this.rerenderState()
         } else {
             var copyHands = [...this.localState.hands]
             copyHands[playerNumber - 1] = this.localState.drawCard
             this.localState['hands'] = copyHands
             this.localState['drawCard'] = drawnCard
             this.checkIfGameOver()
-            // this.rerenderState()
         }
         this.hideAllCards()
     }
@@ -483,7 +478,6 @@ class LoveLetterAI extends Component{
     }
 
     evaluateShowdownWin() {
-        this.isGameOver = true
         this.updateMessage("SHOWDOWN! Players compare card values, highest wins.")
         this.showAllCards()
         var maxPlayer = 0
@@ -503,7 +497,8 @@ class LoveLetterAI extends Component{
         this.localState['currentTurn'] = -1
         this.rerenderState()
         if (!isTie) {
-            this.updateMessage("Player " + maxPlayer + " wins showdown!")
+            this.winProcedures(maxPlayer)
+            // this.updateMessage("Player " + maxPlayer + " wins showdown!")
             // window.alert("Player " + maxPlayer + " wins showdown!")
         } else {
             this.updateMessage("Tie!")
@@ -531,12 +526,10 @@ class LoveLetterAI extends Component{
                 }
             }
             this.localState['currentTurn'] = nextClosestPlayer
-            this.rerenderState()
         } else {
             this.localState['currentTurn'] = this.localState.playersInGame[(currentIndex + 1) % this.localState.playersInGame.length]  
-            this.rerenderState(() => {
-            })
         }
+        this.rerenderState()
     }
 
     eliminatePlayer(playerNumber) {
@@ -545,10 +538,18 @@ class LoveLetterAI extends Component{
         copyPlayers.splice(index, 1)
         this.localState['playersInGame'] = copyPlayers
         this.updateMessage("Player " + playerNumber + " was eliminated.")
+        this.updateMessage("Player " + playerNumber + " discarded a " + this.localState.hands[playerNumber - 1] + ".")
+        this.localState.playedCards.push(this.localState.hands[playerNumber - 1])
         if (copyPlayers.length === 1) {
-            this.updateMessage("Player " + copyPlayers[0] + " wins!")
-            this.isGameOver = true
+            this.winProcedures(copyPlayers[0])
         }
+    }
+
+    winProcedures(player) {
+        this.updateMessage("Player " + player + " wins!")
+        this.isGameOver = true
+        window.alert("Player " + player + " wins!")
+
     }
 
 
@@ -582,17 +583,17 @@ class LoveLetterAI extends Component{
         this.rerenderState()
     }
 
-    renderHands(playerNumber) {
-        var newPlayers = [];
-        for (var i = 1; i <= playerNumber; i++ ) {
-            newPlayers.push(i)
-        }
+    renderHands() {
+        // var newPlayers = [];
+        // for (var i = 1; i <= this.localState.playersInGame.length; i++ ) {
+        //     newPlayers.push(i)
+        // }
 
         //SET STATE COLLECTIVELY
 
         return(
             <div>
-                {newPlayers.map((number) => {
+                {this.state.playersInGame.map((number) => {
                     return(
                     <div>Hand {number}{this.state.isDisplayed[number - 1] && 
                     <button id={"hand"+number} onClick={(() => { this.playerPlayCard(number, this.localState.hands[number - 1]) })}>{this.localState.hands[number - 1]}</button>} 
@@ -662,7 +663,7 @@ class LoveLetterAI extends Component{
                 } else if (this.doesActivePlayerHaveCard(this.localState.currentTurn, "baron")) {
                     let handCopy = [...playerHand]
                     handCopy.splice(handCopy.indexOf("baron"), 1)
-                    if ((this.getCardValue(handCopy[0] >= 3)) && (this.getCardValue(handCopy[0]) > (Math.random() * 10))) {
+                    if ((this.getCardValue(handCopy[0]) >= 3) && (this.getCardValue(handCopy[0]) > (Math.random() * 10))) {
                         chosenCard = "baron"
                     }
                 }
@@ -702,7 +703,10 @@ class LoveLetterAI extends Component{
         deckCopy.splice(deckCopy.indexOf(this.localState.hands[player - 1]), 1)
         console.log(deckCopy)
         const randomGuessNumber = Math.floor(Math.random() * deckCopy.length)
-        let randomGuessString = deckCopy[randomGuessNumber]
+        let randomGuessString = "princess"
+        if (deckCopy.length > 0) {
+            randomGuessString = deckCopy[randomGuessNumber]
+        }
         // let randomGuessString = "priest"
         // switch (randomGuessNumber) {
         //     case 0:
@@ -755,7 +759,7 @@ class LoveLetterAI extends Component{
                     <div>
                         Current Draw Card
                         {this.state.isDisplayed[this.state.totalNumberOfPlayers] && <button id="drawCard" onClick={ () => { this.playCard(this.state.drawCard, 0)}}>{this.state.drawCard}</button> }
-                        {this.renderHands(this.state.totalNumberOfPlayers)}
+                        {this.renderHands()}
                     </div>
                     <div>
                         Target of Card
@@ -787,7 +791,7 @@ class LoveLetterAI extends Component{
                     <button onClick={() => {this.printState()}}>Print State</button>
                     <button onClick={() => {this.rerenderState()}}>Rerender State</button>
                     <p>...</p>
-                    </div> : <div></div>}
+                    </div> : <p></p>}
                     <p>Choose Number of Players and Restart Game</p>
                     <button onClick={() => {this.redeal(2)} }>2 Players</button>
                     <button onClick={() => {this.redeal(3)} }>3 Players</button>

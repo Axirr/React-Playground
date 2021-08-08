@@ -23,7 +23,8 @@ class App extends Component {
               <RPS />
             </Route>
             <Route path="/loveletter">
-              <LoveLetter doShuffle={true}/>
+              {/* <LoveLetter doShuffle={true}/> */}
+              <LoveLetterAI doShuffle={true}/>
             </Route>
             <Route path="/loveletterai">
               <LoveLetterAI doShuffle={true}/>
