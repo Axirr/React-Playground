@@ -595,10 +595,23 @@ class LoveLetterAI extends Component{
             <div>
                 {this.state.playersInGame.map((number) => {
                     return(
-                    <div>Hand {number}{this.state.isDisplayed[number - 1] && 
-                    <button id={"hand"+number} onClick={(() => { this.playerPlayCard(number, this.localState.hands[number - 1]) })}>{this.localState.hands[number - 1]}</button>} 
+                    <div class="col-12">Hand {number}{this.state.isDisplayed[number - 1] && 
+                        <button id={"hand"+number} onClick={(() => { this.playerPlayCard(number, this.localState.hands[number - 1]) })}>{this.localState.hands[number - 1]}</button>} 
                     </div>);
                 })}
+            </div>
+        );
+    }
+
+    renderTargets() {
+        return(
+            <div>
+                {this.state.playersInGame.map((number) => {
+                    return(
+                        <div class="col-12">
+                            <input type="radio" value={number} name="target" defaultChecked/>Player {number}
+                        </div>
+                )})}
             </div>
         );
     }
@@ -763,20 +776,33 @@ class LoveLetterAI extends Component{
                     </div>
                     <div>
                         Target of Card
-                        <input type="radio" value="1" name="target" defaultChecked/>Player 1
-                        <input type="radio" value="2" name="target" />Player 2
-                        <input type="radio" value="3" name="target" />Player 3
-                        <input type="radio" value="4" name="target" />Player 4
+                        {this.renderTargets()}
+                        {/* <div>
+                            <input type="radio" value="1" name="target" defaultChecked/>Player 1
+                        </div>
+                        <div>
+                            <input type="radio" value="2" name="target" />Player 2
+                        </div>
+                        <div>
+                            <input type="radio" value="3" name="target" />Player 3
+                        </div>
+                        <div>
+                            <input type="radio" value="4" name="target" />Player 4
+                        </div> */}
                     </div>
                     <div>
                         Guess for Guard
-                        <input type="radio" value="priest" name="guardGuess" defaultChecked/>Priest
-                        <input type="radio" value="baron" name="guardGuess" />Baron
-                        <input type="radio" value="handmaiden" name="guardGuess" />Handmaiden
-                        <input type="radio" value="prince" name="guardGuess" />Prince
-                        <input type="radio" value="king" name="guardGuess" />King
-                        <input type="radio" value="countess" name="guardGuess" />Countess
-                        <input type="radio" value="princess" name="guardGuess" />Princess
+                        <div>
+                            <input type="radio" value="priest" name="guardGuess" defaultChecked/>Priest
+                            <input type="radio" value="baron" name="guardGuess" />Baron
+                            <input type="radio" value="handmaiden" name="guardGuess" />Handmaiden
+                            <input type="radio" value="prince" name="guardGuess" />Prince
+                        </div>
+                        <div>
+                            <input type="radio" value="king" name="guardGuess" />King
+                            <input type="radio" value="countess" name="guardGuess" />Countess
+                            <input type="radio" value="princess" name="guardGuess" />Princess
+                        </div>
                     </div>
                     <p>...</p>
                     <button id="playAiTurn" onClick={() => {this.playTurn(this.localState.currentTurn)}}>Play AI Turn</button>
@@ -792,10 +818,6 @@ class LoveLetterAI extends Component{
                     <button onClick={() => {this.rerenderState()}}>Rerender State</button>
                     <p>...</p>
                     </div> : <p></p>}
-                    <p>Choose Number of Players and Restart Game</p>
-                    <button onClick={() => {this.redeal(2)} }>2 Players</button>
-                    <button onClick={() => {this.redeal(3)} }>3 Players</button>
-                    <button onClick={() => {this.redeal(4)} }>4 Players</button>
                     </Col>
                     <Col>
                         <h3>Game History</h3>
@@ -815,6 +837,10 @@ class LoveLetterAI extends Component{
                         <p>Baron (2): Compare cards with another player. Lower value card player is eliminated. No effect on tie. (Value: 3)</p>
                         <p>Priest (2): Look at another player's hand card. (Value: 2)</p>
                         <p>Guard (5): Guess another player's card. If correct, they are eliminated. Cannot guess 'Guard'. (Value: 1)</p>
+                    <h3>Choose Number of Players and Restart Game</h3>
+                    <button onClick={() => {this.redeal(2)} }>2 Players</button>
+                    <button onClick={() => {this.redeal(3)} }>3 Players</button>
+                    <button onClick={() => {this.redeal(4)} }>4 Players</button>
                     </Col>
                 </Row>
             </Container>

@@ -16,7 +16,7 @@ describe('example to-do app', () => {
     
   })
 
-  it("check AI don't voluntarily play princess", () => {
+  it("check AI doesn't voluntarily play princess", () => {
     cy.visit('localhost:3000/loveletteraitest4')
     cy.get("#playAiTurn").click()
     cy.contains("Show All").click()
