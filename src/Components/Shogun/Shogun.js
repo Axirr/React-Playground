@@ -302,12 +302,10 @@ class Shogun extends Component {
     }
 
     resetRolls() {
+        this.localState['remainingRolls'] = 3
         if (this.hasCard(this.localState.currentTurn, "Giant Brain")) {
-            this.localState['remainingRolls'] = 4
-        } else {
-            this.localState['remainingRolls'] = 3
+            this.localState['remainingRolls'] += 1
         }
-        console.log("Add in cards that change number of rolls and change number of dice")
         this.resetDiceState()
     }
 
@@ -486,6 +484,10 @@ class Shogun extends Component {
             this.removeFromEdo(player)
         }
         this.updateMessage("Player " + player + " is eliminated!")
+        if (this.localState.playersInGame.length === 1) {
+            this.updateMessage("Player " + this.localState.playersInGame[0] + " wins!")
+            window.alert("Player " + this.localState.playersInGame[0] + " wins!")
+        }
     }
 
     isEdoEmpty() {
@@ -742,10 +744,15 @@ class Shogun extends Component {
                 break;
             case 'Fire Blast':
                 this.updateMessage("All players (other than the active player) take 2 damage.")
+                let playersToFireBlast = []
                 for (let i = 0; i < this.localState.playersInGame.length; i++) {
                     if (this.localState.currentTurn !== this.localState.playersInGame[i]) {
-                        this.changeHealth(this.localState.playersInGame[i], -2)
+                        playersToFireBlast.push(this.localState.playersInGame[i])
+                        // this.changeHealth(this.localState.playersInGame[i], -2)
                     }
+                }
+                for (let i = 0; i < playersToFireBlast.length; i++) {
+                    this.changeHealth(playersToFireBlast[i], -2)
                 }
                 break;
             case 'Heal':
@@ -753,7 +760,7 @@ class Shogun extends Component {
                 break
             case 'Gas Refinery':
                 this.updateMessage("All players (other than the active player) take 3 damage.")
-                for (let i = 0; i < this.localState.playersInGame.length; i++) {
+                for (let i = this.localState.playersInGame.length - 1; i >= 0; i--) {
                     if (this.localState.currentTurn !== this.localState.playersInGame[i]) {
                         this.changeHealth(this.localState.playersInGame[i], -3)
                     }
@@ -761,7 +768,7 @@ class Shogun extends Component {
                 this.addPoints(this.localState.currentTurn, 2)
                 break
             case 'High Altitude Bombing':
-                for (let i = 0; i < this.localState.playersInGame.length; i++) {
+                for (let i = this.localState.playersInGame.length - 1; i >= 0; i--) {
                     this.changeHealth(this.localState.playersInGame[i], -3)
                 }
                 break
@@ -972,7 +979,7 @@ class Shogun extends Component {
                             <div>Player In Edo: {(this.state.edo === 0) ? "empty" : this.state.edo}</div>
                             {(this.state.playersInGame.length > 4) && <p>Player In Edo Bay: {this.state.bayEdo}</p>}
                             <div>
-                                <button id="roll" class={(this.buttonPhase === 0) ? "btn-success" : "btn-danger"} onClick={() => {this.roll()}}>Roll</button>
+                                <button id="roll" class={(this.buttonPhase === 0 && this.state.remainingRolls > 0) ? "btn-success" : "btn-danger"} onClick={() => {this.roll()}}>Roll</button>
                             </div>
                             <button id="resolveRoll" class={(this.buttonPhase === 0) ? "btn-success" : "btn-danger"} onClick={() => {this.resolveRoll()}}>Lock-in Roll</button>
                             <div>
@@ -981,13 +988,13 @@ class Shogun extends Component {
                             <button id="doneYielding" class={(this.buttonPhase === 1) ? "btn-success" : "btn-danger"} onClick={() => {this.doneYielding()}}>Done Yielding</button>
                             </div>
                             <div>
-                                <button id="clearBuy" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.clearBuy()}}>Pay 2 to Clear Buy Cards</button>
+                                <button id="clearBuy" class={(this.buttonPhase === 2 && this.localState.energy[this.localState.currentTurn - 1] > 2) ? "btn-success" : "btn-danger"} onClick={() => {this.clearBuy()}}>Pay 2 to Clear Buy Cards</button>
                                 <button id="doneBuying" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(-1)}}>Done Buying</button>
                                 <Row>
                                     <Col>
                                         <div class="border border-primary rounded">
                                             <div>{this.renderCardInfo(0)}</div>
-                                            <button id="buy0" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(0)}}>Buy</button>
+                                            <button id="buy0" class={((this.buttonPhase === 2 && (this.localState.deck[0] && this.localState.deck[0].cost) <= this.localState.energy[this.localState.currentTurn - 1])) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(0)}}>Buy</button>
                                         </div>
                                     </Col>
                                 </Row>
@@ -995,7 +1002,7 @@ class Shogun extends Component {
                                     <Col>
                                         <div class="border border-primary">
                                     <div>{this.renderCardInfo(1)}</div>
-                                    <button id="buy1" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(1)}}>Buy</button>
+                                    <button id="buy1" class={((this.buttonPhase === 2 && (this.localState.deck[1] && this.localState.deck[1].cost <= this.localState.energy[this.localState.currentTurn - 1]))) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(1)}}>Buy</button>
                                         </div>
                                     </Col>
                                 </Row>
@@ -1003,7 +1010,7 @@ class Shogun extends Component {
                                     <Col>
                                         <div class="border border-primary">
                                         <div>{this.renderCardInfo(2)}</div>
-                                        <button id="buy2" class={(this.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(2)}}>Buy</button>
+                                        <button id="buy2" class={((this.buttonPhase === 2) && (this.localState.deck[2] && this.localState.deck[2].cost <= this.localState.energy[this.localState.currentTurn - 1])) ? "btn-success" : "btn-danger"} onClick={() => {this.buy(2)}}>Buy</button>
                                         </div>
                                     </Col>
                                 </Row>

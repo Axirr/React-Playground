@@ -8,6 +8,14 @@ describe('Shogun of Edo app', () => {
 
   })
 
+  it("damage muliple players, with an elimination in the middle (e.g. fire blast or high altitude bombing)", () => {
+
+  })
+
+  it("tests win with points card buy", () => {
+
+  })
+
   it("test herbivore", () => {
 
   })
@@ -346,9 +354,6 @@ describe('Shogun of Edo app', () => {
     cy.contains('Player 1Score: 0Health: 10Energy: 0')
   })
 
-  it("tests win with points card buy", () => {
-
-  })
 
   it("tests tries to buy empty card", () => {
     cy.visit('localhost:3000/shoguntestbuy')
