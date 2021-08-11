@@ -63,6 +63,13 @@ class LoveLetterAI extends Component{
 
     componentDidMount() {
         this.deal(4)
+
+        // Pre-load card images
+        let pictures = [guardCard, priestCard, baronCard, handmaidenCard, princeCard, kingCard, countessCard, princessCard]
+        pictures.forEach((picture) => {
+            let img = new Image();
+            img.src = picture
+        })
     }
 
     rerenderState(handler = () => {}) {
@@ -881,6 +888,8 @@ class LoveLetterAI extends Component{
                     <button onClick={() => {this.redeal(2)} }>2 Players</button>
                     <button onClick={() => {this.redeal(3)} }>3 Players</button>
                     <button onClick={() => {this.redeal(4)} }>4 Players</button>
+                    <p></p>
+                    <a href="https://github.com/Axirr/React-Playground/blob/main/src/Components/LoveLetter/LoveLetterAI.js">Love Letter Source Code</a>
                     </Col>
                 </Row>
             </Container>

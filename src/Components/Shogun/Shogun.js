@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Container, Col, Row} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import TokyoRules from './9b-king-of-tokyo-rulebook.pdf'
 
 class Shogun extends Component {
 
@@ -1051,7 +1052,7 @@ class Shogun extends Component {
                                 <p>Message -5: {this.state.message[5]}</p>
                             </div>
                             <div>
-                                <a href="https://cdn.1j1ju.com/medias/f9/2f/9b-king-of-edo-rulebook.pdf">King of Tokyo Full Rules</a>
+                                <a href={TokyoRules}>King of Tokyo Full Rules</a>
                                 <h3>Short Rules</h3>
                                 <div>First to <b><u>{this.winPoints} points</u></b> or last player alive wins!</div>
                                 <div>Roll dice up 3 (default) times, and then resolve when done. Dice can be saved between rolls.</div>
@@ -1080,6 +1081,7 @@ class Shogun extends Component {
                                 </div>
                                 <button onClick={() => {this.setup(this.maxPlayers)}}>Restart Game With New Settings</button>
                             </div>
+                            <a href="https://github.com/Axirr/React-Playground/blob/main/src/Components/Shogun/Shogun.js">Shogun of Edo Source Code</a>
                         </Col>
                     </Row>
                 </Container>

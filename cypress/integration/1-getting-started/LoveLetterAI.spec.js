@@ -8,11 +8,11 @@ describe('example to-do app', () => {
 
   })
 
-  it("check keep higher card when last turn", () => {
+  it("ai test, check keep higher card when last turn", () => {
 
   })
 
-  it("check keep high card if last turn", () => {
+  it("ai test, check keep high card if last turn", () => {
     
   })
 

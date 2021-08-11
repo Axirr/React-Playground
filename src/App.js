@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import NavigationBar from './Components/Navigation/NavigationBar';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import RPS from './Components/RockPaperScissors/RPS';
-import LoveLetter from './Components/LoveLetter/LoveLetter';
+import LoveLetter from './Components/LoveLetter/OldLoveLetter';
 import LoveLetterAI from './Components/LoveLetter/LoveLetterAI';
 import Shogun from './Components/Shogun/Shogun'
 import 'bootstrap/dist/css/bootstrap.min.css';
