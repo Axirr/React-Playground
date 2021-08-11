@@ -2,6 +2,14 @@ import React, { Component } from 'react';
 import { Container, Col, Row} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './LoveLetter.module.css'
+import guardCard from './CardImages/guard.png'
+import priestCard from './CardImages/priest.png'
+import baronCard from './CardImages/baron.png'
+import handmaidenCard from './CardImages/handmaiden.png'
+import princeCard from './CardImages/prince.png'
+import kingCard from './CardImages/king.png'
+import countessCard from './CardImages/countess.png'
+import princessCard from './CardImages/princess.png'
 
 class LoveLetterAI extends Component{
     isAI = true
@@ -427,19 +435,18 @@ class LoveLetterAI extends Component{
             return false
         }
 
-        // Check not self unless prince
-        if (['king', 'guard', 'baron', 'priest', 'guard'].indexOf(card) !== -1) {
-            if (myTarget === this.localState.currentTurn) {
-                this.alertWindow("INVALID MOVE. Cannot target self except with prince.")
-                return false
-            }
-        }
 
         // Check if handmaiden
         if (this.isOnlyHandmaidenTargets()) {
             return true
         } else if (this.localState.isHandMaiden[myTarget - 1]) {
-            if (this.localState.playersInGame.length > 2) {
+        // Check not self unless prince
+            if (['king', 'guard', 'baron', 'priest', 'guard'].indexOf(card) !== -1) {
+                if (myTarget === this.localState.currentTurn) {
+                    this.alertWindow("INVALID MOVE. Cannot target self except with prince.")
+                    return false
+                }
+            } else if (this.localState.playersInGame.length > 2) {
                 this.alertWindow("INVALID MOVE. Cannot target handmaiden player.")
                 return false
             } else if (card === "prince") {
@@ -549,7 +556,7 @@ class LoveLetterAI extends Component{
         this.updateMessage("Player " + player + " wins!")
         this.isGameOver = true
         window.alert("Player " + player + " wins!")
-
+        this.showAllCards()
     }
 
 
@@ -596,17 +603,62 @@ class LoveLetterAI extends Component{
                 {this.state.playersInGame.map((number) => {
                     return(
                     <div class="col-12">Hand {number}{this.state.isDisplayed[number - 1] && 
-                        <button id={"hand"+number} onClick={(() => { this.playerPlayCard(number, this.localState.hands[number - 1]) })}>{this.localState.hands[number - 1]}</button>} 
+                        <div>
+                            <div>
+                        <button id={"hand"+number}> 
+                        <img src={this.getLinkForCard(this.localState.hands[number - 1])} width="100" 
+                        onClick={(() => { this.playerPlayCard(number, this.localState.hands[number - 1]) })}/>
+                        </button> 
+                            </div>
+                        </div>}
                     </div>);
                 })}
             </div>
         );
     }
 
+    getLinkForCard(card) {
+        let imageLink=""
+        switch (card) {
+            case "guard":
+                imageLink=guardCard
+                break
+            case "priest":
+                imageLink=priestCard
+                break
+            case "baron":
+                imageLink=baronCard
+                break
+            case "handmaiden":
+                imageLink=handmaidenCard
+                break
+            case "prince":
+                imageLink=princeCard
+                break
+            case "king":
+                imageLink=kingCard
+                break
+            case "countess":
+                imageLink=countessCard
+                break
+            case "princess":
+                imageLink=princessCard
+                break
+            default:
+                console.log("Error, unrecognized")
+        }
+        console.log(imageLink)
+        return imageLink
+    }
+
     renderTargets() {
+        let allPlayers = []
+        for (let i = 1; i <= this.localState.totalNumberOfPlayers; i++) {
+            allPlayers.push(i)
+        }
         return(
             <div>
-                {this.state.playersInGame.map((number) => {
+                {allPlayers.map((number) => {
                     return(
                         <div class="col-12">
                             <input type="radio" value={number} name="target" defaultChecked/>Player {number}
@@ -720,47 +772,36 @@ class LoveLetterAI extends Component{
         if (deckCopy.length > 0) {
             randomGuessString = deckCopy[randomGuessNumber]
         }
-        // let randomGuessString = "priest"
-        // switch (randomGuessNumber) {
-        //     case 0:
-        //         randomGuessString = "priest"
-        //         break
-        //     case 1:
-        //         randomGuessString = "baron"
-        //         break
-        //     case 2:
-        //         randomGuessString = "handmaiden"
-        //         break
-        //     case 3:
-        //         randomGuessString = "prince"
-        //         break
-        //     case 4:
-        //         randomGuessString = "king"
-        //         break
-        //     case 5:
-        //         randomGuessString = "countess"
-        //         break
-        //     case 6:
-        //         randomGuessString = "princess"
-        //         break
-        //     case 7:
-        //         randomGuessString = "princess"
-        //         break
-        //     default:
-        //         console.log("ERROR: Random guess should not be here.")
-        // }
         let radioList = document.getElementsByName("guardGuess")
-        // console.log(radioList)
         for (let i = 0; i < radioList.length; i++) {
             let button = radioList[i]
-            // console.log(button["value"])
-            // console.log("Randome guess string" + randomGuessString)
             if (button["value"] === randomGuessString) {
                 button.checked = true;
                 break
             } 
         }
-        // console.log(radioList)
+    }
+
+    renderLivePlayers() {
+        return(
+            <div>
+                <div>Current Live Players: </div>
+                {this.localState.playersInGame.map(number => {
+                    return(<div>Player {number}</div>)
+                })}
+            </div>
+        )
+    }
+
+    renderHandmaidenStatus() {
+        return(
+            <div className="border">
+                Can Target Player (Handmaiden Status):
+                {this.localState.playersInGame.map((number) => {
+                    return(<div>{this.localState.isHandMaiden[number - 1] ? <div className="bg-danger">Player {number} </div> : <div><div className="bg-success">Player {number} </div></div>}</div>)
+                })}
+            </div>
+        )
     }
 
     render() {
@@ -769,45 +810,45 @@ class LoveLetterAI extends Component{
                 <Row>
                     <Col>
                     <p>Current Turn: Player {this.state.currentTurn}</p>
+                    <Row className="border">
+                        <Col>
                     <div>
-                        Current Draw Card
-                        {this.state.isDisplayed[this.state.totalNumberOfPlayers] && <button id="drawCard" onClick={ () => { this.playCard(this.state.drawCard, 0)}}>{this.state.drawCard}</button> }
+                        <div>Current Draw Card</div>
+                        {this.state.isDisplayed[this.state.totalNumberOfPlayers] && <button id="drawCard" onClick={ () => { this.playCard(this.state.drawCard, 0)}}>
+                        <img src={this.getLinkForCard(this.localState.drawCard)} width="100" />
+                        </button> }
                         {this.renderHands()}
                     </div>
+                        </Col>
+                        <Col>
                     <div>
                         Target of Card
                         {this.renderTargets()}
-                        {/* <div>
-                            <input type="radio" value="1" name="target" defaultChecked/>Player 1
-                        </div>
-                        <div>
-                            <input type="radio" value="2" name="target" />Player 2
-                        </div>
-                        <div>
-                            <input type="radio" value="3" name="target" />Player 3
-                        </div>
-                        <div>
-                            <input type="radio" value="4" name="target" />Player 4
-                        </div> */}
                     </div>
+                        </Col>
+                    </Row>
                     <div>
                         Guess for Guard
-                        <div>
-                            <input type="radio" value="priest" name="guardGuess" defaultChecked/>Priest
-                            <input type="radio" value="baron" name="guardGuess" />Baron
-                            <input type="radio" value="handmaiden" name="guardGuess" />Handmaiden
-                            <input type="radio" value="prince" name="guardGuess" />Prince
-                        </div>
-                        <div>
-                            <input type="radio" value="king" name="guardGuess" />King
-                            <input type="radio" value="countess" name="guardGuess" />Countess
-                            <input type="radio" value="princess" name="guardGuess" />Princess
-                        </div>
+                        <Row>
+                            <Col>
+                                <input type="radio" value="priest" name="guardGuess" defaultChecked/>Priest
+                                <input type="radio" value="baron" name="guardGuess" />Baron
+                                <input type="radio" value="handmaiden" name="guardGuess" />Handmaiden
+                                <input type="radio" value="prince" name="guardGuess" />Prince
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <input type="radio" value="king" name="guardGuess" />King
+                                <input type="radio" value="countess" name="guardGuess" />Countess
+                                <input type="radio" value="princess" name="guardGuess" />Princess
+                            </Col>
+                        </Row>
                     </div>
                     <p>...</p>
                     <button id="playAiTurn" onClick={() => {this.playTurn(this.localState.currentTurn)}}>Play AI Turn</button>
-                    <p>Current Live Players: { JSON.stringify(this.state.playersInGame)}</p>
-                    <p>Handmaiden Status for Players (in order): { JSON.stringify(this.state.isHandMaiden)}</p>
+                    <p>{this.renderLivePlayers()}</p>
+                    <p>{this.renderHandmaidenStatus()}</p>
                     <p>Cards in the deck {this.state.deck.length}</p>
                     <button onClick = {() => { this.showCurrentPlayerCards()}}>Show Current Player Cards</button>
                     <button onClick={() => { this.hideAllCards()}}>Hide All Cards</button>
@@ -816,7 +857,6 @@ class LoveLetterAI extends Component{
                     <p>Debug</p>
                     <button onClick={() => {this.printState()}}>Print State</button>
                     <button onClick={() => {this.rerenderState()}}>Rerender State</button>
-                    <p>...</p>
                     </div> : <p></p>}
                     </Col>
                     <Col>
