@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import { Container, Col, Row} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import TokyoRules from './9b-king-of-tokyo-rulebook.pdf'
+import Game from '../Game'
 
-class Shogun extends Component {
+class Shogun extends Game {
 
     constructor(props) {
         super(props)
