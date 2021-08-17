@@ -1,17 +1,19 @@
 import React, {Component} from 'react';
 import Game from '../Game';
-import JSON from 'serialize-json';
+import { setConstantValue } from 'typescript';
 
 class RPS extends Game {
     http = require('https');
 
     localState = {leftHand: "None",
         rightHand: "None",
-        win: "Not Evaluated"}
+        win: "Not Evaluated",
+        time: "None"}
 
     state = {leftHand: "None",
         rightHand: "None",
-        win: "Not Evaluated"}
+        win: "Not Evaluated", 
+        time: "None"}
     
     evaluateGame() {
         if (this.localState.leftHand !== "None" && this.localState.rightHand !== "None")  {
@@ -49,18 +51,32 @@ class RPS extends Game {
     requestApi() {
         const http = require('http')
         const options = {
-        hostname: '44.230.70.0',
+        // hostname: '44.230.70.0',
+        hostname: '0.0.0.0',
         port: 8000,
         path: '/',
         method: 'GET'
         }
 
         const req = http.request(options, res => {
-        console.log(`statusCode: ${res.statusCode}`)
+            console.log(`statusCode: ${res.statusCode}`)
+            var body = '';
 
-        res.on('data', d => {
-            console.log(d);
-        })
+            res.on('data', function(chunk){
+                body += chunk;
+            });
+
+            res.on('end', () => {
+                console.log("Got a response: ", body);
+                // body = JSON.decode(body);
+                const result = JSON.parse(body);
+                this.localState = result;
+                this.rerenderState();
+                setTimeout(() => {this.requestApi()}, 3000);
+            });
+
+            // this.localState.time = d
+            // this.rerenderState();
         })
 
         req.on('error', error => {
@@ -92,6 +108,7 @@ class RPS extends Game {
             <button onClick={() => this.setRightHand("Paper")}>Paper</button>
             <button onClick={() => this.setRightHand("Scissors")}>Scissors</button>
             <button onClick={() => {this.requestApi()}}>Request API</button>
+            <button onClick={() => {this.rerenderState()}}>Rerender</button>
         </div>
         );
 
