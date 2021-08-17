@@ -23,8 +23,11 @@ class App extends Component {
             <Route path="/rps">
               <RPS />
             </Route>
-            <Route path="/deepsea">
+            <Route path="/deepseadiving">
               <DeepSeaDiving />
+            </Route>
+            <Route path="/deepseadivingtest1">
+              <DeepSeaDiving withSpoof={true}/>
             </Route>
             <Route path="/loveletter">
               {/* <LoveLetter doShuffle={true}/> */}
