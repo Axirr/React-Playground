@@ -1,31 +1,75 @@
 import React, {Component} from 'react';
+import Game from '../Game';
+import JSON from 'serialize-json';
 
-class RPS extends Component {
-  state = {leftHand: "None",
-          rightHand: "None",
-          win: "Not Evaluated"}
-  
-  evaluateGame() {
-    if (this.state.leftHand !== "None" && this.state.rightHand !== "None")  {
-        if (this.state.leftHand === this.state.rightHand) {
-          this.setState({win: "Tie"})
-        } else {
-            if (this.state.leftHand === "Rock" && this.state.rightHand === "Paper") {
-              this.setState({win: "Right Hand"})
-          } else if (this.state.leftHand === "Rock" && this.state.rightHand === "Scissors") {
-            this.setState({win: "Left Hand"})
-          } else if (this.state.leftHand === "Paper" && this.state.rightHand === "Rock") {
-            this.setState({win: "Left Hand"})
-          } else if (this.state.leftHand === "Paper" && this.state.rightHand === "Scissors") {
-            this.setState({win: "Right Hand"})
-          } else if (this.state.leftHand === "Scissors" && this.state.rightHand === "Rock") {
-            this.setState({win: "Right Hand"})
-          } else if (this.state.leftHand === "Scissors" && this.state.rightHand === "Paper") {
-            this.setState({win: "Left Hand"})
-          }
-      }
+class RPS extends Game {
+    http = require('https');
+
+    localState = {leftHand: "None",
+        rightHand: "None",
+        win: "Not Evaluated"}
+
+    state = {leftHand: "None",
+        rightHand: "None",
+        win: "Not Evaluated"}
+    
+    evaluateGame() {
+        if (this.localState.leftHand !== "None" && this.localState.rightHand !== "None")  {
+            if (this.localState.leftHand === this.localState.rightHand) {
+                this.localState.win = "Tie";
+            } else {
+                if (this.state.leftHand === "Rock" && this.state.rightHand === "Paper") {
+                this.localState.win = "Right Hand";
+            } else if (this.state.leftHand === "Rock" && this.state.rightHand === "Scissors") {
+                this.localState.win = "Left Hand";
+            } else if (this.state.leftHand === "Paper" && this.state.rightHand === "Rock") {
+                this.localState.win = "Left Hand";
+            } else if (this.state.leftHand === "Paper" && this.state.rightHand === "Scissors") {
+                this.localState.win = "Right Hand";
+            } else if (this.state.leftHand === "Scissors" && this.state.rightHand === "Rock") {
+                this.localState.win = "Right Hand";
+            } else if (this.state.leftHand === "Scissors" && this.state.rightHand === "Paper") {
+                this.localState.win = "Left Hand";
+            }
+        }
+        }
+        this.rerenderState();
     }
-  }
+
+    setLeftHand(string) {
+        this.localState.leftHand = string;
+        this.rerenderState();
+    }
+
+    setRightHand(string) {
+        this.localState.rightHand = string;
+        this.rerenderState();
+    }
+
+    requestApi() {
+        const http = require('http')
+        const options = {
+        hostname: '44.230.70.0',
+        port: 8000,
+        path: '/',
+        method: 'GET'
+        }
+
+        const req = http.request(options, res => {
+        console.log(`statusCode: ${res.statusCode}`)
+
+        res.on('data', d => {
+            console.log(d);
+        })
+        })
+
+        req.on('error', error => {
+        console.error(error)
+        })
+
+        req.end()
+    }
+
     render() {
         return (
         <div>
@@ -33,19 +77,25 @@ class RPS extends Component {
             <p>Right Hand: {this.state.rightHand}</p>
             <p>Win: {this.state.win}</p>
             <button onClick={() => this.evaluateGame()}>Evaluate</button>
-            <button onClick={() => this.setState({leftHand: "None", rightHand: "None", win: "Not Evaluated"})}>Reset</button>
+            <button onClick={() => {
+                this.localState.leftHand = "None";
+                this.localState.rightHand = "None";
+                this.localState.win = "Not Evaluated";
+                this.rerenderState();
+            }}>Reset</button>
             <h1>Left Hand Moves</h1>
-            <button onClick={() => this.setState({leftHand: "Rock"})}>Rock</button>
-            <button onClick={() => this.setState({leftHand: "Paper"})}>Paper</button>
-            <button onClick={() => this.setState({leftHand: "Scissors"})}>Scissors</button>
+            <button onClick={() => this.setLeftHand("Rock")}>Rock</button>
+            <button onClick={() => this.setLeftHand("Paper")}>Paper</button>
+            <button onClick={() => this.setLeftHand("Scissors")}>Scissors</button>
             <h1>Right Hand Moves</h1>
-            <button onClick={() => this.setState({rightHand: "Rock"})}>Rock</button>
-            <button onClick={() => this.setState({rightHand: "Paper"})}>Paper</button>
-            <button onClick={() => this.setState({rightHand: "Scissors"})}>Scissors</button>
+            <button onClick={() => this.setRightHand("Rock")}>Rock</button>
+            <button onClick={() => this.setRightHand("Paper")}>Paper</button>
+            <button onClick={() => this.setRightHand("Scissors")}>Scissors</button>
+            <button onClick={() => {this.requestApi()}}>Request API</button>
         </div>
         );
 
     }
-}
+    }
 
 export default RPS;
