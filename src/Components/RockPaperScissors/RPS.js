@@ -6,10 +6,10 @@ class RPS extends Game {
     http = require('https');
     gameId = 1;
     playerNumber = 0;
-    // portNumber = 80;
-    portNumber = 8000;
-    hostname = '0.0.0.0';
-    // hostname = '44.230.70.0';
+    portNumber = 80;
+    // portNumber = 8000;
+    // hostname = '0.0.0.0';
+    hostname = '44.230.70.0';
     displayHands = false;
 
     localState = {leftHand: "None",
@@ -54,7 +54,7 @@ class RPS extends Game {
 
             res.on('end', () => {
                 console.log("body " + body);
-                if (body !== "Left Hand" && body !== "Right Hand") {
+                if (body !== "Left Hand" && body !== "Right Hand" && body != "Tie") {
                     this.updateMessage("GAME COULD NOT BE EVALUATED BECAUSE ALL HANDS ARE NOT SET.");
                     this.rerenderState();
                 } else {
@@ -98,16 +98,13 @@ class RPS extends Game {
             });
 
             res.on('end', () => {
-                // console.log("Got a response: ", body);
-                // console.log("Got a response: ");
-                // console.log(body);
                 const result = JSON.parse(body);
-                // console.log(result[0].fields);
+                console.log(result[0].fields);
                 this.localState.leftHand = result[0].fields.leftHand;
                 this.localState.rightHand = result[0].fields.rightHand;
                 this.localState.win = result[0].fields.win;
                 this.rerenderState();
-                setTimeout(() => {this.getGameState()}, 1000);
+                setTimeout(() => {this.getGameState()}, 3000);
             });
 
             // this.localState.time = d
@@ -278,6 +275,10 @@ class RPS extends Game {
         // this.gameId = gameId;
     }
 
+    toggleHidden() {
+        this.displayHands = !this.displayHands;
+    }
+
     render() {
         return (
         <div>
@@ -297,6 +298,9 @@ class RPS extends Game {
                         <button onClick={() => this.apiSetHand("Rock", 1)}>Rock</button>
                         <button onClick={() => this.apiSetHand("Paper", 1)}>Paper</button>
                         <button onClick={() => this.apiSetHand("Scissors", 1)}>Scissors</button>
+                        <div>
+                            <button onClick={() => this.toggleHidden()}>Toggle Hidden</button>
+                        </div>
                         {/* <div>...</div>
                         <div>
                             <button onClick={() => {this.getGameState()}}>Request Game State</button>
