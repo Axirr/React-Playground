@@ -7,11 +7,11 @@ import { ThemeConsumer } from 'react-bootstrap/esm/ThemeProvider';
 class DeepSeaDiving extends Game {
     withDebug = true
     withSpoof = false
-    maxPlayers = 4
+    maxPlayers = 2
     doShuffle = false
-    roundsRemaining = 3
+    maxRemainingRounds = 1
     buttonPhase = 0
-    oxygen = 2;
+    maxOxygen = 2;
     doRemove = false;
 
     constructor(props) {
@@ -32,7 +32,8 @@ class DeepSeaDiving extends Game {
         board: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         isUp: [false, false, false, false],
         treasureBoard: [1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4],
-        oxygenCounter: this.oxygen
+        oxygenCounter: this.maxOxygen,
+        remainingRounds: this.maxRemainingRounds
     }
 
     state = {
@@ -46,23 +47,53 @@ class DeepSeaDiving extends Game {
         board: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         isUp: [false, false, false, false],
         treasureBoard: [1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4],
-        oxygenCounter: this.oxygen
+        oxygenCounter: this.maxOxygen,
+        remainingRounds: this.maxRemainingRounds
     }
 
     componentDidMount() {
-        this.setup()
+        this.setup(this.maxPlayers);
     }
 
     setup(playerNumber) {
-        this.maxPlayers = playerNumber
+        this.maxPlayers = playerNumber;
+        let newPlayers = [];
+        let newSavedTreasures = [];
+        let newHeldTreasures = [];
+        let newPoints = [];
+        let newIsUp = [];
+        for (let i = 1; i <= this.maxPlayers; i++) { 
+            newPlayers.push(i);
+            newSavedTreasures.push([]);
+            newHeldTreasures.push([]);
+            newPoints.push(0);
+            newIsUp.push(false);
+        };
+        this.localState = {
+            playersInGame: newPlayers,
+            currentTurn: 1,
+            savedTreasure: newSavedTreasures,
+            heldTreasure: newHeldTreasures,
+            dice: ["none", "none"],
+            message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
+            points: newPoints,
+            board: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            isUp: newIsUp,
+            treasureBoard: [1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4],
+            oxygenCounter: this.maxOxygen,
+            remainingRounds: this.maxRemainingRounds
+        }
+        this.rerenderState();
     }
 
-    playTurn(withRoll = true) {
+    playTurn(withRoll = true, withAdvance = false) {
         if (withRoll) {
             this.roll();
         }
         this.resolveRoll();
-        // this.advanceTurn()
+        if (withAdvance) {
+            this.advanceTurn();
+        }
         this.rerenderState();
     }
 
@@ -105,8 +136,8 @@ class DeepSeaDiving extends Game {
         this.subtractOxygen();
         this.resetRoll();
         if (this.localState.oxygenCounter <= 0) {
-            this.roundsRemaining -= 1;
-            if (this.roundsRemaining === 0) {
+            this.localState.remainingRounds -= 1;
+            if (this.localState.remainingRounds === 0) {
                 this.buttonPhase = -1;
                 this.determineWinner();
             } else {
@@ -121,7 +152,8 @@ class DeepSeaDiving extends Game {
         this.printTreasureStatus();
 
         this.localState.playersInGame = []
-        for (let i = 0; i < this.localState.maxPlayers; i++) {
+        console.log("Max players " + this.maxPlayers);
+        for (let i = 0; i < this.maxPlayers; i++) {
             this.localState.playersInGame.push(i + 1);
         }
 
@@ -140,7 +172,7 @@ class DeepSeaDiving extends Game {
             this.localState.board.push(0);
         }
 
-        this.localState.oxygenCounter = 25;
+        this.localState.oxygenCounter = this.maxOxygen;
         this.localState.currentTurn = 1;
         this.localState.dice = ["none", "none"];
         this.localState.isUp = [false, false, false, false];
@@ -154,7 +186,35 @@ class DeepSeaDiving extends Game {
     }
 
     determineWinner() {
-        window.alert("Win not implemented.")
+        let singlePoints = [0,0,1,1,2,2,3,3];
+        let doublePoints = [4,4,5,5,6,6,7,7];
+        let triplePoints = [8,8,9,9,10,10,11,11];
+        let quadPoints = [12,12,13,13,14,14,15,15];
+        let points = [];
+        for (let i = 0; i < this.maxPlayers; i++) {
+            points.push(0);
+        }
+        for (let i = 0; i < this.maxPlayers; i++) {
+            let treasures = this.localState.savedTreasure[i];
+            for (let j = 0; j < treasures.length; j++) {
+                if (treasures[j] === 1) {
+                    points[i] = points[i] + singlePoints.splice(Math.floor(Math.random() * singlePoints.length), 1);
+                } else {
+                    console.log("Not equal to 1. Is this right?");
+                }
+            }
+        }
+        let maxPlayerNumber = -1;
+        let maxPointValue = -1;
+        for (let i = 0; i < points.length; i++) {
+            if (points[i] > maxPointValue) {
+                maxPlayerNumber = i;
+                maxPointValue = points[i];
+            }
+        }
+        this.updateMessage("Player " + (maxPlayerNumber + 1) + " wins with " + maxPointValue + " points!");
+        this.updateMessage("IMPLEMENT TIE.")
+        this.rerenderState();
     }
 
     subtractOxygen() {
@@ -178,31 +238,39 @@ class DeepSeaDiving extends Game {
     }
 
     movePlayerForDice() {
-        let movementValue = this.getRollValue() - this.getCurrentTreasureNumberForPlayer();
-        if (this.localState.isUp[this.localState.currentTurn - 1]) {
-            movementValue = -movementValue;
-        }
+        let movementValue = Math.max(this.getRollValue() - this.getCurrentTreasureNumberForPlayer(),0);
+        // if (this.localState.isUp[this.localState.currentTurn - 1]) {
+        //     movementValue = -movementValue;
+        // }
         let playerIndex = this.localState.board.indexOf(this.localState.currentTurn);
         let indexToMoveTo;
-        if (playerIndex !== -1) {
-            console.log("Not initial move.");
-            indexToMoveTo = playerIndex + movementValue - 1;
-            this.localState.board[playerIndex] = 0;
-            // this.localState.board[playerIndex + movementValue - 1] = this.localState.currentTurn;
-        } else {
+        if (playerIndex === -1) {
+            indexToMoveTo = -1;
             console.log("Initial move.");
-            indexToMoveTo = movementValue - 1;
-            // this.localState.board[movementValue - 1] = this.localState.currentTurn;
+        } else {
+            this.localState.board[playerIndex] = 0;
+            console.log("Not initial move.");
+            indexToMoveTo = playerIndex;
         }
-        indexToMoveTo = this.nextFreeSpace(indexToMoveTo);
+        let remainingMoves = movementValue;
+        let incrementor = 1;
+        if (this.localState.isUp[this.localState.currentTurn - 1]) {
+            incrementor = -1;
+            console.log("negative incrementor")
+            console.log("remaining moves(outside) " + remainingMoves);
+        }
+        while (remainingMoves > 0) {
+            indexToMoveTo = this.nextFreeSpace(indexToMoveTo + incrementor);
+            remainingMoves--;
+            console.log("Remaining moves" + remainingMoves);
+        }
         if (indexToMoveTo >= 0) {
             this.localState.board[indexToMoveTo] = this.localState.currentTurn;
         } else {
-            // this.localState.playersInGame.splice(this.localState.playersInGame.indexOf(this.localState.currentTurn), 1);
             this.doRemove = true;
             console.log("Players " + this.localState.playersInGame);
             for(let i = 0; i < this.localState.heldTreasure[this.localState.currentTurn - 1].length; i++) {
-                this.localState.savedTreasure.push(this.localState.heldTreasure[this.localState.currentTurn - 1][i]);
+                this.localState.savedTreasure[this.localState.currentTurn - 1].push(this.localState.heldTreasure[this.localState.currentTurn - 1][i]);
             }
             this.localState.heldTreasure[this.localState.currentTurn - 1] = [];
         }
@@ -240,8 +308,8 @@ class DeepSeaDiving extends Game {
     }
 
     spoofDice(diceArray) {
-        this.localState.dice = diceArray
-        this.playTurn(false)
+        this.localState.dice = diceArray;
+        this.playTurn(false, true);
     }
 
     roll() {
@@ -316,6 +384,18 @@ class DeepSeaDiving extends Game {
         )
     }
 
+    renderPlayerTreasure() {
+        return(
+            <div>
+                {this.state.playersInGame.map((playerNumber) => {
+                    return (<div>
+                        {"Player " + playerNumber + " Saved Treasure: " + this.state.savedTreasure[playerNumber - 1]}
+                        </div>)
+                })}
+            </div>
+        )
+    }
+
     render() {
         return(
             <div>
@@ -325,6 +405,7 @@ class DeepSeaDiving extends Game {
                             <h1>Deep Sea Diving</h1>
                             {this.renderScoreBoards()}
                             <div>Oxygen Counter {this.state.oxygenCounter}</div>
+                            <div>Remaining Rounds {this.state.remainingRounds}</div>
                             <div>Current Turn: Player {this.state.currentTurn}</div>
                             {this.state.isUp[this.state.currentTurn - 1] ? <div>Current Direction Up</div> : <div>Current Direction Down</div>}
                             <div>{this.state.dice[0]}</div>
@@ -349,6 +430,7 @@ class DeepSeaDiving extends Game {
                             </div>
                             <div>{this.renderPath()}</div>
                             <div>{this.renderTreasurePath()}</div>
+                            {this.renderPlayerTreasure()}
                             <div>
                                 {this.withSpoof && 
                                 <div>

@@ -1,41 +1,46 @@
 import React, {Component} from 'react';
 import Game from '../Game';
-import { setConstantValue } from 'typescript';
 
 class RPS extends Game {
     http = require('https');
+    gameId = 1;
+    playerNumber = 0;
+    portNumber = 80;
+    // portNumber = 8000;
+    // hostname = '0.0.0.0';
+    hostname = '44.230.70.0';
 
     localState = {leftHand: "None",
         rightHand: "None",
         win: "Not Evaluated",
-        time: "None"}
+        }
 
     state = {leftHand: "None",
         rightHand: "None",
         win: "Not Evaluated", 
-        time: "None"}
+        }
     
     evaluateGame() {
-        if (this.localState.leftHand !== "None" && this.localState.rightHand !== "None")  {
-            if (this.localState.leftHand === this.localState.rightHand) {
-                this.localState.win = "Tie";
-            } else {
-                if (this.state.leftHand === "Rock" && this.state.rightHand === "Paper") {
-                this.localState.win = "Right Hand";
-            } else if (this.state.leftHand === "Rock" && this.state.rightHand === "Scissors") {
-                this.localState.win = "Left Hand";
-            } else if (this.state.leftHand === "Paper" && this.state.rightHand === "Rock") {
-                this.localState.win = "Left Hand";
-            } else if (this.state.leftHand === "Paper" && this.state.rightHand === "Scissors") {
-                this.localState.win = "Right Hand";
-            } else if (this.state.leftHand === "Scissors" && this.state.rightHand === "Rock") {
-                this.localState.win = "Right Hand";
-            } else if (this.state.leftHand === "Scissors" && this.state.rightHand === "Paper") {
-                this.localState.win = "Left Hand";
-            }
+        this.isGameId();
+        let http = require('http')
+        let options;
+        let path = '/rps/' + this.gameId + '/evaluate/';
+        options = {
+            hostname: this.hostname,
+            port: this.portNumber,
+            path: path,
+            method: 'GET'
         }
-        }
-        this.rerenderState();
+
+        const req = http.request(options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+        })
+
+        req.on('error', error => {
+            console.error(error)
+        })
+
+        req.end()
     }
 
     setLeftHand(string) {
@@ -48,13 +53,12 @@ class RPS extends Game {
         this.rerenderState();
     }
 
-    requestApi() {
+    getGameState() {
         const http = require('http')
         const options = {
-        // hostname: '44.230.70.0',
-        hostname: '0.0.0.0',
-        port: 8000,
-        path: '/',
+        hostname: this.hostname,
+        port: this.portNumber,
+        path: '/rps/' + this.gameId + '/',
         method: 'GET'
         }
 
@@ -67,12 +71,14 @@ class RPS extends Game {
             });
 
             res.on('end', () => {
-                console.log("Got a response: ", body);
-                // body = JSON.decode(body);
+                // console.log("Got a response: ", body);
+                console.log("Got a response: ");
+                console.log(body);
                 const result = JSON.parse(body);
-                this.localState = result;
+                console.log(result[0].fields);
+                this.localState = result[0].fields;
                 this.rerenderState();
-                setTimeout(() => {this.requestApi()}, 3000);
+                setTimeout(() => {this.getGameState()}, 1000);
             });
 
             // this.localState.time = d
@@ -80,10 +86,89 @@ class RPS extends Game {
         })
 
         req.on('error', error => {
-        console.error(error)
+            console.error(error)
         })
 
         req.end()
+    }
+
+    apiSetHand(handString, handNumber) {
+        this.isGameId();
+        let http = require('http')
+        let options;
+        let whichHand = "left";
+        if (handNumber === 1) {
+            whichHand = "right";
+        }
+        let codeForHand;
+        if (handString === "Rock") {
+            codeForHand = 1;
+        } else if (handString === "Paper") {
+            codeForHand = 2;
+        } else if (handString === "Scissors") {
+            codeForHand = 3;
+        } else {
+            window.alert("ERROR");
+            return;
+        }
+        let path = '/rps/' + this.gameId + '/' + whichHand + '/' + codeForHand + '/';
+        options = {
+            hostname: this.hostname,
+            port: this.portNumber,
+            path: path,
+            method: 'GET'
+        }
+
+        const req = http.request(options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+        })
+
+        req.on('error', error => {
+            console.error(error)
+        })
+
+        req.end()
+    }
+
+    apiReset() {
+        const http = require('http')
+        const options = {
+        hostname: this.hostname,
+        port: this.portNumber,
+        path: '/rps/' + this.gameId + '/reset/',
+        method: 'GET'
+        }
+
+        const req = http.request(options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+            var body = '';
+
+            res.on('data', function(chunk){
+                body += chunk;
+            });
+
+        })
+
+        req.on('error', error => {
+            console.error(error)
+        })
+
+        req.end()
+    }
+
+    isGameId() {
+        if (this.gameId) return true;
+        return false;
+    }
+
+    setGameId(gameId) {
+        console.log("VALIDATE GAME NUMBER");
+        this.gameId = gameId;
+    }
+
+    setPlayerNumber(playerNumber) {
+        console.log("VALIDATE PLAYER NUMBER");
+        this.playerNumber = playerNumber;
     }
 
     render() {
@@ -93,22 +178,31 @@ class RPS extends Game {
             <p>Right Hand: {this.state.rightHand}</p>
             <p>Win: {this.state.win}</p>
             <button onClick={() => this.evaluateGame()}>Evaluate</button>
-            <button onClick={() => {
-                this.localState.leftHand = "None";
-                this.localState.rightHand = "None";
-                this.localState.win = "Not Evaluated";
-                this.rerenderState();
-            }}>Reset</button>
+            <button onClick={() => { this.apiReset() }}>Reset</button>
             <h1>Left Hand Moves</h1>
-            <button onClick={() => this.setLeftHand("Rock")}>Rock</button>
-            <button onClick={() => this.setLeftHand("Paper")}>Paper</button>
-            <button onClick={() => this.setLeftHand("Scissors")}>Scissors</button>
+            <button onClick={() => {this.apiSetHand("Rock", 0)}}>Rock</button>
+            <button onClick={() => {this.apiSetHand("Paper", 0)}}>Paper</button>
+            <button onClick={() => {this.apiSetHand("Scissors", 0)}}>Scissors</button>
             <h1>Right Hand Moves</h1>
-            <button onClick={() => this.setRightHand("Rock")}>Rock</button>
-            <button onClick={() => this.setRightHand("Paper")}>Paper</button>
-            <button onClick={() => this.setRightHand("Scissors")}>Scissors</button>
-            <button onClick={() => {this.requestApi()}}>Request API</button>
-            <button onClick={() => {this.rerenderState()}}>Rerender</button>
+            <button onClick={() => this.apiSetHand("Rock", 1)}>Rock</button>
+            <button onClick={() => this.apiSetHand("Paper", 1)}>Paper</button>
+            <button onClick={() => this.apiSetHand("Scissors", 1)}>Scissors</button>
+            <div>...</div>
+            <div>
+                <button onClick={() => {this.getGameState()}}>Request Game State</button>
+                <button onClick={() => {this.rerenderState()}}>Rerender</button>
+            </div>
+            <div><b>Configure Game</b></div>
+            <div>
+                Game Number
+                <input type="text" id="gameArea"></input>
+                <button onClick={() => this.setGameId(document.getElementById("gameArea").value)}>Set Game ID</button>
+            </div>
+            <div>
+                Player Number
+                <input type="text" id="playerNumberArea"></input>
+                <button onClick={() => this.setPlayerNumber(document.getElementById("playerNumberArea").value)}>Set Player Number</button>
+            </div>
         </div>
         );
 

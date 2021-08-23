@@ -9,6 +9,10 @@ describe('example to-do app', () => {
 
   })
 
+  it("check non-end spot leap frog", () => {
+
+  })
+
 //   it("fall off board after reach end", () => {
 //     cy.visit('localhost:3000/deepseadivingtest1')
 //     cy.get("#spoof33").click()
