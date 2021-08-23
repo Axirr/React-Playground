@@ -1,25 +1,35 @@
 import React, {Component} from 'react';
 import Game from '../Game';
+import { Container, Col, Row} from 'react-bootstrap';
 
 class RPS extends Game {
     http = require('https');
     gameId = 1;
     playerNumber = 0;
-    portNumber = 80;
-    // portNumber = 8000;
-    // hostname = '0.0.0.0';
-    hostname = '44.230.70.0';
+    // portNumber = 80;
+    portNumber = 8000;
+    hostname = '0.0.0.0';
+    // hostname = '44.230.70.0';
+    displayHands = false;
 
     localState = {leftHand: "None",
         rightHand: "None",
         win: "Not Evaluated",
+        message: ["blank message","blank message","blank message","blank message","blank message","blank message"]
         }
 
     state = {leftHand: "None",
         rightHand: "None",
         win: "Not Evaluated", 
+        message: ["blank message","blank message","blank message","blank message","blank message","blank message"]
         }
     
+    componentDidMount() {
+        this.updateMessage("Playing Game 1.");
+        this.rerenderState();
+        this.getGameState();
+    }
+
     evaluateGame() {
         this.isGameId();
         let http = require('http')
@@ -34,6 +44,23 @@ class RPS extends Game {
 
         const req = http.request(options, res => {
             console.log(`statusCode: ${res.statusCode}`)
+
+            var body = '';
+
+            res.on('data', function(chunk){
+                body += chunk;
+            });
+
+
+            res.on('end', () => {
+                console.log("body " + body);
+                if (body !== "Left Hand" && body !== "Right Hand") {
+                    this.updateMessage("GAME COULD NOT BE EVALUATED BECAUSE ALL HANDS ARE NOT SET.");
+                    this.rerenderState();
+                } else {
+                    this.displayHands = true;
+                }
+            })
         })
 
         req.on('error', error => {
@@ -63,7 +90,7 @@ class RPS extends Game {
         }
 
         const req = http.request(options, res => {
-            console.log(`statusCode: ${res.statusCode}`)
+            console.log(`getGameState statusCode: ${res.statusCode}`)
             var body = '';
 
             res.on('data', function(chunk){
@@ -72,11 +99,13 @@ class RPS extends Game {
 
             res.on('end', () => {
                 // console.log("Got a response: ", body);
-                console.log("Got a response: ");
-                console.log(body);
+                // console.log("Got a response: ");
+                // console.log(body);
                 const result = JSON.parse(body);
-                console.log(result[0].fields);
-                this.localState = result[0].fields;
+                // console.log(result[0].fields);
+                this.localState.leftHand = result[0].fields.leftHand;
+                this.localState.rightHand = result[0].fields.rightHand;
+                this.localState.win = result[0].fields.win;
                 this.rerenderState();
                 setTimeout(() => {this.getGameState()}, 1000);
             });
@@ -147,6 +176,10 @@ class RPS extends Game {
                 body += chunk;
             });
 
+            res.on('end', () => {
+                this.displayHands = false;
+            })
+
         })
 
         req.on('error', error => {
@@ -161,48 +194,137 @@ class RPS extends Game {
         return false;
     }
 
+
     setGameId(gameId) {
-        console.log("VALIDATE GAME NUMBER");
-        this.gameId = gameId;
+        const parsedInt = parseInt(gameId, 10)
+        if(isNaN(parsedInt) || !Number.isInteger(parsedInt)) {
+            window.alert("Must be a valid integer.")
+            return
+        }
+        const http = require('http')
+        const options = {
+        hostname: this.hostname,
+        port: this.portNumber,
+        path: '/rps/' + gameId + '/checkId/',
+        method: 'GET'
+        }
+
+        const req = http.request(options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+            var body = '';
+
+            res.on('data', function(chunk){
+                body += chunk;
+            });
+
+            res.on('end', () => {
+                console.log("Response " + body);
+                if (body == "ID GOOD") {
+                    this.updateMessage("Game ID updated to " + gameId);
+                    this.gameId = gameId;
+                } else if (body === "ID BAD") {
+                    this.updateMessage("GAME ID BAD. NOT UPDATED");
+                }
+                this.rerenderState();
+            })
+
+        })
+
+        req.on('error', error => {
+            console.error(error)
+        })
+
+        req.end()
     }
 
     setPlayerNumber(playerNumber) {
-        console.log("VALIDATE PLAYER NUMBER");
+        if (playerNumber === 0 || playerNumber === 1) {
+            this.playerNumber = playerNumber;
+        }
         this.playerNumber = playerNumber;
+    }
+
+    createNewGame() {
+        const http = require('http')
+        const options = {
+        hostname: this.hostname,
+        port: this.portNumber,
+        path: '/rps/createGame/',
+        method: 'GET'
+        }
+
+        const req = http.request(options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+            var body = '';
+
+            res.on('data', function(chunk){
+                body += chunk;
+            });
+
+            res.on('end', () => {
+                console.log("Response " + body);
+                this.updateMessage("New game created! Game ID is " + body);
+                this.gameId = body;
+                this.rerenderState();
+            })
+
+        })
+
+        req.on('error', error => {
+            console.error(error)
+        })
+
+        req.end()
+        // this.gameId = gameId;
     }
 
     render() {
         return (
         <div>
-            <p>Left Hand: {this.state.leftHand}</p>
-            <p>Right Hand: {this.state.rightHand}</p>
-            <p>Win: {this.state.win}</p>
-            <button onClick={() => this.evaluateGame()}>Evaluate</button>
-            <button onClick={() => { this.apiReset() }}>Reset</button>
-            <h1>Left Hand Moves</h1>
-            <button onClick={() => {this.apiSetHand("Rock", 0)}}>Rock</button>
-            <button onClick={() => {this.apiSetHand("Paper", 0)}}>Paper</button>
-            <button onClick={() => {this.apiSetHand("Scissors", 0)}}>Scissors</button>
-            <h1>Right Hand Moves</h1>
-            <button onClick={() => this.apiSetHand("Rock", 1)}>Rock</button>
-            <button onClick={() => this.apiSetHand("Paper", 1)}>Paper</button>
-            <button onClick={() => this.apiSetHand("Scissors", 1)}>Scissors</button>
-            <div>...</div>
-            <div>
-                <button onClick={() => {this.getGameState()}}>Request Game State</button>
-                <button onClick={() => {this.rerenderState()}}>Rerender</button>
-            </div>
-            <div><b>Configure Game</b></div>
-            <div>
-                Game Number
-                <input type="text" id="gameArea"></input>
-                <button onClick={() => this.setGameId(document.getElementById("gameArea").value)}>Set Game ID</button>
-            </div>
-            <div>
-                Player Number
-                <input type="text" id="playerNumberArea"></input>
-                <button onClick={() => this.setPlayerNumber(document.getElementById("playerNumberArea").value)}>Set Player Number</button>
-            </div>
+            <Container>
+                <Row>
+                    <Col>
+                        <p>Left Hand: {this.displayHands ? this.state.leftHand : "Hidden"}</p>
+                        <p>Right Hand: {this.displayHands ? this.state.rightHand : "Hidden"}</p>
+                        <p>Win: {this.displayHands ? this.state.win : "Hidden"}</p>
+                        <button onClick={() => this.evaluateGame()}>Evaluate</button>
+                        <button onClick={() => { this.apiReset() }}>Reset</button>
+                        <h1>Left Hand Moves</h1>
+                        <button onClick={() => {this.apiSetHand("Rock", 0)}}>Rock</button>
+                        <button onClick={() => {this.apiSetHand("Paper", 0)}}>Paper</button>
+                        <button onClick={() => {this.apiSetHand("Scissors", 0)}}>Scissors</button>
+                        <h1>Right Hand Moves</h1>
+                        <button onClick={() => this.apiSetHand("Rock", 1)}>Rock</button>
+                        <button onClick={() => this.apiSetHand("Paper", 1)}>Paper</button>
+                        <button onClick={() => this.apiSetHand("Scissors", 1)}>Scissors</button>
+                        {/* <div>...</div>
+                        <div>
+                            <button onClick={() => {this.getGameState()}}>Request Game State</button>
+                            <button onClick={() => {this.rerenderState()}}>Rerender</button>
+                        </div> */}
+                        <div><b>Configure Game</b></div>
+                        <div>
+                            Game Number
+                            <input type="text" id="gameArea"></input>
+                            <button onClick={() => this.setGameId(document.getElementById("gameArea").value)}>Set Game ID</button>
+                        </div>
+                        <div>
+                            <button onClick={() => this.createNewGame()}>Create New Game</button>
+                        </div>
+                    </Col>
+                    <Col>
+                            <div>
+                                <h3>Game History</h3>
+                                <p>Message  0: {this.state.message[0]}</p>
+                                <p>Message -1: {this.state.message[1]}</p>
+                                <p>Message -2: {this.state.message[2]}</p>
+                                <p>Message -3: {this.state.message[3]}</p>
+                                <p>Message -4: {this.state.message[4]}</p>
+                                <p>Message -5: {this.state.message[5]}</p>
+                            </div>
+                    </Col>
+                </Row>
+            </Container>
         </div>
         );
 
