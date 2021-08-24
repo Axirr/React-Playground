@@ -6,10 +6,12 @@ class RPS extends Game {
     http = require('https');
     gameId = 1;
     playerNumber = 0;
-    portNumber = 80;
-    // portNumber = 8000;
+    // portNumber = 80;
+    portnumber ='';
+    // portNumber = 443;
     // hostname = '0.0.0.0';
-    hostname = '44.230.70.0';
+    // hostname = '44.230.70.0';
+    hostname = 'www.scottsherlock.one';
     displayHands = false;
 
     localState = {leftHand: "None",
@@ -32,7 +34,7 @@ class RPS extends Game {
 
     evaluateGame() {
         this.isGameId();
-        let http = require('http')
+        let https = require('https')
         let options;
         let path = '/rps/' + this.gameId + '/evaluate/';
         options = {
@@ -42,7 +44,7 @@ class RPS extends Game {
             method: 'GET'
         }
 
-        const req = http.request(options, res => {
+        const req = https.request(options, res => {
             console.log(`statusCode: ${res.statusCode}`)
 
             var body = '';
@@ -81,7 +83,7 @@ class RPS extends Game {
     }
 
     getGameState() {
-        const http = require('http')
+        const https = require('https')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
@@ -89,7 +91,7 @@ class RPS extends Game {
         method: 'GET'
         }
 
-        const req = http.request(options, res => {
+        const req = https.request(options, res => {
             console.log(`getGameState statusCode: ${res.statusCode}`)
             var body = '';
 
@@ -104,7 +106,7 @@ class RPS extends Game {
                 this.localState.rightHand = result[0].fields.rightHand;
                 this.localState.win = result[0].fields.win;
                 this.rerenderState();
-                setTimeout(() => {this.getGameState()}, 3000);
+                setTimeout(() => {this.getGameState()}, 1000);
             });
 
             // this.localState.time = d
@@ -120,7 +122,7 @@ class RPS extends Game {
 
     apiSetHand(handString, handNumber) {
         this.isGameId();
-        let http = require('http')
+        let https = require('https')
         let options;
         let whichHand = "left";
         if (handNumber === 1) {
@@ -145,7 +147,7 @@ class RPS extends Game {
             method: 'GET'
         }
 
-        const req = http.request(options, res => {
+        const req = https.request(options, res => {
             console.log(`statusCode: ${res.statusCode}`)
         })
 
@@ -157,7 +159,7 @@ class RPS extends Game {
     }
 
     apiReset() {
-        const http = require('http')
+        const https = require('https')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
@@ -165,7 +167,7 @@ class RPS extends Game {
         method: 'GET'
         }
 
-        const req = http.request(options, res => {
+        const req = https.request(options, res => {
             console.log(`statusCode: ${res.statusCode}`)
             var body = '';
 
