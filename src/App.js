@@ -8,6 +8,7 @@ import LoveLetterAI from './Components/LoveLetter/LoveLetterAI';
 import Shogun from './Components/Shogun/Shogun'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import DeepSeaDiving from './Components/DeepSeaDiving/DeepSeaDiving';
+import NetworkLoveLetter from './Components/NetworkLoveLetter/NetworkLoveLetter'
 
 class App extends Component {
 
@@ -28,6 +29,9 @@ class App extends Component {
             </Route>
             <Route path="/deepseadivingtest1">
               <DeepSeaDiving withSpoof={true}/>
+            </Route>
+            <Route path="/netloveletter">
+              <NetworkLoveLetter doShuffle={true}/>
             </Route>
             <Route path="/loveletter">
               {/* <LoveLetter doShuffle={true}/> */}
