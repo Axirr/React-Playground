@@ -15,13 +15,13 @@ import Game from '../Game';
 class NetworkLoveLetter extends Game {
 
     // portNumber = 80;
-    // portNumber = 8000;
+    portNumber = 8000;
     // portNumber = 443;
     portnumber ='';
 
-    // hostname = '0.0.0.0';
+    hostname = '0.0.0.0';
     // hostname = '44.230.70.0';
-    hostname = 'www.scottsherlock.one';
+    // hostname = 'www.scottsherlock.one';
 
     isAI = false
     isGameOver = false
@@ -508,7 +508,7 @@ class NetworkLoveLetter extends Game {
     }
 
     apiCreateNewGame() {
-        const https = require('https')
+        const https = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
@@ -526,7 +526,7 @@ class NetworkLoveLetter extends Game {
 
             res.on('end', () => {
                 console.log("Response " + body);
-                this.updateMessage("New game created! Game ID is " + body);
+                this.alertWindow("New game created! Game ID is " + body);
                 this.gameId = body;
                 this.rerenderState();
             })
@@ -541,7 +541,7 @@ class NetworkLoveLetter extends Game {
     }
 
     apiGetGameState(isRefresh=false) {
-        const https = require('https')
+        const https = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
@@ -626,7 +626,7 @@ class NetworkLoveLetter extends Game {
     }
 
     apiAdvanceTurn() {
-        const https = require('https')
+        const https = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
@@ -660,7 +660,7 @@ class NetworkLoveLetter extends Game {
     }
 
     apiDeal(numberOfPlayers) {
-        const https = require('https')
+        const https = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
@@ -714,7 +714,7 @@ class NetworkLoveLetter extends Game {
         }
         let spoofPlayerNumber = this.playerNumber;
         if (isAi) spoofPlayerNumber = this.localState.currentTurn
-        const https = require('https')
+        const https = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
@@ -753,7 +753,7 @@ class NetworkLoveLetter extends Game {
             window.alert("Game ID must be a valid integer.")
             return
         }
-        const http = require('https')
+        const http = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
@@ -790,7 +790,7 @@ class NetworkLoveLetter extends Game {
     }
 
     apiResetCurrentGame(gameId) {
-        const http = require('https')
+        const http = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
