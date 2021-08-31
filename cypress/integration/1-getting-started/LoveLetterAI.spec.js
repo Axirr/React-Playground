@@ -17,14 +17,6 @@ describe('example to-do app', () => {
   })
 
   it("check AI doesn't voluntarily play princess", () => {
-    cy.visit('localhost:3000/loveletteraitest4')
-    cy.get("#playAiTurn").click()
-    cy.contains("Show All").click()
-    cy.contains("priest")
-    cy.contains("king")
-    cy.contains("king")
-    cy.contains("baron")
-    cy.contains("princess")
   })
 
   it('check countess forced play AI turn, prince', () => {
