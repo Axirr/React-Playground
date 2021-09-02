@@ -21,6 +21,38 @@ class Game extends Component {
         messageCopy[messageCopy.length - 1] = newMessage
         this.localState['message'] = messageCopy
     }
+
+    getArrayForCsvString(csvString) {
+        if (csvString === "") return []
+        let result = csvString.split(',');
+        return result
+    }
+
+    getNumericalArrayForCsvString(csvString) {
+        if (csvString === "") return []
+        let result = csvString.split(',');
+        for (let i = 0; i < result.length; i++) {
+            result[i] = Number.parseInt(result[i])
+        }
+        return result;
+    }
+
+    getBooleanArrayForCsvString(csvString) {
+        if (csvString === "") return []
+        let result = csvString.split(',');
+        for (let i = 0; i < result.length; i++) {
+            console.log(result[i]);
+            if (result[i] === '0') {
+                result[i] = false;
+            } else if (result[i] === '1'){
+                result[i] = true;
+            } else {
+                console.log("Error parsing boolean");
+            }
+        }
+        // console.log(result);
+        return result;
+    }
 }
 
 export default Game;

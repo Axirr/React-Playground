@@ -9,6 +9,7 @@ import Shogun from './Components/Shogun/Shogun'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import DeepSeaDiving from './Components/DeepSeaDiving/DeepSeaDiving';
 import NetworkLoveLetter from './Components/NetworkLoveLetter/NetworkLoveLetter'
+import NetworkShogun from './Components/Shogun/NetworkShogun'
 
 class App extends Component {
 
@@ -59,6 +60,9 @@ class App extends Component {
             <Route path="/loveletteraitest4">
               <LoveLetterAI deck={["guard", "guard","guard","countess","guard","priest","guard","king", "princess", "baron", "king", "princess"]} 
  doShuffle={false} debug={true}/>
+            </Route>
+            <Route path="/netshogun">
+              <NetworkShogun />
             </Route>
             <Route path="/shogun">
               <Shogun />
