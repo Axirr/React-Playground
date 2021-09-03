@@ -21,17 +21,12 @@ class NetworkLoveLetter extends Game {
     portnumber ='';
     hostname = 'www.scottsherlock.one';
     withDebug = false
+    waitTime = 1000
 
     // portNumber = 8000;
     // hostname = '0.0.0.0';
     // withDebug = true
-
-    // hostname = '44.230.70.0';
-
-
-    waitTime = 1000
     // waitTime = 3000
-
     // END CHANGE FOR PRODUCTION
     //
     //
@@ -603,38 +598,6 @@ class NetworkLoveLetter extends Game {
         this.localState.useDefaultDeck = data.useDefaultDeck;
         this.localState.totalNumberOfPlayers = data.totalNumberOfPlayers;
         this.localState.playedCards = data.playedCards;
-    }
-
-    getArrayForCsvString(csvString) {
-        if (csvString === "") return []
-        let result = csvString.split(',');
-        return result
-    }
-
-    getNumericalArrayForCsvString(csvString) {
-        if (csvString === "") return []
-        let result = csvString.split(',');
-        for (let i = 0; i < result.length; i++) {
-            result[i] = Number.parseInt(result[i])
-        }
-        return result;
-    }
-
-    getBooleanArrayForCsvString(csvString) {
-        if (csvString === "") return []
-        let result = csvString.split(',');
-        for (let i = 0; i < result.length; i++) {
-            console.log(result[i]);
-            if (result[i] === '0') {
-                result[i] = false;
-            } else if (result[i] === '1'){
-                result[i] = true;
-            } else {
-                console.log("Error parsing boolean");
-            }
-        }
-        // console.log(result);
-        return result;
     }
 
     apiAdvanceTurn() {
