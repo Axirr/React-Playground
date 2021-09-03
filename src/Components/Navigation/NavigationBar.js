@@ -20,8 +20,9 @@ class NavigationBar extends Component {
                     <NavDropdown.Item href="/rps">Rock Paper Scissors</NavDropdown.Item>
                     <NavDropdown.Item href="/loveletter">Love Letter</NavDropdown.Item>
                     <NavDropdown.Item href="/shogun">Shogun of Edo</NavDropdown.Item>
-                    <NavDropdown.Item href="/netloveletter">Network Love Letter</NavDropdown.Item>
+                    <NavDropdown.Item href="/netloveletter">Multiplayer Love Letter</NavDropdown.Item>
                     <NavDropdown.Item href="/deepseadiving">Deep Sea Diving</NavDropdown.Item>
+                    <NavDropdown.Item href="/netshogun">Multiplayer Shogun of Edo</NavDropdown.Item>
                   </NavDropdown>
                 </Nav>
               </Navbar.Collapse>

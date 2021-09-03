@@ -448,6 +448,7 @@ class LoveLetterAI extends Component{
             return true
         } else if (this.localState.isHandMaiden[myTarget - 1]) {
         // Check not self unless prince
+            // #BUG CAN TARGET SELF
             if (['king', 'guard', 'baron', 'priest', 'guard'].indexOf(card) !== -1) {
                 if (myTarget === this.localState.currentTurn) {
                     this.alertWindow("INVALID MOVE. Cannot target self except with prince.")

@@ -18,15 +18,20 @@ class NetworkLoveLetter extends Game {
     //
     // CHANGE THESE FOR PRODUCTION 
 
-    portnumber ='';
-    hostname = 'www.scottsherlock.one';
-    withDebug = false
-    waitTime = 1000
+    // portnumber ='';
+    // hostname = 'www.scottsherlock.one';
+    // withDebug = false
+    // waitTime = 1000
 
-    // portNumber = 8000;
-    // hostname = '0.0.0.0';
-    // withDebug = true
-    // waitTime = 3000
+    portNumber = 8000;
+    hostname = '0.0.0.0';
+    withDebug = true
+    waitTime = 3000
+
+    // hostname = '44.230.70.0';
+
+
+
     // END CHANGE FOR PRODUCTION
     //
     //

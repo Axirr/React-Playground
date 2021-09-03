@@ -16,7 +16,7 @@ class NetworkShogun extends Game {
     // portNumber = 8000;
     // hostname = '0.0.0.0';
     // withDebug = true
-    // waitTime = 1000
+    // waitTime = 3000
 
     // hostname = '44.230.70.0';
 
@@ -679,13 +679,78 @@ class NetworkShogun extends Game {
         )
     }
 
-    spoofDice(diceArray) {
-        this.localState.dice = diceArray
-        this.rerenderState(() => {
-            this.resolveRoll()
-        })
+    isArrayEquals(array1, array2) {
+        if (array1.length !== array2.length) return false
+        for (let i = 0; i < array1.length; i++) {
+            console.log("array1[i] ", array1[i])
+            console.log("array2[i] ", array2[i])
+            if (array1[i] != array2[i]) {
+                return false
+            }
+        }
+        return true
     }
 
+    spoofDice(diceArray) {
+        let diceCode;
+        console.log("diceArray ", diceArray)
+        if (this.isArrayEquals(diceArray, ["3","3","3","1","2","2"])) {
+            diceCode = "333"
+        } else if (this.isArrayEquals(diceArray, ["claw","3","3","1","2","2"])){
+            diceCode = "oneClaw"
+        } else if (this.isArrayEquals(diceArray, ["1","1","2","2","3","3"])){
+            diceCode = "nothing"
+        } else if (this.isArrayEquals(diceArray, ["claw","claw","claw","claw","claw","claw"])){
+            diceCode = "sixClaw"
+        } else if (this.isArrayEquals(diceArray, ["heart","1","1","2","2","3"])){
+            diceCode = "oneHeart"
+        } else if (this.isArrayEquals(diceArray, ["energy","energy","energy","energy","energy","energy"])){
+            diceCode = "sixEnergy"
+        } else if (this.isArrayEquals(diceArray, ["energy","claw","heart","1","2","3"])){
+            diceCode = "completeDestruction"
+        } else if (this.isArrayEquals(diceArray, ["energy","energy","energy","3","3","3"])){
+            diceCode = "threeEnergyThreePoints"
+        } else if (this.isArrayEquals(diceArray, ["energy","energy","1","1","3","3"])){
+            diceCode = "twoEnergy"
+        } else if (this.isArrayEquals(diceArray, ["energy","energy","energy","energy","energy","claw"])){
+            diceCode = "fiveEnergyOneClaw"
+        } else if (this.isArrayEquals(diceArray, ["claw","claw","1","1","2","2"])){
+            diceCode = "twoClaw"
+        } else {
+            console.log("DICE ARRAY NOT RECOGNIZED, DICE SET DID NOT HAPPEN")
+            return
+        }
+        // if (diceArray === ["3","3","3","1","2","2"]) {
+        //     diceCode = "333"
+        // } else if (diceArray === ["claw","3","3","1","2","2"]){
+        //     diceCode = "oneClaw"
+        // } else if (diceArray === ["1","1","2","2","3","3"]){
+        //     diceCode = "nothing"
+        // } else if (diceArray === ["claw","claw","claw","claw","claw","claw"]){
+        //     diceCode = "sixClaw"
+        // } else if (diceArray === ["heart","1","1","2","2","3"]){
+        //     diceCode = "oneHeart"
+        // } else if (diceArray === ["energy","energy","energy","energy","energy","energy"]){
+        //     diceCode = "sixEnergy"
+        // } else if (diceArray === ["energy","claw","heart","1","2","3"]){
+        //     diceCode = "completeDestruction"
+        // } else if (diceArray === ["energy","energy","energy","3","3","3"]){
+        //     diceCode = "threeEnergyThreePoints"
+        // } else if (diceArray === ["energy","energy","1","1","3","3"]){
+        //     diceCode = "twoEnergy"
+        // } else if (diceArray === ["energy","energy","energy","energy","energy","claw"]){
+        //     diceCode = "fiveEnergyOneClaw"
+        // } else if (diceArray === ["claw","claw","1","1","2","2"]){
+        //     diceCode = "twoClaw"
+        // } else {
+        //     console.log("DICE ARRAY NOT RECOGNIZED, DICE SET DID NOT HAPPEN")
+        //     return
+        // }
+        this.apiSetDice(diceCode)
+        setTimeout(() => {
+            this.apiResolveRoll()
+        }, 100)
+    }
 
     buy(cardNumber) {
         if (this.localState.buttonPhase !== 2) {
@@ -994,11 +1059,49 @@ class NetworkShogun extends Game {
             this.alertWindow("NOT YOUR TURN!")
             return
         }
-        const https = require('https')
+        const https = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
         path: '/shogun/' + this.gameId + '/resolveroll/',
+        method: 'GET'
+        }
+
+        const req = https.request(options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+            var body = '';
+
+            res.on('data', function(chunk){
+                body += chunk;
+            });
+
+            res.on('end', () => {
+                console.log("Response " + body);
+                if (body.length > 0) {
+                    this.alertWindow(body)
+                }
+                this.apiGetGameState();
+            })
+
+        })
+
+        req.on('error', error => {
+            console.error(error)
+        })
+
+        req.end()
+    }
+
+    apiSetDice(diceCode) {
+        if (! this.isCurrentTurn()) {
+            this.alertWindow("NOT YOUR TURN!")
+            return
+        }
+        const https = require('http')
+        const options = {
+        hostname: this.hostname,
+        port: this.portNumber,
+        path: '/shogun/' + this.gameId + '/setdice/' + diceCode + "/",
         method: 'GET'
         }
 
@@ -1033,7 +1136,7 @@ class NetworkShogun extends Game {
             this.alertWindow("NOT YOUR TURN!")
             return
         }
-        const https = require('https')
+        const https = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
@@ -1071,7 +1174,7 @@ class NetworkShogun extends Game {
             this.alertWindow("NOT YOUR TURN!")
             return
         }
-        const https = require('https')
+        const https = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
@@ -1109,7 +1212,7 @@ class NetworkShogun extends Game {
             this.alertWindow("NOT YOUR TURN!")
             return
         }
-        const https = require('https')
+        const https = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
@@ -1143,7 +1246,7 @@ class NetworkShogun extends Game {
     }
 
     apiCreateNewGame() {
-        const https = require('https')
+        const https = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
@@ -1176,7 +1279,7 @@ class NetworkShogun extends Game {
     }
 
     apiCreateNewGame() {
-        const https = require('https')
+        const https = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
@@ -1209,12 +1312,12 @@ class NetworkShogun extends Game {
         req.end()
     }
 
-    apiResetGame() {
-        const https = require('https')
+    apiResetGame(numberPlayers=0) {
+        const https = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
-        path: '/shogun/resetgame/' + this.gameId + "/",
+        path: '/shogun/resetgame/' + this.gameId + "/" + numberPlayers + "/",
         method: 'GET'
         }
 
@@ -1243,7 +1346,7 @@ class NetworkShogun extends Game {
     }
 
     apiGetGameState(isRefresh=false) {
-        const https = require('https')
+        const https = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
@@ -1330,7 +1433,7 @@ class NetworkShogun extends Game {
             window.alert("Game ID must be a valid integer.")
             return
         }
-        const http = require('https')
+        const http = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
@@ -1371,7 +1474,7 @@ class NetworkShogun extends Game {
             this.alertWindow("NOT YOUR TURN!")
             return
         }
-        const https = require('https')
+        const https = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
@@ -1410,7 +1513,7 @@ class NetworkShogun extends Game {
             this.alertWindow("Must be a valid integer.")
             return
         }
-        const https = require('https')
+        const https = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
@@ -1449,7 +1552,7 @@ class NetworkShogun extends Game {
             this.alertWindow("Must be a valid integer.")
             return
         }
-        const https = require('https')
+        const https = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
@@ -1487,7 +1590,7 @@ class NetworkShogun extends Game {
             this.alertWindow("NOT YOUR TURN!")
             return
         }
-        const https = require('https')
+        const https = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
@@ -1525,7 +1628,7 @@ class NetworkShogun extends Game {
             this.alertWindow("NOT YOUR TURN!")
             return
         }
-        const https = require('https')
+        const https = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
@@ -1556,6 +1659,68 @@ class NetworkShogun extends Game {
         })
 
         req.end()
+    }
+
+    apiResetTests() {
+        const https = require('http')
+        const options = {
+        hostname: this.hostname,
+        port: this.portNumber,
+        path: '/shogun/resettests/',
+        method: 'GET'
+        }
+
+        const req = https.request(options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+            var body = '';
+
+            res.on('data', function(chunk){
+                body += chunk;
+            });
+
+            res.on('end', () => {
+                console.log("Response " + body);
+                if (body.length > 0) {
+                    this.alertWindow(body)
+                }
+                this.apiGetGameState();
+            })
+
+        })
+
+        req.on('error', error => {
+            console.error(error)
+        })
+
+        req.end()
+    }
+
+    advancePlayerNumber() {
+        let nextClosestPlayer;
+        var currentIndex = this.localState.playersInGame.indexOf(this.currentPlayerNumber)
+        if (currentIndex === -1) {
+            var potentialPlayers = []
+            for (var i = 1; i < this.localState.totalNumberOfPlayers; i++) {
+                var player = i + this.currentPlayerNumber
+                if (player <= this.localState.totalNumberOfPlayers) {
+                    potentialPlayers.push(player)
+                } else {
+                    potentialPlayers.push(player % this.localState.totalNumberOfPlayers)
+                }
+            }
+            nextClosestPlayer = this.localState.playersInGame[0]
+            for (i = 0; i < potentialPlayers.length; i++) {
+                if (this.localState.playersInGame.indexOf(potentialPlayers[i]) !== -1) {
+                    console.log("Next player is " + potentialPlayers[i])
+                    nextClosestPlayer = potentialPlayers[i]
+                    break
+                }
+            }
+        } else {
+            nextClosestPlayer = this.localState.playersInGame[(currentIndex + 1) % this.state.playersInGame.length] 
+        }
+        this.currentPlayerNumber = nextClosestPlayer
+        this.rerenderState()
     }
 
     render() {
@@ -1622,26 +1787,35 @@ class NetworkShogun extends Game {
                             {this.renderHands()}
                             <p>Players in game: {JSON.stringify(this.state.playersInGame)}</p>
                             <div>
-                                {this.withSpoof && 
+                                {this.withDebug && 
                                 <div>
-                                <p>Change player numbers and restart game.</p>
-                                <button onClick={() => {this.setup(2)}}>2 Players</button>
-                                <button onClick={() => {this.setup(5)}}>5 Players</button>
-                                <button onClick={() => {this.printState()}}>Print State</button>
-                                <button onClick={() => this.printLocalState()}>Print Local State</button>
-                                <button id="spoof3" onClick={() => this.spoofDice(["3","3","3","1","2","2"])}>Spoof Dice 333</button>
-                                <button id="spoofClaw" onClick={() => this.spoofDice(["claw","3","3","1","2","2"])}>Spoof Dice One Claw</button>
-                                <button id="spoofNone" onClick={() => this.spoofDice(["1","1","2","2","3","3"])}>Spoof None</button>
-                                <button id="spoof6Claw" onClick={() => this.spoofDice(["claw","claw","claw","claw","claw","claw"])}>Spoof Six Claw</button>
-                                <button id="spoofHeart" onClick={() => this.spoofDice(["heart","1","1","2","2","3"])}>Spoof Heart</button>
-                                <button id="spoof6Energy" onClick={() => this.spoofDice(["energy","energy","energy","energy","energy","energy"])}>Spoof 6 Energy</button>
-                                <button id="spoofCompleteDestruction" onClick={() => this.spoofDice(["energy","claw","heart","1","2","3"])}>Spoof Complete Destruction</button>
-                                <button id="spoof3Points3Energy" onClick={() => this.spoofDice(["energy","energy","energy","3","3","3"])}>Spoof 3 Energy, 3 Points</button>
-                                <button id="spoof2Energy" onClick={() => this.spoofDice(["energy","energy","1","1","3","3"])}>Spoof 2 Energy</button>
-                                <button id="spoof5Energy1Claw" onClick={() => this.spoofDice(["energy","energy","energy","energy","energy","claw"])}>Spoof 5 Energy, 1 Claw</button>
-                                <button id="spoof2Claw" onClick={() => this.spoofDice(["claw","claw","1","1","2","2"])}>Spoof 2 Claw</button>
+                                    <p>Change player numbers and restart game.</p>
+                                    <div>
+                                        <button onClick={() => {this.apiResetGame(2)}}>Reset to 2 Players</button>
+                                        <button onClick={() => {this.apiResetGame(4)}}>Reset to 4 Players</button>
+                                        <button onClick={() => {this.apiResetGame(5)}}>Reset to 5 Players</button>
+                                    </div>
+                                    <div>
+                                        <button onClick={() => {this.printState()}}>Print State</button>
+                                        <button onClick={() => this.printLocalState()}>Print Local State</button>
+                                        <button id="resetTests" onClick={() => this.apiResetTests()}>Reset Tests</button>
+                                        <button id="advancePlayerNumber" onClick={() => this.advancePlayerNumber()}>Advance Player Number</button>
+                                    </div>
+                                    <div>
+                                        <button id="spoof3" onClick={() => this.spoofDice(["3","3","3","1","2","2"])}>Spoof Dice 333</button>
+                                        <button id="spoofClaw" onClick={() => this.spoofDice(["claw","3","3","1","2","2"])}>Spoof Dice One Claw</button>
+                                        <button id="spoofNone" onClick={() => this.spoofDice(["1","1","2","2","3","3"])}>Spoof None</button>
+                                        <button id="spoof6Claw" onClick={() => this.spoofDice(["claw","claw","claw","claw","claw","claw"])}>Spoof Six Claw</button>
+                                        <button id="spoofHeart" onClick={() => this.spoofDice(["heart","1","1","2","2","3"])}>Spoof Heart</button>
+                                        <button id="spoof6Energy" onClick={() => this.spoofDice(["energy","energy","energy","energy","energy","energy"])}>Spoof 6 Energy</button>
+                                        <button id="spoofCompleteDestruction" onClick={() => this.spoofDice(["energy","claw","heart","1","2","3"])}>Spoof Complete Destruction</button>
+                                        <button id="spoof3Points3Energy" onClick={() => this.spoofDice(["energy","energy","energy","3","3","3"])}>Spoof 3 Energy, 3 Points</button>
+                                        <button id="spoof2Energy" onClick={() => this.spoofDice(["energy","energy","1","1","3","3"])}>Spoof 2 Energy</button>
+                                        <button id="spoof5Energy1Claw" onClick={() => this.spoofDice(["energy","energy","energy","energy","energy","claw"])}>Spoof 5 Energy, 1 Claw</button>
+                                        <button id="spoof2Claw" onClick={() => this.spoofDice(["claw","claw","1","1","2","2"])}>Spoof 2 Claw</button>
+                                    </div>
                                 </div>
-    }
+                                }
                             </div>
                         </Col>
                         <Col>
@@ -1655,15 +1829,15 @@ class NetworkShogun extends Game {
                                 <p>Message -5: {this.state.message[5]}</p>
                             </div>
                             <div>
-                                <button onClick={() => {this.apiCreateNewGame()}}>Create Game</button>
+                                <button onClick={() => {this.apiCreateNewGame()}}>Create New Game</button>
                             </div>
                             <div>
                                 Game Number
                                 <input type="text" id="gameArea"></input>
-                                <button onClick={() => this.setGameId(document.getElementById("gameArea").value)}>Set Game ID</button>
+                                <button id="gameAreaButton" onClick={() => this.setGameId(document.getElementById("gameArea").value)}>Set Game ID</button>
                             </div>
                             <div>
-                                <button onClick={() => {this.apiResetGame()}}>Reset Game</button>
+                                <button onClick={() => {this.apiResetGame(0)}}>Reset Game</button>
                             </div>
                             <div>
                                 <button onClick={() => {this.apiGetGameState()}}>Get Game State</button>
