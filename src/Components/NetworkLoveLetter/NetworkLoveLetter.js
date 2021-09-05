@@ -1,4 +1,3 @@
-import React, { Component } from 'react';
 import { Container, Col, Row} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../LoveLetter/LoveLetter.module.css'
@@ -676,7 +675,7 @@ class NetworkLoveLetter extends Game {
 
     apiPlayCard(card, cardNumberSelected, isAi=false) {
         if (!isAi) {
-            if (cardNumberSelected !== 0 && cardNumberSelected != this.playerNumber) {
+            if (cardNumberSelected !== 0 && cardNumberSelected !== this.playerNumber) {
                 this.alertWindow("Can't select another player's card! Your current player number is " + this.playerNumber + " which can be changed in the top text box.")
                 return
             }
@@ -753,7 +752,7 @@ class NetworkLoveLetter extends Game {
 
             res.on('end', () => {
                 console.log("Response " + body);
-                if (body == "ID GOOD") {
+                if (body === "ID GOOD") {
                     this.updateMessage("Game ID updated to " + gameId);
                     this.gameId = gameId;
                 } else if (body === "ID BAD") {
@@ -832,7 +831,7 @@ class NetworkLoveLetter extends Game {
                         <Col>
                     <div>
                         <div>Current Draw Card</div>
-                        {(this.playerNumber == this.localState.currentTurn || this.withDebug) && <button id="drawCard" onClick={ () => { this.apiPlayCard(this.state.drawCard, 0)}}>
+                        {(this.playerNumber === this.localState.currentTurn || this.withDebug) && <button id="drawCard" onClick={ () => { this.apiPlayCard(this.state.drawCard, 0)}}>
                         <img src={this.getLinkForCard(this.localState.drawCard)} alt={this.localState.drawCard} width="100" />
                         </button> }
                         {this.renderHands()}

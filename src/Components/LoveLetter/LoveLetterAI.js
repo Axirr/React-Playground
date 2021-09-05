@@ -225,10 +225,11 @@ class LoveLetterAI extends Component{
             this.updateMessage("Player " + this.localState.currentTurn + " played a " + card + " with no direct effect.")
         }
         var isDrawCardPlayed = (card === this.localState.drawCard)
+        var notPlayedCard;
         if (isDrawCardPlayed) {
-            var notPlayedCard = this.localState.hands[this.localState.currentTurn - 1]
+            notPlayedCard = this.localState.hands[this.localState.currentTurn - 1]
         } else {
-            var notPlayedCard = this.localState.drawCard
+            notPlayedCard = this.localState.drawCard
         }
         switch(card) {
             case 'princess':
@@ -258,11 +259,11 @@ class LoveLetterAI extends Component{
                 this.updateMessage("Player " + myTarget + " discards their hand.")
                 this.updateMessage("Player " + myTarget + " hand card was a " + this.localState.hands[myTarget - 1] + ".")
                 var deckCopy = [...this.localState.deck]
-                var handsCopy = [...this.localState.hands]
+                handsCopy = [...this.localState.hands]
                 var discardedCard = handsCopy[myTarget - 1]
                 if (myTarget === this.localState.currentTurn) {
                     if (discardedCard === "prince") {
-                        var discardedCard = this.localState.drawCard
+                        discardedCard = this.localState.drawCard
                     }
                 }
                 if (deckCopy.length >= 1) {
@@ -291,20 +292,21 @@ class LoveLetterAI extends Component{
                 this.normalDrawAndAdvance(isDrawCardPlayed)
                 break;
             case 'baron':
+                var playerValue;
                 if (isDrawCardPlayed) {
-                    var playerValue = this.getCardValue(this.localState.hands[this.localState.currentTurn - 1])
+                    playerValue = this.getCardValue(this.localState.hands[this.localState.currentTurn - 1])
                 } else {
-                    var playerValue = this.getCardValue(this.localState.drawCard)
+                    playerValue = this.getCardValue(this.localState.drawCard)
                 }
                 var targetValue = this.getCardValue(this.localState.hands[myTarget - 1])
                 var playerToEliminate = 0
                 var message = "Player " + myTarget + " and Player " + this.localState.currentTurn + " tie in baron comparison."
                 if (playerValue > targetValue) {
                     playerToEliminate = myTarget
-                    var message = "Player " + this.localState.currentTurn + " wins against Player " + myTarget + " in baron comparison."
+                    message = "Player " + this.localState.currentTurn + " wins against Player " + myTarget + " in baron comparison."
                 } else if (targetValue > playerValue) {
                     playerToEliminate = this.localState.currentTurn
-                    var message = "Player " + this.localState.currentTurn + " loses against Player " + myTarget + " in baron comparison."
+                    message = "Player " + this.localState.currentTurn + " loses against Player " + myTarget + " in baron comparison."
                 }
                 this.updateMessage(message)
                 if (playerToEliminate !== 0) {
@@ -326,8 +328,8 @@ class LoveLetterAI extends Component{
                 var guess = this.getGuardGuess()
                 this.updateMessage("Player " + this.localState.currentTurn + " guessed " + guess + ".")
                 var actualHand = this.localState.hands[myTarget - 1]
-                var playerToEliminate = 0
-                var message = "Guess was wrong."
+                playerToEliminate = 0
+                message = "Guess was wrong."
                 if (guess === actualHand) {
                     message = "Guess was right!"
                     playerToEliminate = myTarget
@@ -467,10 +469,11 @@ class LoveLetterAI extends Component{
 
     replaceCard(playerNumber) {
         // var deckCopy = [...this.localState.deck]
-        if (this.localState.deck.length == 0) {
-            var drawnCard = "none"
+        var drawnCard;
+        if (this.localState.deck.length === 0) {
+            drawnCard = "none"
         } else {
-            var drawnCard = this.localState.deck.pop()
+            drawnCard = this.localState.deck.pop()
         }
         if (playerNumber === 0) {
             this.localState['drawCard'] = drawnCard
@@ -534,7 +537,7 @@ class LoveLetterAI extends Component{
                 }
             }
             var nextClosestPlayer = this.localState.playersInGame[0]
-            for (var i = 0; i < potentialPlayers.length; i++) {
+            for (i = 0; i < potentialPlayers.length; i++) {
                 if (this.localState.playersInGame.indexOf(potentialPlayers[i]) !== -1) {
                     nextClosestPlayer = potentialPlayers[i]
                     break
@@ -614,7 +617,7 @@ class LoveLetterAI extends Component{
                         <div>
                             <div>
                         <button id={"hand"+number}> 
-                        <img src={this.getLinkForCard(this.localState.hands[number - 1])} width="100" 
+                        <img alt="" src={this.getLinkForCard(this.localState.hands[number - 1])} width="100" 
                         onClick={(() => { this.playerPlayCard(number, this.localState.hands[number - 1]) })}/>
                         </button> 
                             </div>
@@ -823,7 +826,7 @@ class LoveLetterAI extends Component{
                     <div>
                         <div>Current Draw Card</div>
                         {this.state.isDisplayed[this.state.totalNumberOfPlayers] && <button id="drawCard" onClick={ () => { this.playCard(this.state.drawCard, 0)}}>
-                        <img src={this.getLinkForCard(this.localState.drawCard)} width="100" />
+                        <img alt="" src={this.getLinkForCard(this.localState.drawCard)} width="100" />
                         </button> }
                         {this.renderHands()}
                     </div>

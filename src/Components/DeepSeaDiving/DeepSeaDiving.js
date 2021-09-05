@@ -1,8 +1,7 @@
-import React, {Component} from 'react';
+import React from 'react';
 import Game from '../Game'
 import { Container, Col, Row} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { ThemeConsumer } from 'react-bootstrap/esm/ThemeProvider';
 
 class DeepSeaDiving extends Game {
     withDebug = true
@@ -112,7 +111,7 @@ class DeepSeaDiving extends Game {
                 }
             }
             nextClosestPlayer = this.localState.playersInGame[0]
-            for (var i = 0; i < potentialPlayers.length; i++) {
+            for (i = 0; i < potentialPlayers.length; i++) {
                 if (this.localState.playersInGame.indexOf(potentialPlayers[i]) !== -1) {
                     console.log("Next player is " + potentialPlayers[i])
                     nextClosestPlayer = potentialPlayers[i]

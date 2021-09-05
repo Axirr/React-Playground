@@ -1,4 +1,3 @@
-import React, {Component} from 'react';
 import Game from '../Game';
 import { Container, Col, Row} from 'react-bootstrap';
 
@@ -56,7 +55,7 @@ class RPS extends Game {
 
             res.on('end', () => {
                 console.log("body " + body);
-                if (body !== "Left Hand" && body !== "Right Hand" && body != "Tie") {
+                if (body !== "Left Hand" && body !== "Right Hand" && body !== "Tie") {
                     this.updateMessage("GAME COULD NOT BE EVALUATED BECAUSE ALL HANDS ARE NOT SET.");
                     this.rerenderState();
                 } else {
@@ -169,11 +168,11 @@ class RPS extends Game {
 
         const req = https.request(options, res => {
             console.log(`statusCode: ${res.statusCode}`)
-            var body = '';
+            // var body = '';
 
-            res.on('data', function(chunk){
-                body += chunk;
-            });
+            // res.on('data', function(chunk){
+            //     body += chunk;
+            // });
 
             res.on('end', () => {
                 this.displayHands = false;
@@ -218,7 +217,7 @@ class RPS extends Game {
 
             res.on('end', () => {
                 console.log("Response " + body);
-                if (body == "ID GOOD") {
+                if (body === "ID GOOD") {
                     this.updateMessage("Game ID updated to " + gameId);
                     this.gameId = gameId;
                 } else if (body === "ID BAD") {

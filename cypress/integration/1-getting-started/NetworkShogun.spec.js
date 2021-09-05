@@ -143,10 +143,10 @@ describe('Network Shogun of Edo app', () => {
   it("nova breath test", () => {
     cy.visit('localhost:3000/netshogun')
     cy.get("#resetTests").click()
-    cy.wait(500)
+    cy.wait(1000)
     cy.get("#gameArea").clear().type("2")
     cy.get("#gameAreaButton").click()
-    cy.wait(500)
+    cy.wait(1000)
     cy.get("#spoof6Energy").click()
     cy.wait(300)
     cy.get("#doneBuying").click()

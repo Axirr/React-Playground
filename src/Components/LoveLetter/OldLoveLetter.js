@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import { Container, Col, Row} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './LoveLetter.module.css'
-import { render } from 'react-dom';
-import ReactDOMServer from 'react-dom/server';
 
 class LoveLetter extends Component {
     state = {
@@ -23,11 +21,6 @@ class LoveLetter extends Component {
         totalNumberOfPlayers: 4
     }
 
-    constructor(props) {
-        super(props)
-    }
-    
-
     componentDidMount() {
         this.deal(4)
     }
@@ -41,10 +34,11 @@ class LoveLetter extends Component {
             newDeck = this.props.deck
         }
         this.setState( {deck: newDeck}, () => {
+        var shuffledDeck;
         if (this.props.doShuffle) {
-            var shuffledDeck = this.returnShuffledDeck()
+            shuffledDeck = this.returnShuffledDeck()
         } else {
-            var shuffledDeck = this.state.deck
+            shuffledDeck = this.state.deck
         }
         this.setState( { deck: shuffledDeck }, () => {
             var deckCopy = [...this.state.deck]
@@ -163,10 +157,11 @@ class LoveLetter extends Component {
             this.removeSelfHandmaiden(() => {
                 var myTarget = this.getTargetPlayerNumber()
                 var isDrawCardPlayed = (card === this.state.drawCard)
+                var notPlayedCard;
                 if (isDrawCardPlayed) {
-                    var notPlayedCard = this.state.hands[this.state.currentTurn - 1]
+                    notPlayedCard = this.state.hands[this.state.currentTurn - 1]
                 } else {
-                    var notPlayedCard = this.state.drawCard
+                    notPlayedCard = this.state.drawCard
                 }
                 switch(card) {
                     case 'princess':
@@ -198,11 +193,11 @@ class LoveLetter extends Component {
                         break;
                     case 'prince':
                         var deckCopy = [...this.state.deck]
-                        var handsCopy = [...this.state.hands]
+                        handsCopy = [...this.state.hands]
                         var discardedCard = handsCopy[myTarget - 1]
                         if (myTarget === this.state.currentTurn) {
                             if (discardedCard === "prince") {
-                                var discardedCard = this.state.drawCard
+                                discardedCard = this.state.drawCard
                             }
                         }
                         if (deckCopy.length >= 1) {
@@ -233,20 +228,21 @@ class LoveLetter extends Component {
                         })
                         break;
                     case 'baron':
+                        var playerValue;
                         if (isDrawCardPlayed) {
-                            var playerValue = this.getCardValue(this.state.hands[this.state.currentTurn - 1])
+                            playerValue = this.getCardValue(this.state.hands[this.state.currentTurn - 1])
                         } else {
-                            var playerValue = this.getCardValue(this.state.drawCard)
+                            playerValue = this.getCardValue(this.state.drawCard)
                         }
                         var targetValue = this.getCardValue(this.state.hands[myTarget - 1])
                         var playerToEliminate = 0
                         var message = "Player " + myTarget + " and Player " + this.state.currentTurn + " tie in baron comparison."
                         if (playerValue > targetValue) {
                             playerToEliminate = myTarget
-                            var message = "Player " + this.state.currentTurn + " wins against Player " + myTarget + " in baron comparison."
+                            message = "Player " + this.state.currentTurn + " wins against Player " + myTarget + " in baron comparison."
                         } else if (targetValue > playerValue) {
                             playerToEliminate = this.state.currentTurn
-                            var message = "Player " + myTarget + " wins against Player " + this.state.currentTurn + " in baron comparison."
+                            message = "Player " + myTarget + " wins against Player " + this.state.currentTurn + " in baron comparison."
                         }
                         this.updateMessage(message, () => {
                             if (playerToEliminate !== 0) {
@@ -418,10 +414,11 @@ class LoveLetter extends Component {
 
     replaceCard(playerNumber, handler = () => {}) {
         var deckCopy = [...this.state.deck]
-        if (deckCopy.length == 0) {
-            var drawnCard = "none"
+        var drawnCard;
+        if (deckCopy.length === 0) {
+            drawnCard = "none"
         } else {
-            var drawnCard = deckCopy.pop()
+            drawnCard = deckCopy.pop()
         }
         if (playerNumber === 0) {
             this.setState( {drawCard: drawnCard,
@@ -491,7 +488,7 @@ class LoveLetter extends Component {
             console.log("Ordered player list")
             console.log(potentialPlayers)
             var nextClosestPlayer = this.state.playersInGame[0]
-            for (var i = 0; i < potentialPlayers.length; i++) {
+            for (i = 0; i < potentialPlayers.length; i++) {
                 if (this.state.playersInGame.indexOf(potentialPlayers[i]) !== -1) {
                     console.log("Next player is " + potentialPlayers[i])
                     nextClosestPlayer = potentialPlayers[i]

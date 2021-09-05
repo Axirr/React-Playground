@@ -26,15 +26,6 @@ class NetworkShogun extends Game {
     //
     //
 
-    // winPoints = 20
-    // maxHealth = 10
-    // startEnergy = 0
-    // withSpoof = true
-    // canBuy = false
-    // canYield = false
-    // buttonPhase = 0
-    // maxPlayers = 4
-
     isAI = false
     gameId = 1
     currentPlayerNumber = 1
@@ -128,532 +119,10 @@ class NetworkShogun extends Game {
     }
 
     componentDidMount() {
-        // if (!this.props.initialData) {
-        //     this.setup(4)
-        // } else {
-        //     this.localState = this.props.initialData
-        //     this.rerenderState()
-        // }
-        // if (this.props.withSpoof) {
-        //     this.withSpoof = this.props.withSpoof
-        // }
         this.apiGetGameState(true);
     }
 
-    // setup(numberPlayers) {
-    //     this.canBuy = false
-    //     this.canYield = false
-    //     this.localState.buttonPhase = 0
-    //     var newDice = ["none", "none", "none", "none", "none", "none"]
-    //     var newSaved = [false, false, false, false, false, false]
-    //     var newHands = []
-    //     var newPlayers = []
-    //     var newDeck = this.localState.deck
-    //     if (this.localState.doShuffle) {
-    //         console.log("Shuffling")
-    //         newDeck = this.returnShuffledDeck(newDeck)
-    //     } else {
-    //         console.log("Not shuffling.")
-    //     }
-    //     var newPoints = []
-    //     var newHealth = []
-    //     var newEnergy = []
-    //     for (var i = 0; i < numberPlayers; i++) {
-    //         newPlayers.push(i + 1)
-    //         newHands.push([])
-    //         newPoints.push(0)
-    //         newHealth.push(this.maxHealth)
-    //         newEnergy.push(this.startEnergy)
-    //     }
-    //     this.setState({
-    //         dice: newDice,
-    //         saved: newSaved,
-    //         playersInGame: newPlayers,
-    //         currentTurn: 1,
-    //         hands: newHands,
-    //         deck: newDeck,
-    //         points: newPoints,
-    //         health: newHealth,
-    //         energy: newEnergy,
-    //         edo: 0,
-    //         bayEdo: 0,
-    //         remainingRolls: 3
-    //     }, () => {
-    //         this.localState = JSON.parse(JSON.stringify(this.state))
-    //         this.rerenderState()
-    //     })
-
-    // }
-
-    // returnShuffledDeck(deck) {
-    //     var tempDeck = [...deck]
-    //     var shuffledDeck = []
-    //     while (true) {
-    //         var n = tempDeck.length
-    //         var index = Math.floor(Math.random() * n)
-    //         shuffledDeck.push(tempDeck.splice(index, 1)[0])
-    //         n -= 1
-    //         if (n === 0) {
-    //             break
-    //         }
-    //     }
-    //     return shuffledDeck
-    // }
-
-    // roll() {
-    //     if (this.localState.buttonPhase !== 0) {
-    //         this.alertWindow("Not the rolling phase right now.")
-    //         return
-    //     }
-    //     if (this.localState.remainingRolls <= 0) {
-    //         this.alertWindow("No rolls left!")
-    //         return
-    //     }
-    //     var numberOfDice = 6
-    //     var newDice = []
-    //     for(var i = 0; i < numberOfDice; i++) {
-    //         if (!this.localState.saved[i]) {
-    //             newDice.push(this.getRollResult())
-    //         } else {
-    //             newDice.push(this.state.dice[i])
-    //         }
-    //     }
-    //     this.localState['dice'] = newDice
-    //     // this.updateMessage("Player " + this.localState.currentTurn + " rolled!")
-    //     this.localState['remainingRolls'] -= 1
-    //     this.rerenderState()
-    // }
-
-    // advanceTurn() {
-    //     let nextClosestPlayer;
-    //     var currentIndex = this.localState.playersInGame.indexOf(this.state.currentTurn)
-    //     if (currentIndex === -1) {
-    //         var potentialPlayers = []
-    //         for (var i = 1; i < this.localState.totalNumberOfPlayers; i++) {
-    //             var player = i + this.localState.currentTurn 
-    //             if (player <= this.localState.totalNumberOfPlayers) {
-    //                 potentialPlayers.push(player)
-    //             } else {
-    //                 potentialPlayers.push(player % this.localState.totalNumberOfPlayers)
-    //             }
-    //         }
-    //         nextClosestPlayer = this.localState.playersInGame[0]
-    //         for (i = 0; i < potentialPlayers.length; i++) {
-    //             if (this.localState.playersInGame.indexOf(potentialPlayers[i]) !== -1) {
-    //                 console.log("Next player is " + potentialPlayers[i])
-    //                 nextClosestPlayer = potentialPlayers[i]
-    //                 break
-    //             }
-    //         }
-    //     } else {
-    //         nextClosestPlayer = this.localState.playersInGame[(currentIndex + 1) % this.state.playersInGame.length] 
-    //     }
-    //     this.endTurnSelfProcedures()
-    //     this.localState['currentTurn'] = nextClosestPlayer
-    //     this.endTurnAllProcedures()
-    //     this.startTurnProcedures()
-    // }
-
-    // endTurnSelfProcedures() {
-    //     if (this.hasCard(this.localState.currentTurn, "Solar Powered")) {
-    //         if (this.localState.energy[this.localState.currentTurn - 1] === 0) {
-    //             this.updateMessage("Solar Powered activated.")
-    //             this.addEnergy(this.localState.currentTurn, 1)
-    //         }
-    //     }
-    //     if (this.hasCard(this.localState.currentTurn, "Energy Hoarder") && this.localState.energy[this.localState.currentTurn - 1] >= 6) {
-    //         this.updateMessage("Energy Hoarder activated.")
-    //         const energyToAdd = Math.floor(this.localState.energy[this.localState.currentTurn - 1] / 6)
-    //         console.log("energy" + energyToAdd)
-    //         this.addEnergy(this.localState.currentTurn, energyToAdd)
-    //         this.rerenderState()
-    //     }
-    // }
-
-    // endTurnAllProcedures() {
-    //     this.rootingForUnderdog()
-    // }
-
-    // rootingForUnderdog() {
-    //     for (let i = 0; i < this.localState.playersInGame.length; i++) {
-    //         if (this.hasCard(this.localState.playersInGame[i], "Rooting For The Underdog")) {
-    //             let underdogPoints = this.localState.points[this.localState.playersInGame[i] - 1]
-    //             for (let j = 0; j < this.localState.playersInGame.length; j++) {
-    //                 if (this.localState.playersInGame[i] !== this.localState.playersInGame[j]) {
-    //                     if (this.localState.points[this.localState.playersInGame[j] - 1] <= underdogPoints) {
-    //                         break
-    //                     }
-    //                 }
-    //                 if (j === (this.localState.playersInGame.length - 1)) {
-    //                     this.updateMessage("Underdog activated.")
-    //                     this.addPoints(this.localState.playersInGame[i], 1)
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-
-    // startTurnProcedures() {
-    //     if (this.inEdo(this.localState.currentTurn)) {
-    //         let pointsToEarn = 2
-    //         if (this.hasCard(this.localState.currentTurn, "Urbavore")) {
-    //             pointsToEarn += 1
-    //         }
-    //         this.updateMessage("Player " + this.localState.currentTurn + " gets " + pointsToEarn + " points for starting in Edo.")
-    //         this.addPoints(this.localState.currentTurn, pointsToEarn)
-    //     }
-    //     this.resetRolls()
-    //     this.localState.buttonPhase = 0
-    //     this.rerenderState()
-    //     this.canBuy = false
-    //     this.canYield = false
-    // }
-
-    // addPoints(player, newPoints) {
-    //     if (this.localState.playersInGame.indexOf(player) === -1) {
-    //         console.log("Can't add points to a dead player.")
-    //         return
-    //     }
-    //     const originalPoints = this.localState.points[player - 1]
-    //     let newPointValue = Math.max(this.localState.points[player - 1] + newPoints,0)
-    //     this.localState.points[player - 1] = newPointValue
-    //     if (newPointValue !== originalPoints) {
-    //         this.updateMessage("Player " + player + " earns " + newPoints + " points.")
-    //     }
-    //     this.checkPointsWin()
-    // }
-
-    // checkPointsWin() {
-    //     for (let i = 0; i < this.localState.playersInGame.length; i++) {
-    //         let playerToCheck = this.localState.playersInGame[i]
-    //         if (this.localState.points[playerToCheck - 1] >= this.winPoints) {
-    //             if (this.localState.health[playerToCheck - 1] > 0) {
-    //                 this.alertWindow("Player " + playerToCheck + " wins!")
-    //                 this.rerenderState()
-    //             }
-    //             break;
-    //         }
-    //     }
-    // }
-
-    // resetRolls() {
-    //     this.localState['remainingRolls'] = 3
-    //     if (this.hasCard(this.localState.currentTurn, "Giant Brain")) {
-    //         this.localState['remainingRolls'] += 1
-    //     }
-    //     this.resetDiceState()
-    // }
-
-    // resetDiceState() {
-    //     this.localState['saved'] = [false,false,false,false,false,false]
-    //     this.localState['dice'] = ['none','none','none','none','none','none']
-    // }
-
-
-    // resolveRoll() {
-    //     if (this.localState.buttonPhase !== 0) {
-    //         this.alertWindow("Not the rolling phase right now.")
-    //         return
-    //     }
-    //     if (document.getElementById("dice0").innerText === "none") {
-    //         this.alertWindow("Cannot finish turn without rolling.")
-    //         return
-    //     }
-    //     var pointsToAdd = 0;
-    //     var energyToAdd = 0;
-    //     var healthToAdd = 0;
-    //     var damage = 0;
-    //     pointsToAdd = this.pointsForRoll()
-    //     var count = this.count(this.localState.dice, 'energy')
-    //     energyToAdd += count
-    //     count = this.count(this.localState.dice, 'heart')
-    //     if (!this.inEdo(this.localState.currentTurn)) healthToAdd = count
-    //     count = this.count(this.localState.dice, 'claw')
-    //     damage += count
-    //     this.addEnergy(this.localState.currentTurn, energyToAdd)
-    //     this.changeHealth(this.localState.currentTurn, healthToAdd)
-    //     this.addPoints(this.localState.currentTurn, pointsToAdd)
-    //     // this.updateMessage("Player " + this.localState.currentTurn + " earns " + pointsToAdd + " points, " + energyToAdd + " energy, " + healthToAdd 
-    //     // + " health, and deals " + damage + " damage.")
-    //     this.attack(damage)
-    //     this.checkElim()
-    //     if (damage > 0) {
-    //         if (this.localState.playersInGame.length <= 4) {
-    //             if (this.localState.edo === 0) {
-    //                 this.enterEdo(this.localState.currentTurn)
-    //             }
-    //             if (!this.onlyCurrentPlayerInEdo()) {
-    //                 this.canYield = true
-    //             }
-    //         } else {
-    //             this.alertWindow("Implement yield for double edo")
-    //         }
-    //         // Fix for both and yield
-    //     }
-    //     if (this.hasCard(this.localState.currentTurn, "Complete Destruction")) {
-    //         let diceFaces = ['claw','heart','energy', '1','2','3']
-    //         let diceCounts = diceFaces.map((face) => {
-    //             return this.count(this.localState.dice, face)
-    //         })
-    //         console.log(diceCounts)
-    //         if (this.count(diceCounts, 1) === 6) {
-    //             this.updateMessage("Player " + this.localState.currentTurn + " earns 9 points for COMPLETE DESTRUCTION!")
-    //             this.addPoints(this.localState.currentTurn, 9)
-    //         }
-    //     }
-    //     this.canBuy = true
-    //     this.rerenderState()
-    //     if (this.canYield) {
-    //         this.localState.buttonPhase = 1
-    //     } else {
-    //         this.localState.buttonPhase = 2
-    //     }
-    // }
-
-    // pointsForRoll() {
-    //     let pointsToAdd = 0
-    //     var count = this.count(this.localState.dice, '1')
-    //     if (this.hasCard(this.localState.currentTurn, "Gourmet")) {
-    //         if (count >= 3) pointsToAdd += count 
-    //     } else {
-    //         if (count >= 3) pointsToAdd += count - 2
-    //     }
-    //     count = this.count(this.localState.dice, '2')
-    //     if (count >= 3) pointsToAdd += count - 1
-    //     count = this.count(this.localState.dice, '3')
-    //     if (count >= 3) pointsToAdd += count 
-    //     if (this.hasCard(this.localState.currentTurn, "Omnivore")) {
-    //         const onesCount = this.count(this.localState.dice, '1')
-    //         const twosCount = this.count(this.localState.dice, '2')
-    //         const threesCount = this.count(this.localState.dice, '3')
-    //         if (onesCount >= 1 && twosCount >= 1 && threesCount >= 1) {
-    //             this.updateMessage("Omnivore effect activated.")
-    //             pointsToAdd += 2
-    //         }
-    //     }
-    //     return pointsToAdd
-    // }
-
-    // changeHealth(player, healthToAdd) {
-    //     let healString = " heals for "
-    //     if (healthToAdd < 0) {
-    //         healString = " is damaged for "
-    //     }
-    //     if (Math.abs(healthToAdd) > 0) {
-    //         this.updateMessage("Player " + player + healString + healthToAdd)
-    //     }
-    //     if (this.hasCard(player, "Regeneration") && healthToAdd > 0) {
-    //         this.updateMessage("Regeneration effect activated.")
-    //         healthToAdd += 1
-    //     }
-    //     if (this.hasCard(player, "Even Bigger")) {
-    //         this.localState.health[player - 1] = Math.min(this.localState.health[player - 1] + healthToAdd, this.maxHealth + 2)
-    //     } else {
-    //         this.localState.health[player - 1] = Math.min(this.localState.health[player - 1] + healthToAdd, this.maxHealth)
-    //     }
-    //     if (this.localState.health[player - 1] <= 0) {
-    //         this.eliminatePlayer(player)
-    //     }
-    //     if (this.hasCard(player, "We're Only Making It Stronger") && healthToAdd <= -2) {
-    //         this.updateMessage("We're Only Making It Stronger activated.")
-    //         this.addEnergy(player, 1)
-    //     }
-    // }
-
-    // addEnergy(player, energyToAdd) {
-    //     if (this.hasCard(player, "Friend of Children")) energyToAdd += 1
-    //     this.localState.energy[player - 1] += energyToAdd
-    // }
-
-    // hasCard(player, cardName) {
-    //     const playerHand = this.localState.hands[player - 1]
-    //     for (let i = 0; i < playerHand.length; i++) {
-    //         if (playerHand[i]['name'] === cardName) {
-    //             return true
-    //         }
-    //     }
-    //     return false
-    // }
-
-    // enterEdo(player) {
-    //     this.localState.edo = player
-    //     this.updateMessage("Player " + this.localState.currentTurn + " goes into Edo.")
-    //     this.addPoints(player, 1)
-    // }
-
-    // enterBayEdo(player) {
-    //     this.localState.bayEdo = player
-    //     this.updateMessage("Player " + this.localState.currentTurn + " goes into Edo Bay.")
-    //     this.addPoints(player, 1)
-    // }
-
-    // onlyCurrentPlayerInEdo() {
-    //     let returnValue = (this.localState.edo === this.localState.currentTurn || this.localState.edo === 0) && (this.localState.bayEdo === this.localState.currentTurn || this.localState.bayEdo === 0)
-    //     console.log("return value" + returnValue)
-    //     console.log(this.localState.edo)
-    //     console.log(this.localState.bayEdo)
-    //     return returnValue
-    //     // return (this.localState.edo === this.localState.currentTurn || this.localState.edo === 0) && (this.localState.bayEdo === this.localState.currentTurn || this.localState.bayEdo === 0)
-    // }
-
-    // checkElim() {
-    //     let playersToElim = []
-    //     for (let i = 0; i < this.localState.playersInGame.length; i++) {
-    //         let playerToCheck = this.localState.playersInGame[i]
-    //         if (this.localState.health[playerToCheck - 1] <= 0) {
-    //             playersToElim.push(playerToCheck)
-    //         } 
-    //     }
-    //     for (let i = 0; i < playersToElim.length; i++) {
-    //         this.eliminatePlayer(playersToElim[i])
-    //     }
-    //     if (this.localState.playersInGame.length === 1) {
-    //         this.alertWindow("Player " + this.localState.playersInGame[0] + " wins!")
-    //     }
-    // }
-
-    // eliminatePlayer(player) {
-    //     const playerIndex = this.localState.playersInGame.indexOf(player)
-    //     this.localState.playersInGame.splice(playerIndex, 1)
-    //     if (this.inEdo(player)) {
-    //         this.removeFromEdo(player)
-    //     }
-    //     this.updateMessage("Player " + player + " is eliminated!")
-    //     if (this.localState.playersInGame.length === 1) {
-    //         this.updateMessage("Player " + this.localState.playersInGame[0] + " wins!")
-    //         this.alertWindow("Player " + this.localState.playersInGame[0] + " wins!")
-    //     }
-    // }
-
-    // isEdoEmpty() {
-    //     if (this.localState.playersInGame.length <= 4) {
-    //         return this.localState.edo === 0 
-    //     } else {
-    //         return (this.localState.edo === 0 && this.localState.bayEdo === 0)
-    //     }
-    // }
-
-    // removeFromEdo(player) {
-    //     if (this.localState.edo === player) {
-    //         this.localState.edo = 0
-    //     } else if (this.localState.bayEdo === player) {
-    //         this.localState.bayEdo = 0
-    //     }
-    // }
-
-    // attack(damage) {
-    //     let damageBool = true
-    //     let attackString = "Edo"
-    //     if (this.hasCard(this.localState.currentTurn, "Acid Attack")) damage += 1
-    //     if (this.hasCard(this.localState.currentTurn, "Spiked Tail") && damage > 0) damage += 1
-    //     if (this.hasCard(this.localState.currentTurn, "Urbavore") && damage > 0) damage += 1
-    //     if (damage >= 3 && this.hasCard(this.localState.currentTurn, "Throw A Tanker")) {
-    //         this.updateMessage("Throw A Tanker activated.")
-    //         this.addPoints(this.localState.currentTurn, 2)
-    //     }
-    //     if (this.inEdo(this.localState.currentTurn)) {
-    //         damageBool = false
-    //         attackString = "Outside Edo"
-    //     }
-    //     if (damage > 0) {
-    //         this.updateMessage("Player " + this.localState.currentTurn + " deals " + damage + " damage to " + attackString + ".")
-    //         if(this.hasCard(this.localState.currentTurn, "Cannibalistic")) {
-    //             this.updateMessage("Cannibalistic activated.")
-    //             this.addPoints(this.localState.currentTurn, 1)
-    //         }
-    //     } else {
-    //         if (this.hasCard(this.localState.currentTurn, "Herbivore")) {
-    //             this.updateMessage("Herbivore activated!")
-    //             this.addPoints(this.localState.currentTurn, 1)
-    //         }
-    //     }
-    //     let playersToDamage = []
-    //     if (this.hasCard(this.localState.currentTurn, "Nova Breath")) {
-    //         for (let i = 0; i < this.localState.playersInGame.length; i++) {
-    //             if (this.localState.playersInGame[i] !== this.localState.currentTurn) {
-    //                 playersToDamage.push(this.localState.playersInGame[i])
-    //             }
-    //         }
-    //     } else {
-    //         for (let i = 0; i < this.localState.playersInGame.length; i++) {
-    //             if (this.inEdo(this.localState.playersInGame[i]) === damageBool) {
-    //                 playersToDamage.push(this.localState.playersInGame[i])
-    //             }
-    //     }
-    //     }
-    //     for (let i = 0; i < playersToDamage.length; i++) {
-    //         this.changeHealth(playersToDamage[i], -damage)
-    //         if (this.hasCard(playersToDamage[i], "Reflective Hide") && damage > 1) {
-    //             this.updateMessage("Reflective Hide activated.")
-    //             this.changeHealth(this.localState.currentTurn, -1)
-    //         }
-    //     }
-    // }
-
-    // inEdo(playerNumber) {
-    //     if (this.localState.playersInGame.length <= 4) {
-    //         if (playerNumber !== this.localState.edo) return false
-    //     } else {
-    //         if (playerNumber !== this.localState.edo && playerNumber !== this.localState.bayEdo) return false
-    //     }
-    //     return true
-    // }
-
-    // count(myArray, item) {
-    //     var count = 0
-    //     for(var i = 0; i < myArray.length; i++) {
-    //         if (myArray[i] === item) count++
-    //     }
-    //     return count
-    // }
-
-
-    // toggleSave(diceIndexNumber) {
-    //     if (this.localState.buttonPhase !== 0) {
-    //         this.alertWindow("Not the rolling phase right now.")
-    //         return
-    //     }
-    //     var index = "dice" + parseInt(diceIndexNumber)
-    //     const button = document.getElementById(index)
-    //     if (button.innerText === "none") {
-    //         this.alertWindow("Cannot save an unrolled dice.")
-    //         return
-    //     }
-    //     var copySaved = this.state.saved
-    //     copySaved[diceIndexNumber] = !copySaved[diceIndexNumber]
-    //     this.localState['saved'] = copySaved
-    //     this.rerenderState()
-    // }
-
-    // getNameForRollNumber(rollNumber) {
-    //     var rollName = "default"
-    //     switch(rollNumber) {
-    //         case 0:
-    //             rollName = "claw"
-    //             break;
-    //         case 1:
-    //             rollName = "energy"
-    //             break;
-    //         case 2:
-    //             rollName = "heart"
-    //             break;
-    //         case 3:
-    //             rollName = "1"
-    //             break;
-    //         case 4:
-    //             rollName = "2"
-    //             break;
-    //         case 5:
-    //             rollName = "3"
-    //             break;
-    //         default:
-    //             console.log("ERROR, UNIDENTIFIED ROLL")
-    //     }
-    //     return rollName
-    // }
-
     isCurrentTurn() {
-        // if (this.withDebug) return true
         return (this.currentPlayerNumber === this.localState.currentTurn)
     }
 
@@ -679,12 +148,12 @@ class NetworkShogun extends Game {
         )
     }
 
-    isArrayEquals(array1, array2) {
+    isArrayEqual(array1, array2) {
         if (array1.length !== array2.length) return false
         for (let i = 0; i < array1.length; i++) {
             console.log("array1[i] ", array1[i])
             console.log("array2[i] ", array2[i])
-            if (array1[i] != array2[i]) {
+            if (array1[i] !== array2[i]) {
                 return false
             }
         }
@@ -694,238 +163,36 @@ class NetworkShogun extends Game {
     spoofDice(diceArray) {
         let diceCode;
         console.log("diceArray ", diceArray)
-        if (this.isArrayEquals(diceArray, ["3","3","3","1","2","2"])) {
+        if (this.isArrayEqual(diceArray, ["3","3","3","1","2","2"])) {
             diceCode = "333"
-        } else if (this.isArrayEquals(diceArray, ["claw","3","3","1","2","2"])){
+        } else if (this.isArrayEqual(diceArray, ["claw","3","3","1","2","2"])){
             diceCode = "oneClaw"
-        } else if (this.isArrayEquals(diceArray, ["1","1","2","2","3","3"])){
+        } else if (this.isArrayEqual(diceArray, ["1","1","2","2","3","3"])){
             diceCode = "nothing"
-        } else if (this.isArrayEquals(diceArray, ["claw","claw","claw","claw","claw","claw"])){
+        } else if (this.isArrayEqual(diceArray, ["claw","claw","claw","claw","claw","claw"])){
             diceCode = "sixClaw"
-        } else if (this.isArrayEquals(diceArray, ["heart","1","1","2","2","3"])){
+        } else if (this.isArrayEqual(diceArray, ["heart","1","1","2","2","3"])){
             diceCode = "oneHeart"
-        } else if (this.isArrayEquals(diceArray, ["energy","energy","energy","energy","energy","energy"])){
+        } else if (this.isArrayEqual(diceArray, ["energy","energy","energy","energy","energy","energy"])){
             diceCode = "sixEnergy"
-        } else if (this.isArrayEquals(diceArray, ["energy","claw","heart","1","2","3"])){
+        } else if (this.isArrayEqual(diceArray, ["energy","claw","heart","1","2","3"])){
             diceCode = "completeDestruction"
-        } else if (this.isArrayEquals(diceArray, ["energy","energy","energy","3","3","3"])){
+        } else if (this.isArrayEqual(diceArray, ["energy","energy","energy","3","3","3"])){
             diceCode = "threeEnergyThreePoints"
-        } else if (this.isArrayEquals(diceArray, ["energy","energy","1","1","3","3"])){
+        } else if (this.isArrayEqual(diceArray, ["energy","energy","1","1","3","3"])){
             diceCode = "twoEnergy"
-        } else if (this.isArrayEquals(diceArray, ["energy","energy","energy","energy","energy","claw"])){
+        } else if (this.isArrayEqual(diceArray, ["energy","energy","energy","energy","energy","claw"])){
             diceCode = "fiveEnergyOneClaw"
-        } else if (this.isArrayEquals(diceArray, ["claw","claw","1","1","2","2"])){
+        } else if (this.isArrayEqual(diceArray, ["claw","claw","1","1","2","2"])){
             diceCode = "twoClaw"
         } else {
             console.log("DICE ARRAY NOT RECOGNIZED, DICE SET DID NOT HAPPEN")
             return
         }
-        // if (diceArray === ["3","3","3","1","2","2"]) {
-        //     diceCode = "333"
-        // } else if (diceArray === ["claw","3","3","1","2","2"]){
-        //     diceCode = "oneClaw"
-        // } else if (diceArray === ["1","1","2","2","3","3"]){
-        //     diceCode = "nothing"
-        // } else if (diceArray === ["claw","claw","claw","claw","claw","claw"]){
-        //     diceCode = "sixClaw"
-        // } else if (diceArray === ["heart","1","1","2","2","3"]){
-        //     diceCode = "oneHeart"
-        // } else if (diceArray === ["energy","energy","energy","energy","energy","energy"]){
-        //     diceCode = "sixEnergy"
-        // } else if (diceArray === ["energy","claw","heart","1","2","3"]){
-        //     diceCode = "completeDestruction"
-        // } else if (diceArray === ["energy","energy","energy","3","3","3"]){
-        //     diceCode = "threeEnergyThreePoints"
-        // } else if (diceArray === ["energy","energy","1","1","3","3"]){
-        //     diceCode = "twoEnergy"
-        // } else if (diceArray === ["energy","energy","energy","energy","energy","claw"]){
-        //     diceCode = "fiveEnergyOneClaw"
-        // } else if (diceArray === ["claw","claw","1","1","2","2"]){
-        //     diceCode = "twoClaw"
-        // } else {
-        //     console.log("DICE ARRAY NOT RECOGNIZED, DICE SET DID NOT HAPPEN")
-        //     return
-        // }
         this.apiSetDice(diceCode)
         setTimeout(() => {
             this.apiResolveRoll()
         }, 100)
-    }
-
-    buy(cardNumber) {
-        if (this.localState.buttonPhase !== 2) {
-            this.alertWindow("Not buy phase.")
-            return
-        }
-        if (this.canYield) {
-            this.alertWindow("Deal with yield before buying.")
-            return
-        }
-        if (this.localState.deck.length - 1 < cardNumber) {
-            this.alertWindow("Cannot buy card " + (cardNumber + 1) + " because it doesn't exist.")
-            return
-        }
-        if (this.canBuy) {
-            if (cardNumber === -1) {
-                this.advanceTurn()
-                this.rerenderState()
-                return
-            } else {
-                const boughtCard = this.localState.deck[cardNumber]
-                let boughtCardModifiedCost = this.getModifiedCost(this.localState.currentTurn, boughtCard['cost'])
-                if (boughtCardModifiedCost > this.localState.energy[this.localState.currentTurn - 1]) {
-                    this.alertWindow('Not enough money to buy.')
-                    return
-                } else {
-                    this.localState.energy[this.localState.currentTurn - 1] -= boughtCardModifiedCost
-                    this.localState.deck.splice(cardNumber, 1)
-                    if (boughtCard['type'] === 'discard') {
-                        this.discardCardEffect(boughtCard)
-                    } else {
-                        this.localState.hands[this.localState.currentTurn - 1].push(boughtCard)
-                        this.keepCardImmediateEffect(boughtCard)
-                    }
-                    this.rerenderState()
-                }
-            }
-        } else {
-            this.alertWindow("Cannot buy until you resolve your roll.")
-        }
-    }
-
-    keepCardImmediateEffect(card) {
-        if (card['name'] === 'Even Bigger') {
-            this.changeHealth(this.localState.currentTurn, 2)
-        }
-    }
-
-    getModifiedCost(player, originalCost) {
-        let returnCost = originalCost
-        if (this.hasCard(player, "Alien Metabolism")) {
-            returnCost -= 1
-        }
-        return returnCost
-    }
-
-    discardCardEffect(card) {
-        this.updateMessage(card['name'] + " activated.")
-        switch (card['name']) {
-            case 'Apartment Building':
-                this.updateMessage("Player " + this.localState.currentTurn + " earns 3 points from card.")
-                this.addPoints(this.localState.currentTurn, 3)
-                break;
-            case 'Commuter Train':
-                this.updateMessage("Player " + this.localState.currentTurn + " earns 2 points from card.")
-                this.addPoints(this.localState.currentTurn, 2)
-                break;
-            case 'Corner Store':
-                this.updateMessage("Player " + this.localState.currentTurn + " earns 1 points from card.")
-                this.addPoints(this.localState.currentTurn, 1)
-                break;
-            case 'Evacuation Orders':
-                this.updateMessage("All players (other than the active player) lose 5 points.")
-                for (let i = 0; i < this.localState.playersInGame.length; i++) {
-                    if (this.localState.currentTurn !== this.localState.playersInGame[i]) {
-                        this.addPoints(this.localState.playersInGame[i], -5)
-                    }
-                }
-                break;
-            case 'Fire Blast':
-                this.updateMessage("All players (other than the active player) take 2 damage.")
-                let playersToFireBlast = []
-                for (let i = 0; i < this.localState.playersInGame.length; i++) {
-                    if (this.localState.currentTurn !== this.localState.playersInGame[i]) {
-                        playersToFireBlast.push(this.localState.playersInGame[i])
-                        // this.changeHealth(this.localState.playersInGame[i], -2)
-                    }
-                }
-                for (let i = 0; i < playersToFireBlast.length; i++) {
-                    this.changeHealth(playersToFireBlast[i], -2)
-                }
-                break;
-            case 'Heal':
-                this.changeHealth(this.localState.currentTurn, 2)
-                break
-            case 'Gas Refinery':
-                this.updateMessage("All players (other than the active player) take 3 damage.")
-                for (let i = this.localState.playersInGame.length - 1; i >= 0; i--) {
-                    if (this.localState.currentTurn !== this.localState.playersInGame[i]) {
-                        this.changeHealth(this.localState.playersInGame[i], -3)
-                    }
-                }
-                this.addPoints(this.localState.currentTurn, 2)
-                break
-            case 'High Altitude Bombing':
-                for (let i = this.localState.playersInGame.length - 1; i >= 0; i--) {
-                    this.changeHealth(this.localState.playersInGame[i], -3)
-                }
-                break
-            case "Jet Fighters":
-                this.changeHealth(this.localState.currentTurn, -4)
-                this.addPoints(this.localState.currentTurn, 5)
-                break
-            case "National Guard":
-                this.changeHealth(this.localState.currentTurn, -2)
-                this.addPoints(this.localState.currentTurn, 2)
-                break
-            case "Nuclear Power Plant":
-                this.changeHealth(this.localState.currentTurn, 3)
-                this.addPoints(this.localState.currentTurn, 2)
-                break
-            case "Skyscraper":
-                this.addPoints(this.localState.currentTurn, 4)
-                break
-            case "Tanks":
-                this.changeHealth(this.localState.currentTurn, -3)
-                this.addPoints(this.localState.currentTurn, 4)
-                break
-            case "Amusement Park":
-                this.addPoints(this.localState.currentTurn, 4)
-                break
-            case "Army":
-                const cardNumber = this.localState.hands[this.localState.currentTurn - 1].length
-                console.log("Card number" + cardNumber)
-                this.changeHealth(this.localState.currentTurn, -cardNumber)
-                this.addPoints(this.localState.currentTurn, cardNumber)
-                break
-            default:
-                this.alertWindow("ERROR: Unrecognized card.")
-
-        }
-    }
-
-    yieldEdo(location) {
-        if (this.localState.buttonPhase !== 1) {
-            this.alertWindow("Not yield phase.")
-            return
-        }
-        if(!this.canYield) {
-            this.alertWindow("Can't yield, didn't take damage.")
-            return
-        } else {
-            if (this.localState.currentTurn !== this.localState.edo && this.localState.currentTurn !== this.localState.bayEdo) {
-                if (location === 'edo') {
-                    // Possibly can remove inside checks
-                    if (this.localState.edo !== this.localState.currentTurn) {
-                        this.updateMessage("Player " + this.localState.edo + " is yielding Edo.")
-                        this.enterEdo(this.localState.currentTurn)
-                        // this.localState.edo = this.localState.currentTurn
-                    } else {
-                        this.alertWindow("Can't yield Edo on own turn")
-                    }
-                } else if (location === 'bay') {
-                    if (this.localState.bayEdo !== this.localState.currentTurn) {
-                        this.updateMessage("Player " + this.localState.bayEdo + " is yielding Edo Bay.")
-                        this.enterBayEdo(this.localState.currentTurn)
-                    } else {
-                        this.alertWindow("Can't yield Edo on own turn")
-                    }
-                }
-            } else {
-                this.alertWindow("Can't yield Edo on own turn")
-            }
-        }
-        this.rerenderState()
     }
 
     renderHands() {
@@ -957,80 +224,12 @@ class NetworkShogun extends Game {
         )
     }
 
-    clearBuy() {
-        if (this.localState.buttonPhase !== 2) {
-            this.alertWindow("Not buy phase.")
-            return
-        }
-        if (this.localState.energy[this.localState.currentTurn - 1] < 2) {
-            this.alertWindow("Not enough money to clear.")
-            return
-        } else {
-            this.addEnergy(this.localState.currentTurn, -2)
-            this.localState.deck.splice(0, 3)
-            this.rerenderState()
-        }
-    }
-
     printState() {
         console.log(this.state)
     }
 
     printLocalState() {
         console.log(this.localState)
-    }
-
-    doneYielding() {
-        if (this.localState.buttonPhase !== 1) {
-            this.alertWindow("Not yield phase.")
-            return
-        }
-        if (this.localState.buttonPhase !== 1) {
-            return
-        }
-        this.canYield = false;
-        this.localState.buttonPhase = 2;
-        this.rerenderState()
-    }
-
-    setVictoryPointTarget(points) {
-        const parsedInt = parseInt(points, 10)
-        if(isNaN(parsedInt) || !Number.isInteger(parsedInt)) {
-            this.alertWindow("Must be a valid integer.")
-            return
-        }
-        this.updateMessage("Points to win set to " + parsedInt)
-        this.winPoints = parsedInt
-        this.rerenderState()
-    }
-
-    setMaxHealth(health) {
-        const parsedInt = parseInt(health, 10)
-        if(isNaN(parsedInt) || !Number.isInteger(parsedInt)) {
-            this.alertWindow("Must be a valid integer.")
-            return
-        }
-        this.updateMessage("Max Health set to " + parsedInt)
-        this.maxHealth = parsedInt
-        this.resetHealthsToMax()
-        this.rerenderState()
-    }
-
-    resetHealthsToMax() {
-        for (let i = 0; i < this.localState.health.length; i++) {
-            this.localState.health[i] = Math.min(this.localState.health[i], this.maxHealth)
-        }
-    }
-
-    setMaxPlayers(player) {
-        const parsedInt = parseInt(player, 10)
-        if(isNaN(parsedInt) || !Number.isInteger(parsedInt)) {
-            this.alertWindow("Must be a valid integer.")
-            return
-        }
-        this.updateMessage("Max players set to " + parsedInt)
-        this.maxPlayers = parsedInt
-        this.rerenderState()
     }
 
     renderCardInfo(number) {
@@ -1053,6 +252,55 @@ class NetworkShogun extends Game {
             window.alert(message)
         }
     }
+
+    advancePlayerNumber() {
+        let nextClosestPlayer;
+        var currentIndex = this.localState.playersInGame.indexOf(this.currentPlayerNumber)
+        if (currentIndex === -1) {
+            var potentialPlayers = []
+            for (var i = 1; i < this.localState.totalNumberOfPlayers; i++) {
+                var player = i + this.currentPlayerNumber
+                if (player <= this.localState.totalNumberOfPlayers) {
+                    potentialPlayers.push(player)
+                } else {
+                    potentialPlayers.push(player % this.localState.totalNumberOfPlayers)
+                }
+            }
+            nextClosestPlayer = this.localState.playersInGame[0]
+            for (i = 0; i < potentialPlayers.length; i++) {
+                if (this.localState.playersInGame.indexOf(potentialPlayers[i]) !== -1) {
+                    console.log("Next player is " + potentialPlayers[i])
+                    nextClosestPlayer = potentialPlayers[i]
+                    break
+                }
+            }
+        } else {
+            nextClosestPlayer = this.localState.playersInGame[(currentIndex + 1) % this.state.playersInGame.length] 
+        }
+        this.currentPlayerNumber = nextClosestPlayer
+        this.rerenderState()
+    }
+
+    setPlayerNumber(playerNumber) {
+        const parsedInt = parseInt(playerNumber, 10)
+        if(isNaN(parsedInt) || !Number.isInteger(parsedInt)) {
+            window.alert("Player number must be a valid integer.")
+            return
+        }
+        if (parsedInt <= 0 || parsedInt > this.localState.totalNumberOfPlayers) {
+            window.alert("Player number must within player range.");
+            return
+        }
+        this.currentPlayerNumber = parsedInt;
+        // this.alertWindow("Player number has been set to " + parsedInt + ".");
+        this.rerenderState();
+    }
+
+    ////
+    ////
+    // API CALLS
+    ////
+    ////
 
     apiResolveRoll() {
         if (! this.isCurrentTurn()) {
@@ -1278,40 +526,6 @@ class NetworkShogun extends Game {
         req.end()
     }
 
-    apiCreateNewGame() {
-        const https = require('http')
-        const options = {
-        hostname: this.hostname,
-        port: this.portNumber,
-        path: '/shogun/creategame/',
-        method: 'GET'
-        }
-
-        const req = https.request(options, res => {
-            console.log(`statusCode: ${res.statusCode}`)
-            var body = '';
-
-            res.on('data', function(chunk){
-                body += chunk;
-            });
-
-            res.on('end', () => {
-                console.log("Response " + body);
-                this.alertWindow("New game created! Game ID is " + body);
-                this.gameId = body;
-                console.log("IMPLEMENT GET GAME STATE");
-                // this.apiGetGameState();
-            })
-
-        })
-
-        req.on('error', error => {
-            console.error(error)
-        })
-
-        req.end()
-    }
-
     apiResetGame(numberPlayers=0) {
         const https = require('http')
         const options = {
@@ -1323,17 +537,10 @@ class NetworkShogun extends Game {
 
         const req = https.request(options, res => {
             console.log(`statusCode: ${res.statusCode}`)
-            var body = '';
-
-            res.on('data', function(chunk){
-                body += chunk;
-            });
 
             res.on('end', () => {
-                // console.log("Response " + body);
                 this.alertWindow("Game reset.");
-                console.log("IMPLEMENT GET GAME STATE");
-                // this.apiGetGameState();
+                this.apiGetGameState();
             })
 
         })
@@ -1408,26 +615,7 @@ class NetworkShogun extends Game {
         this.localState.maxPlayers = data.maxPlayers
     }
 
-    getArrayForJsonField(csvString) {
-        return []
-    }
-
-    setPlayerNumber(playerNumber) {
-        const parsedInt = parseInt(playerNumber, 10)
-        if(isNaN(parsedInt) || !Number.isInteger(parsedInt)) {
-            window.alert("Player number must be a valid integer.")
-            return
-        }
-        if (parsedInt <= 0 || parsedInt > this.localState.totalNumberOfPlayers) {
-            window.alert("Player number must within player range.");
-            return
-        }
-        this.currentPlayerNumber = parsedInt;
-        // this.alertWindow("Player number has been set to " + parsedInt + ".");
-        this.rerenderState();
-    }
-
-    setGameId(gameId) {
+    apiSetGameId(gameId) {
         const parsedInt = parseInt(gameId, 10)
         if(isNaN(parsedInt) || !Number.isInteger(parsedInt)) {
             window.alert("Game ID must be a valid integer.")
@@ -1451,7 +639,7 @@ class NetworkShogun extends Game {
 
             res.on('end', () => {
                 console.log("Response " + body);
-                if (body == "ID GOOD") {
+                if (body === "ID GOOD") {
                     this.alertWindow("Game ID updated to " + gameId);
                     this.gameId = gameId;
                 } else if (body === "ID BAD") {
@@ -1695,33 +883,6 @@ class NetworkShogun extends Game {
         req.end()
     }
 
-    advancePlayerNumber() {
-        let nextClosestPlayer;
-        var currentIndex = this.localState.playersInGame.indexOf(this.currentPlayerNumber)
-        if (currentIndex === -1) {
-            var potentialPlayers = []
-            for (var i = 1; i < this.localState.totalNumberOfPlayers; i++) {
-                var player = i + this.currentPlayerNumber
-                if (player <= this.localState.totalNumberOfPlayers) {
-                    potentialPlayers.push(player)
-                } else {
-                    potentialPlayers.push(player % this.localState.totalNumberOfPlayers)
-                }
-            }
-            nextClosestPlayer = this.localState.playersInGame[0]
-            for (i = 0; i < potentialPlayers.length; i++) {
-                if (this.localState.playersInGame.indexOf(potentialPlayers[i]) !== -1) {
-                    console.log("Next player is " + potentialPlayers[i])
-                    nextClosestPlayer = potentialPlayers[i]
-                    break
-                }
-            }
-        } else {
-            nextClosestPlayer = this.localState.playersInGame[(currentIndex + 1) % this.state.playersInGame.length] 
-        }
-        this.currentPlayerNumber = nextClosestPlayer
-        this.rerenderState()
-    }
 
     render() {
         return(
@@ -1834,7 +995,7 @@ class NetworkShogun extends Game {
                             <div>
                                 Game Number
                                 <input type="text" id="gameArea"></input>
-                                <button id="gameAreaButton" onClick={() => this.setGameId(document.getElementById("gameArea").value)}>Set Game ID</button>
+                                <button id="gameAreaButton" onClick={() => this.apiSetGameId(document.getElementById("gameArea").value)}>Set Game ID</button>
                             </div>
                             <div>
                                 <button onClick={() => {this.apiResetGame(0)}}>Reset Game</button>

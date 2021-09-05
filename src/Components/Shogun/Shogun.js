@@ -1,14 +1,10 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Container, Col, Row} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import TokyoRules from './9b-king-of-tokyo-rulebook.pdf'
 import Game from '../Game'
 
 class Shogun extends Game {
-
-    constructor(props) {
-        super(props)
-    }
 
     winPoints = 20
     maxHealth = 10
@@ -205,7 +201,7 @@ class Shogun extends Game {
                 }
             }
             nextClosestPlayer = this.localState.playersInGame[0]
-            for (var i = 0; i < potentialPlayers.length; i++) {
+            for (i = 0; i < potentialPlayers.length; i++) {
                 if (this.localState.playersInGame.indexOf(potentialPlayers[i]) !== -1) {
                     console.log("Next player is " + potentialPlayers[i])
                     nextClosestPlayer = potentialPlayers[i]
@@ -543,7 +539,7 @@ class Shogun extends Game {
             }
         } else {
             for (let i = 0; i < this.localState.playersInGame.length; i++) {
-                if (this.inEdo(this.localState.playersInGame[i]) == damageBool) {
+                if (this.inEdo(this.localState.playersInGame[i]) === damageBool) {
                     playersToDamage.push(this.localState.playersInGame[i])
                 }
         }
