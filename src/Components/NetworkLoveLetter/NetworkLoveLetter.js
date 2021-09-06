@@ -17,15 +17,15 @@ class NetworkLoveLetter extends Game {
     //
     // CHANGE THESE FOR PRODUCTION 
 
-    portnumber ='';
-    hostname = 'www.scottsherlock.one';
-    withDebug = false
-    waitTime = 1000
+    // portnumber ='';
+    // hostname = 'www.scottsherlock.one';
+    // withDebug = false
+    // waitTime = 1000
 
-    // portNumber = 8000;
-    // hostname = '0.0.0.0';
-    // withDebug = true
-    // waitTime = 3000
+    portNumber = 8000;
+    hostname = '0.0.0.0';
+    withDebug = true
+    waitTime = 1000
 
     // hostname = '44.230.70.0';
 
@@ -76,6 +76,34 @@ class NetworkLoveLetter extends Game {
         "handmaiden", "prince", "prince", "king", "countess", "princess"],
         totalNumberOfPlayers: 4,
         playedCards: []
+    }
+
+    advancePlayerNumber() {
+        let nextClosestPlayer;
+        var currentIndex = this.localState.playersInGame.indexOf(this.playerNumber)
+        if (currentIndex === -1) {
+            var potentialPlayers = []
+            for (var i = 1; i < this.localState.totalNumberOfPlayers; i++) {
+                var player = i + this.playerNumber
+                if (player <= this.localState.totalNumberOfPlayers) {
+                    potentialPlayers.push(player)
+                } else {
+                    potentialPlayers.push(player % this.localState.totalNumberOfPlayers)
+                }
+            }
+            nextClosestPlayer = this.localState.playersInGame[0]
+            for (i = 0; i < potentialPlayers.length; i++) {
+                if (this.localState.playersInGame.indexOf(potentialPlayers[i]) !== -1) {
+                    console.log("Next player is " + potentialPlayers[i])
+                    nextClosestPlayer = potentialPlayers[i]
+                    break
+                }
+            }
+        } else {
+            nextClosestPlayer = this.localState.playersInGame[(currentIndex + 1) % this.state.playersInGame.length] 
+        }
+        this.playerNumber = nextClosestPlayer
+        this.rerenderState()
     }
 
     constructor(props) {
@@ -728,7 +756,7 @@ class NetworkLoveLetter extends Game {
         req.end()
     }
     
-    setGameId(gameId) {
+    apiSetGameId(gameId) {
         const parsedInt = parseInt(gameId, 10)
         if(isNaN(parsedInt) || !Number.isInteger(parsedInt)) {
             window.alert("Game ID must be a valid integer.")
@@ -753,12 +781,47 @@ class NetworkLoveLetter extends Game {
             res.on('end', () => {
                 console.log("Response " + body);
                 if (body === "ID GOOD") {
-                    this.updateMessage("Game ID updated to " + gameId);
+                    this.alertWindow("Game ID updated to " + gameId);
                     this.gameId = gameId;
+                    this.apiGetGameState();
                 } else if (body === "ID BAD") {
-                    this.updateMessage("GAME ID BAD. NOT UPDATED");
+                    this.alertWindow("GAME ID BAD. NOT UPDATED");
                 }
-                this.rerenderState();
+            })
+
+        })
+
+        req.on('error', error => {
+            console.error(error)
+        })
+
+        req.end()
+    }
+
+    apiResetTests(gameId, deckNumber=0) {
+        const http = require('http')
+        const options = {
+        hostname: this.hostname,
+        port: this.portNumber,
+        path: '/loveletter/resettests/',
+        method: 'GET'
+        }
+
+        const req = http.request(options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+            var body = '';
+
+            res.on('data', function(chunk){
+                body += chunk;
+            });
+
+            res.on('end', () => {
+                // const result = JSON.parse(body);
+                // console.log(result[0].fields);
+                // this.updateMessage("Game state received.");
+                // this.setLocalStateFromApiData(result[0].fields)
+                // this.rerenderState();
+                this.apiGetGameState()
             })
 
         })
@@ -881,7 +944,8 @@ class NetworkLoveLetter extends Game {
                     <div>
                         <button onClick={() => {this.printState()}}>Print State</button>
                         <button onClick={() => {this.rerenderState()}}>Rerender State</button>
-                        <button id="resetTests" onClick={() => {this.resetTests()}}>Reset Test Games</button>
+                        <button id="resetTests" onClick={() => {this.apiResetTests()}}>Reset Test Games</button>
+                        <button id="advancePlayerNumber" onClick={() => this.advancePlayerNumber()}>Advance Player Number</button>
                     </div> : <p></p>}
                     </Col>
                     <Col>
@@ -896,7 +960,7 @@ class NetworkLoveLetter extends Game {
                         <div>
                             Game Number
                             <input type="text" id="gameArea"></input>
-                            <button onClick={() => this.setGameId(document.getElementById("gameArea").value)}>Set Game ID</button>
+                            <button id="gameAreaButton" onClick={() => this.apiSetGameId(document.getElementById("gameArea").value)}>Set Game ID</button>
                         </div>
                         <div>
                             <button onClick={() => this.apiCreateNewGame()}>Create New Game</button>

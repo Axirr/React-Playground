@@ -642,10 +642,10 @@ class NetworkShogun extends Game {
                 if (body === "ID GOOD") {
                     this.alertWindow("Game ID updated to " + gameId);
                     this.gameId = gameId;
+                    this.apiGetGameState();
                 } else if (body === "ID BAD") {
                     this.alertWindow("GAME ID BAD. NOT UPDATED");
                 }
-                this.rerenderState();
             })
 
         })
