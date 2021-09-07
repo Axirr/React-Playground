@@ -8,30 +8,103 @@ describe('Network Love Letter tests', () => {
 
   })
 
-  it("prince, target self", () => {
-
+  it("countess force play with prince warning", () => {
+    const stub = cy.stub()  
+    cy.on ('window:alert', stub)
+    cy.visit('localhost:3000/netloveletter')
+    cy.get("#resetTests").click()
+    cy.wait(200)
+    cy.get("#gameArea").clear().type("8")
+    cy.get("#gameAreaButton").click()
+    cy.wait(200)
+    cy.get("#playerArea").clear().type("1")
+    cy.get("#playerAreaButton").click()
+    cy.wait(100)
+    cy.get('[type="radio"]').check('2')
+    cy.get("#drawCard").click().then(
+        () => {
+          expect(stub.getCall(1)).to.be.calledWith('Not a valid move')
+      })
   })
 
-  it("guard guess, elimination", () => {
-
-  })
-
-  it("countess force play with prince", () => {
-
+  it("countess force play with king warning", () => {
+    const stub = cy.stub()  
+    cy.on ('window:alert', stub)
+    cy.visit('localhost:3000/netloveletter')
+    cy.get("#resetTests").click()
+    cy.wait(200)
+    cy.get("#gameArea").clear().type("7")
+    cy.get("#gameAreaButton").click()
+    cy.wait(200)
+    cy.get("#playerArea").clear().type("1")
+    cy.get("#playerAreaButton").click()
+    cy.wait(100)
+    cy.get('[type="radio"]').check('2')
+    cy.get("#drawCard").click().then(
+        () => {
+          expect(stub.getCall(1)).to.be.calledWith('Not a valid move')
+      })
   })
 
   it("basic win, showdown", () => {
-
+    cy.visit('localhost:3000/netloveletter')
+    cy.get("#resetTests").click()
+    cy.wait(200)
+    cy.get("#gameArea").clear().type("1")
+    cy.get("#gameAreaButton").click()
+    cy.wait(200)
+    cy.get("#playerArea").clear().type("1")
+    cy.get("#playerAreaButton").click()
+    cy.wait(100)
+    cy.get('[type="radio"]').check('2')
+    cy.get('[type="radio"]').check('priest')
+    cy.get("#drawCard").click()
+    cy.wait(100)
+    cy.get("#advancePlayerNumber").click()
+    cy.get("#drawCard").click()
+    cy.wait(100)
+    cy.get("#advancePlayerNumber").click()
+    cy.get("#drawCard").click()
+    cy.wait(100)
+    cy.get("#advancePlayerNumber").click()
+    cy.get("#drawCard").click()
+    cy.wait(100)
+    cy.get("#advancePlayerNumber").click()
+    cy.get("#drawCard").click()
+    cy.wait(100)
+    cy.contains("SHOWDOWN")
+    cy.contains("Player 1 wins!")
   })
 
   it("basic win by eliminations", () => {
-
+    cy.visit('localhost:3000/netloveletter')
+    cy.get("#resetTests").click()
+    cy.wait(200)
+    cy.get("#gameArea").clear().type("1")
+    cy.get("#gameAreaButton").click()
+    cy.wait(200)
+    cy.get("#playerArea").clear().type("1")
+    cy.get("#playerAreaButton").click()
+    cy.wait(100)
+    cy.get('[type="radio"]').check('2')
+    cy.get('[type="radio"]').check('king')
+    cy.get("#drawCard").click()
+    cy.wait(100)
+    cy.contains("Player 2 was eliminated.")
+    cy.get('[type="radio"]').check('1')
+    cy.get("#advancePlayerNumber").click()
+    cy.get("#hand3").click()
+    cy.wait(100)
+    cy.contains("Player 3 was eliminated.")
+    cy.get('[type="radio"]').check('1')
+    cy.get('[type="radio"]').check('princess')
+    cy.get("#advancePlayerNumber").click()
+    cy.get("#drawCard").click()
+    cy.wait(100)
+    cy.contains("Player 1 was eliminated.")
+    cy.contains("Player 4 wins!")
   })
   
-  it("play princess, eliminated", () => {
-
-  })
-
   it("prince targets not self, not princess, last card in deck", () => {
     cy.visit('localhost:3000/netloveletter')
     cy.get("#resetTests").click()
@@ -167,7 +240,7 @@ describe('Network Love Letter tests', () => {
     cy.visit('localhost:3000/netloveletter')
     cy.get("#resetTests").click()
     cy.wait(200)
-    cy.get("#gameArea").clear().type("7")
+    cy.get("#gameArea").clear().type("9")
     cy.get("#gameAreaButton").click()
     cy.wait(200)
     cy.get("#playerArea").clear().type("1")

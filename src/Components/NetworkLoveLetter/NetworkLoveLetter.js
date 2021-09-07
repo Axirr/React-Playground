@@ -25,7 +25,7 @@ class NetworkLoveLetter extends Game {
     portNumber = 8000;
     hostname = '0.0.0.0';
     withDebug = true
-    waitTime = 1000
+    waitTime = 3000
 
     // hostname = '44.230.70.0';
 
@@ -40,6 +40,8 @@ class NetworkLoveLetter extends Game {
     gameId = 1;
     playerNumber = 0;
     displayHands = true;
+    defaultDeck = ["guard", "guard", "guard", "guard", "guard", "priest", "priest", "baron", "baron", "handmaiden","handmaiden",
+        "prince", "prince", "king", "countess", "princess"]
 
     localState = {
         hands: ["none", "none", "none", "none"],
@@ -342,7 +344,7 @@ class NetworkLoveLetter extends Game {
                 {allPlayers.map((number) => {
                     return(
                         <div class="col-12">
-                            <input type="radio" value={number} name="target" defaultChecked/>Player {number}
+                            <input type="radio" value={number} name="target"/>Player {number}
                         </div>
                 )})}
             </div>
@@ -482,9 +484,15 @@ class NetworkLoveLetter extends Game {
 
     setRandomGoodGuess(player) {
         // console.log(this.localState.playedCards)
-        let deckCopy = [...this.localState.defaultDeck]
+        let deckCopy = [...this.defaultDeck]
+        // console.log("played cards ", this.localState.playedCards)
+        // console.log(typeof(this.localState.playedCards))
         for (let i = 0; i < this.localState.playedCards.length; i++) {
-            deckCopy.splice(deckCopy.indexOf(this.localState.playedCards[i]), 1)
+            let index = deckCopy.indexOf(this.localState.playedCards[i])
+            console.log("index ", index)
+            if (index !== -1) {
+                deckCopy.splice(index, 1)
+            }
         }
         for (let i = (deckCopy.length - 1); i >= 0; i--) {
             if (deckCopy[i] === "guard") {
@@ -493,12 +501,13 @@ class NetworkLoveLetter extends Game {
         }
         deckCopy.splice(deckCopy.indexOf(this.localState.drawCard), 1)
         deckCopy.splice(deckCopy.indexOf(this.localState.hands[player - 1]), 1)
-        // console.log(deckCopy)
+        // console.log("valid guesses", deckCopy)
         const randomGuessNumber = Math.floor(Math.random() * deckCopy.length)
         let randomGuessString = "princess"
         if (deckCopy.length > 0) {
             randomGuessString = deckCopy[randomGuessNumber]
         }
+        // console.log("selected random guess ", randomGuessString)
         let radioList = document.getElementsByName("guardGuess")
         for (let i = 0; i < radioList.length; i++) {
             let button = radioList[i]
@@ -546,12 +555,12 @@ class NetworkLoveLetter extends Game {
         this.rerenderState();
     }
 
-    apiCreateNewGame() {
+    apiCreateNewGame(playerNumber) {
         const https = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
-        path: '/loveletter/creategame/',
+        path: '/loveletter/creategame/' + playerNumber + "/",
         method: 'GET'
         }
 
@@ -589,7 +598,7 @@ class NetworkLoveLetter extends Game {
         }
 
         const req = https.request(options, res => {
-            console.log(`statusCode: ${res.statusCode}`)
+            // console.log(`statusCode: ${res.statusCode}`)
             var body = '';
 
             res.on('data', function(chunk){
@@ -598,7 +607,7 @@ class NetworkLoveLetter extends Game {
 
             res.on('end', () => {
                 const result = JSON.parse(body);
-                console.log(result[0].fields);
+                // console.log(result[0].fields);
                 // console.log(result);
                 this.updateMessage("Game state received.");
                 this.setLocalStateFromApiData(result[0].fields)
@@ -629,7 +638,7 @@ class NetworkLoveLetter extends Game {
         this.localState.isDisplayed = this.getBooleanArrayForCsvString(data.isDisplayed);
         this.localState.useDefaultDeck = data.useDefaultDeck;
         this.localState.totalNumberOfPlayers = data.totalNumberOfPlayers;
-        this.localState.playedCards = data.playedCards;
+        this.localState.playedCards = this.getArrayForCsvString(data.playedCards);
     }
 
     apiAdvanceTurn() {
@@ -701,6 +710,11 @@ class NetworkLoveLetter extends Game {
         req.end()
     }
 
+    isValidRadioTarget() {
+        if (this.getTargetPlayerNumber()) return true
+        return false
+    }
+
     apiPlayCard(card, cardNumberSelected, isAi=false) {
         if (!isAi) {
             if (cardNumberSelected !== 0 && cardNumberSelected !== this.playerNumber) {
@@ -719,13 +733,21 @@ class NetworkLoveLetter extends Game {
         //         }
         //     }
         }
+        let target = this.getTargetPlayerNumber()
+        if (!this.isValidRadioTarget() && (['guard','priest','baron','prince','king'].indexOf(card) !== -1)) {
+            this.alertWindow("No valid target selected.");
+            return
+        }
+        if (!this.isValidRadioTarget()) {
+            target = 1
+        }
         let spoofPlayerNumber = this.playerNumber;
         if (isAi) { spoofPlayerNumber = this.localState.currentTurn }
         const https = require('http')
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
-        path: '/loveletter/playCard/' + this.gameId + "/" + card + "/" + spoofPlayerNumber + "/" + this.getTargetPlayerNumber() + "/" + this.getGuardGuess() + "/",
+        path: '/loveletter/playCard/' + this.gameId + "/" + card + "/" + spoofPlayerNumber + "/" + target + "/" + this.getGuardGuess() + "/",
         method: 'GET'
         }
 
@@ -798,7 +820,7 @@ class NetworkLoveLetter extends Game {
         req.end()
     }
 
-    apiResetTests(gameId, deckNumber=0) {
+    apiResetTests() {
         const http = require('http')
         const options = {
         hostname: this.hostname,
@@ -809,18 +831,8 @@ class NetworkLoveLetter extends Game {
 
         const req = http.request(options, res => {
             console.log(`statusCode: ${res.statusCode}`)
-            var body = '';
-
-            res.on('data', function(chunk){
-                body += chunk;
-            });
 
             res.on('end', () => {
-                // const result = JSON.parse(body);
-                // console.log(result[0].fields);
-                // this.updateMessage("Game state received.");
-                // this.setLocalStateFromApiData(result[0].fields)
-                // this.rerenderState();
                 this.apiGetGameState()
             })
 
@@ -963,7 +975,7 @@ class NetworkLoveLetter extends Game {
                             <button id="gameAreaButton" onClick={() => this.apiSetGameId(document.getElementById("gameArea").value)}>Set Game ID</button>
                         </div>
                         <div>
-                            <button onClick={() => this.apiCreateNewGame()}>Create New Game</button>
+                            <button onClick={() => this.apiCreateNewGame(4)}>Create New Game</button>
                         </div>
                         <div>
                             <button onClick={() => {this.apiResetCurrentGame(this.gameId)}}>Reset Game</button>
@@ -979,9 +991,10 @@ class NetworkLoveLetter extends Game {
                         <p>Priest (2): Look at another player's hand card. (Value: 2)</p>
                         <p>Guard (5): Guess another player's card. If correct, they are eliminated. Cannot guess 'Guard'. (Value: 1)</p>
                     <h3>Choose Number of Players and Restart Game</h3>
-                    <button onClick={() => {this.redeal(2)} }>2 Players</button>
-                    <button onClick={() => {this.redeal(3)} }>3 Players</button>
-                    <button onClick={() => {this.redeal(4)} }>4 Players</button>
+                    <button onClick={() => {this.apiCreateNewGame(2)} }>2 Players</button>
+                    <button onClick={() => {this.apiCreateNewGame(3)} }>3 Players</button>
+                    <button onClick={() => {this.apiCreateNewGame(4)} }>4 Players</button>
+                    <button onClick={() => {this.apiCreateNewGame(5)} }>5 Players</button>
                     <p></p>
                     <a href="https://github.com/Axirr/React-Playground/blob/main/src/Components/NetworkLoveLetter/NetworkLoveLetter.js">Network Love Letter Source Code</a>
                     </Col>
