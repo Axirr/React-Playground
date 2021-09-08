@@ -1,7 +1,10 @@
+import '../../App.css';
 import { Container, Col, Row} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import TokyoRules from './9b-king-of-tokyo-rulebook.pdf'
 import Game from '../Game'
+import classes from './Shogun.module.css'
+import bufferIcon from './buffer.png'
 
 class NetworkShogun extends Game {
     //
@@ -15,6 +18,7 @@ class NetworkShogun extends Game {
 
     // portNumber = 8000;
     // hostname = '0.0.0.0';
+    // // withDebug = false
     // withDebug = true
     // waitTime = 3000
 
@@ -148,6 +152,30 @@ class NetworkShogun extends Game {
         )
     }
 
+    verticalRenderScoreBoards() {
+        return(
+            <div>
+                <Container>
+                    <Row>
+                {this.state.playersInGame.map((number) => {
+                    return(
+                        <Row>
+                            <Col>
+                        <div className={classes.scorecard}>
+                        <div>Player {number}</div>
+                        <div>Score: {this.localState.points[number - 1]}</div>
+                        <div>Health: {this.localState.health[number - 1]}</div>
+                        <div>Energy: {this.localState.energy[number - 1]}</div>
+                        </div>
+                            </Col>
+                        </Row>)
+                })}
+                    </Row>
+                </Container>
+            </div>
+        )
+    }
+
     isArrayEqual(array1, array2) {
         if (array1.length !== array2.length) return false
         for (let i = 0; i < array1.length; i++) {
@@ -196,8 +224,9 @@ class NetworkShogun extends Game {
     }
 
     renderHands() {
-        return(<Container>
-                    <div class="border">
+        return(
+                <Row>
+                    <div className={classes.hands}>
                         <Row>
                             {this.state.playersInGame.map((number) => {
                                 return(
@@ -205,9 +234,10 @@ class NetworkShogun extends Game {
                                         Player {number} Hand: {this.renderCards(this.state.hands[number - 1])}
                                     </Col>
                             )})}
+                            <div>Players in game: {JSON.stringify(this.state.playersInGame)}</div>
                         </Row>
                     </div>
-                </Container>
+                </Row>
         )
     }
 
@@ -292,7 +322,7 @@ class NetworkShogun extends Game {
             return
         }
         this.currentPlayerNumber = parsedInt;
-        // this.alertWindow("Player number has been set to " + parsedInt + ".");
+        this.alertWindow("Player number has been set to " + parsedInt + ".");
         this.rerenderState();
     }
 
@@ -886,28 +916,29 @@ class NetworkShogun extends Game {
 
     render() {
         return(
-            <div>
+            <div className={classes.shogunbody}>
                 <Container>
                     <Row>
-                        <Col>
-                            <h1>Shogun of Edo</h1>
+                        <Col className={"col-8"}>
+                            {/* <h1 className={classes.bigblue}>Shogun of Edo</h1> */}
+                            <h1 className={classes.shoguntitle}>Shogun of Edo</h1>
                             <button id="dice0" class={this.state.saved[0] ? "btn-secondary" : "btn-warning"} onClick={() => {this.apiToggleDiceSave(0)}}>{this.state.dice[0]}</button>
                             <button id="dice1" class={this.state.saved[1] ? "btn-secondary" : "btn-warning"} onClick={() => {this.apiToggleDiceSave(1)}}>{this.state.dice[1]}</button>
                             <button id="dice2" class={this.state.saved[2] ? "btn-secondary" : "btn-warning"} onClick={() => {this.apiToggleDiceSave(2)}}>{this.state.dice[2]}</button>
                             <button id="dice3" class={this.state.saved[3] ? "btn-secondary" : "btn-warning"} onClick={() => {this.apiToggleDiceSave(3)}}>{this.state.dice[3]}</button>
                             <button id="dice4" class={this.state.saved[4] ? "btn-secondary" : "btn-warning"} onClick={() => {this.apiToggleDiceSave(4)}}>{this.state.dice[4]}</button>
                             <button id="dice5" class={this.state.saved[5] ? "btn-secondary" : "btn-warning"} onClick={() => {this.apiToggleDiceSave(5)}}>{this.state.dice[5]}</button>
-                            {this.renderScoreBoards()}
-                            <div>Current Turn: Player {this.state.currentTurn}</div>
-                            <div>You are currently Player {this.currentPlayerNumber}</div>
-                            <div>
-                                New Player Number
-                                <input type="text" id="playerArea"></input>
-                                <button id="playerAreaButton" onClick={() => this.setPlayerNumber(document.getElementById("playerArea").value)}>Set Player Number</button>
+                            {/* <img className={"buffer"} src={bufferIcon} alt="buffer-sign" width="50" height="50" /> */}
+                            {/* {this.renderScoreBoards()} */}
+                            {/* <div className={classes.gamestate + " col-3"}> */}
+                            <div className={classes.gamestate}>
+                                <div>Current Turn: Player {this.state.currentTurn}</div>
+                                
+                                <div>You Are Currently Player {this.currentPlayerNumber} <a href="#playerArea">Change</a></div>
+                                <div>Remaining Rolls: {this.state.remainingRolls}</div>
+                                <div>Player In Edo: {(this.state.edo === 0) ? "empty" : this.state.edo}</div>
+                                {(this.state.playersInGame.length > 4) && <p>Player In Edo Bay: {this.state.bayEdo}</p>}
                             </div>
-                            <div>Remaining Rolls: {this.state.remainingRolls}</div>
-                            <div>Player In Edo: {(this.state.edo === 0) ? "empty" : this.state.edo}</div>
-                            {(this.state.playersInGame.length > 4) && <p>Player In Edo Bay: {this.state.bayEdo}</p>}
                             <div>
                                 <button id="roll" class={(this.localState.buttonPhase === 0 && this.state.remainingRolls > 0) ? "btn-success" : "btn-danger"} onClick={() => {this.apiRoll()}}>Roll</button>
                             </div>
@@ -922,7 +953,7 @@ class NetworkShogun extends Game {
                                 <button id="doneBuying" class={(this.localState.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.apiBuy(10)}}>Done Buying</button>
                                 <Row>
                                     <Col>
-                                        <div class="border border-primary rounded">
+                                        <div className={classes.scorecard}>
                                             <div>{this.renderCardInfo(0)}</div>
                                             <button id="buy0" class={((this.localState.buttonPhase === 2 && (this.localState.deck[0] && this.localState.deck[0].cost) <= this.localState.energy[this.localState.currentTurn - 1])) ? "btn-success" : "btn-danger"} onClick={() => {this.apiBuy(0)}}>Buy</button>
                                         </div>
@@ -930,7 +961,7 @@ class NetworkShogun extends Game {
                                 </Row>
                                 <Row>
                                     <Col>
-                                        <div class="border border-primary">
+                                        <div className={classes.scorecard}>
                                     <div>{this.renderCardInfo(1)}</div>
                                     <button id="buy1" class={((this.localState.buttonPhase === 2 && (this.localState.deck[1] && this.localState.deck[1].cost <= this.localState.energy[this.localState.currentTurn - 1]))) ? "btn-success" : "btn-danger"} onClick={() => {this.apiBuy(1)}}>Buy</button>
                                         </div>
@@ -938,7 +969,7 @@ class NetworkShogun extends Game {
                                 </Row>
                                 <Row>
                                     <Col>
-                                        <div class="border border-primary">
+                                        <div className={classes.scorecard}>
                                         <div>{this.renderCardInfo(2)}</div>
                                         <button id="buy2" class={((this.localState.buttonPhase === 2) && (this.localState.deck[2] && this.localState.deck[2].cost <= this.localState.energy[this.localState.currentTurn - 1])) ? "btn-success" : "btn-danger"} onClick={() => {this.apiBuy(2)}}>Buy</button>
                                         </div>
@@ -946,7 +977,7 @@ class NetworkShogun extends Game {
                                 </Row>
                             </div>
                             {this.renderHands()}
-                            <p>Players in game: {JSON.stringify(this.state.playersInGame)}</p>
+                            {/* <div className={classes.gamestate}>Players in game: {JSON.stringify(this.state.playersInGame)}</div> */}
                             <div>
                                 {this.withDebug && 
                                 <div>
@@ -981,6 +1012,9 @@ class NetworkShogun extends Game {
                         </Col>
                         <Col>
                             <div>
+                                {this.verticalRenderScoreBoards()}
+                            </div>
+                            <div className={classes.gamestate}>
                                 <h3>Game History</h3>
                                 <p>Message  0: {this.state.message[0]}</p>
                                 <p>Message -1: {this.state.message[1]}</p>
@@ -989,32 +1023,32 @@ class NetworkShogun extends Game {
                                 <p>Message -4: {this.state.message[4]}</p>
                                 <p>Message -5: {this.state.message[5]}</p>
                             </div>
-                            <div>
-                                <button onClick={() => {this.apiCreateNewGame()}}>Create New Game</button>
+                        </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                            <div className={classes.gamestate}>
+                                New Player Number
+                                <input type="text" id="playerArea"></input>
+                                <button id="playerAreaButton" onClick={() => this.setPlayerNumber(document.getElementById("playerArea").value)}>Set Player Number</button>
+                                <div>
+                                    <button onClick={() => {this.apiCreateNewGame()}}>Create New Game</button>
+                                </div>
                             </div>
-                            <div>
-                                Game Number
-                                <input type="text" id="gameArea"></input>
-                                <button id="gameAreaButton" onClick={() => this.apiSetGameId(document.getElementById("gameArea").value)}>Set Game ID</button>
-                            </div>
-                            <div>
-                                <button onClick={() => {this.apiResetGame(0)}}>Reset Game</button>
-                            </div>
-                            <div>
-                                <button onClick={() => {this.apiGetGameState()}}>Get Game State</button>
-                            </div>
-                            <div>
-                                <a href={TokyoRules}>King of Tokyo Full Rules</a>
-                                <h3>Short Rules</h3>
-                                <div>First to <b><u>{this.localState.winPoints} points</u></b> or last player alive wins!</div>
-                                <div>Roll dice up 3 (default) times, and then resolve when done. Dice can be saved between rolls.</div>
-                                <div>Triple+ # dice get you points (diceValue + # over triple). Claws attack the area you're not in (Edo vs Outside) and put you in Edo if unoccupied or occupant yields to you.</div>
-                                <div>Hearts heal, but not in Edo. Energy is money to buy cards.</div>
-                                <div>If attacked in Edo, have the option to yield. Must press "Done Yielding" to finish phase either way.</div>
-                                <div>Get 1 point when go into Edo. Get 2 points if start your turn in Edo.</div>
-                                <div>Buy cards with energy. Discard cards have an immediate effect. Keep cards have a persistent effect. Click "Done Buying" to end turn.</div>
-                            </div>
-                            <div>
+                            <div className={classes.gamestate}>
+                                <div>
+                                        Game Number
+                                        <input type="text" id="gameArea"></input>
+                                        <button id="gameAreaButton" onClick={() => this.apiSetGameId(document.getElementById("gameArea").value)}>Set Game ID</button>
+                                    </div>
+                                    <div>
+                                        <button onClick={() => {this.apiResetGame(0)}}>Reset Game</button>
+                                    </div>
+                                    <div>
+                                        <button onClick={() => {this.apiGetGameState()}}>Get Game State</button>
+                                    </div>
+                                </div>
+                            <div className={classes.gamestate}>
                                 <div><b>Configure Game</b></div>
                                 <div>
                                     Play To Victory Points
@@ -1033,8 +1067,21 @@ class NetworkShogun extends Game {
                                 </div>
                                 <button onClick={() => {this.setup(this.maxPlayers)}}>Restart Game With New Settings</button>
                             </div>
-                            <a href="https://github.com/Axirr/React-Playground/blob/main/src/Components/Shogun/NetworkShogun.js">Network Shogun of Edo Source Code</a>
                         </Col>
+                            <Col>
+                            <div className={classes.gamestate}>
+                                <a className={"App-link"} href={TokyoRules}>King of Tokyo Full Rules</a>
+                                <h3>Short Rules</h3>
+                                <div>First to <b><u>{this.localState.winPoints} points</u></b> or last player alive wins!</div>
+                                <div>Roll dice up 3 (default) times, and then resolve when done. Dice can be saved between rolls.</div>
+                                <div>Triple+ # dice get you points (diceValue + # over triple). Claws attack the area you're not in (Edo vs Outside) and put you in Edo if unoccupied or occupant yields to you.</div>
+                                <div>Hearts heal, but not in Edo. Energy is money to buy cards.</div>
+                                <div>If attacked in Edo, have the option to yield. Must press "Done Yielding" to finish phase either way.</div>
+                                <div>Get 1 point when go into Edo. Get 2 points if start your turn in Edo.</div>
+                                <div>Buy cards with energy. Discard cards have an immediate effect. Keep cards have a persistent effect. Click "Done Buying" to end turn.</div>
+                            </div>
+                            </Col>
+                        <a href="https://github.com/Axirr/React-Playground/blob/main/src/Components/Shogun/NetworkShogun.js">Network Shogun of Edo Source Code</a>
                     </Row>
                 </Container>
             </div>

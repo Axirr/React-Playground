@@ -1,0 +1,48 @@
+.shoguntitle {
+    color: rgb(26, 21, 15);
+    font-family: Arial;
+    text-align: center;
+}
+
+.buffer {
+    animation-name: buffer-icon-spin;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+}
+
+.gamestate {
+    background-color:navajowhite;
+    border-radius: 25px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+
+.shogunbody {
+    background-color: tan;
+    background-image: url('woodGrain.jpg');
+}
+
+.hands {
+    background-color: navajowhite;
+    border-radius: 25px;
+}
+
+.energy {
+    color: green;
+}
+
+.scorecard {
+    border-radius: 25px;
+    background-image: url('paperTexture.jpg');
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+
+@keyframes buffer-icon-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

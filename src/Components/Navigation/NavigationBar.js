@@ -9,7 +9,7 @@ class NavigationBar extends Component {
     render() {
         return (
         <div>
-            <Navbar bg="light" expand="lg">
+            <Navbar bg="success" expand="lg">
             <Container>
               <Navbar.Brand href="/home">Lime Co.</Navbar.Brand>
               <Navbar.Toggle aria-controls="basic-navbar-nav" />
