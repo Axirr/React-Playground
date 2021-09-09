@@ -8,6 +8,14 @@ describe('Network Shogun of Edo app', () => {
 
   })
 
+  it("normal yield edo", () => {
+
+  })
+
+  it("normal do not yield edo", () => {
+
+  })
+
 
   it("5 player, both yield, only replaces one", () => {
 
@@ -768,7 +776,13 @@ describe('Network Shogun of Edo app', () => {
     cy.get("#advancePlayerNumber").click()
     cy.get("#spoof6Claw").click()
     cy.wait(300)
+    cy.get("#playerArea").clear().type("1")
+    cy.get("#playerAreaButton").click()
+    cy.wait(300)
     cy.get("#doneYielding").click()
+    cy.wait(300)
+    cy.get("#playerArea").clear().type("2")
+    cy.get("#playerAreaButton").click()
     cy.wait(300)
     cy.get("#doneBuying").click()
     cy.wait(300)

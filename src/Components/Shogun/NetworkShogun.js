@@ -18,7 +18,6 @@ class NetworkShogun extends Game {
 
     // portNumber = 8000;
     // hostname = '0.0.0.0';
-    // // withDebug = false
     // withDebug = true
     // waitTime = 3000
 
@@ -63,7 +62,7 @@ class NetworkShogun extends Game {
         {'name': 'Spiked Tail', 'cost': 5, 'type': 'keep', 'ability': "When you attack, do 1 additional damage."},
         {'name': 'Solar Powered', 'cost': 2, 'type': 'keep', 'ability': "At the end your turn, if you have 0 energy, gain 1 energy."},
         {'name': 'Tanks', 'cost': 4, 'type': 'discard', 'ability': "+4 Points and take 3 damage."},
-        {'name': 'Urbavore', 'cost': 4, 'type': 'keep', 'ability': "Gain 1 extra point when starting a turn in Edo. Deal 1 extra damage when dealing damage from Tokyo."},
+        {'name': 'Urbavore', 'cost': 4, 'type': 'keep', 'ability': "Gain 1 extra point when starting a turn in Edo. Deal 1 extra damage when dealing damage from Edo."},
         {'name': "We're Only Making It Stronger", 'cost': 3, 'type': 'keep', 'ability': "When you lost 2 health, gain 1 energy."},
         {'name': "Amusement Park", 'cost': 6, 'type': 'discard', 'ability': "+4 Points"},
         {'name': "Army", 'cost': 2, 'type': 'discard', 'ability': "+1 point and take a damage for every card you have."},
@@ -95,6 +94,7 @@ class NetworkShogun extends Game {
         canYield: false,
         buttonPhase: 0,
         maxPlayers: 4,
+        isGameOver: false,
     }
 
     state = {
@@ -120,6 +120,7 @@ class NetworkShogun extends Game {
         canYield: false,
         buttonPhase: 0,
         maxPlayers: 4,
+        isGameOver: false,
     }
 
     componentDidMount() {
@@ -333,6 +334,10 @@ class NetworkShogun extends Game {
     ////
 
     apiResolveRoll() {
+        if (this.localState.isGameOver) {
+            this.alertWindow("GAME IS OVER!")
+            return
+        }
         if (! this.isCurrentTurn()) {
             this.alertWindow("NOT YOUR TURN!")
             return
@@ -371,6 +376,10 @@ class NetworkShogun extends Game {
     }
 
     apiSetDice(diceCode) {
+        if (this.localState.isGameOver) {
+            this.alertWindow("GAME IS OVER!")
+            return
+        }
         if (! this.isCurrentTurn()) {
             this.alertWindow("NOT YOUR TURN!")
             return
@@ -410,6 +419,10 @@ class NetworkShogun extends Game {
 
 
     apiRoll() {
+        if (this.localState.isGameOver) {
+            this.alertWindow("GAME IS OVER!")
+            return
+        }
         if (! this.isCurrentTurn()) {
             this.alertWindow("NOT YOUR TURN!")
             return
@@ -448,6 +461,10 @@ class NetworkShogun extends Game {
     }
 
     apiBuy(buyNumber) {
+        if (this.localState.isGameOver) {
+            this.alertWindow("GAME IS OVER!")
+            return
+        }
         if (! this.isCurrentTurn()) {
             this.alertWindow("NOT YOUR TURN!")
             return
@@ -486,6 +503,10 @@ class NetworkShogun extends Game {
     }
 
     apiToggleDiceSave(diceIndex) {
+        if (this.localState.isGameOver) {
+            this.alertWindow("GAME IS OVER!")
+            return
+        }
         if (! this.isCurrentTurn()) {
             this.alertWindow("NOT YOUR TURN!")
             return
@@ -601,10 +622,12 @@ class NetworkShogun extends Game {
 
             res.on('end', () => {
                 const result = JSON.parse(body);
-                console.log(result[0].fields);
+                if (this.withDebug) {
+                    console.log(result[0].fields);
+                }
                 this.updateMessage("Game state received.");
                 this.setLocalStateFromApiData(result[0].fields)
-                console.log("Hands " + this.localState.hands)
+                // console.log("Hands " + this.localState.hands)
                 this.rerenderState();
                 if (isRefresh) {
                     setTimeout(() => {this.apiGetGameState(true)}, this.waitTime);
@@ -643,6 +666,7 @@ class NetworkShogun extends Game {
         this.localState.canYield = data.canYield
         this.localState.buttonPhase = data.buttonPhase
         this.localState.maxPlayers = data.maxPlayers
+        this.localState.isGameOver = data.isGameOver
     }
 
     apiSetGameId(gameId) {
@@ -688,10 +712,15 @@ class NetworkShogun extends Game {
     }
 
     apiDoneYielding() {
-        if (! this.isCurrentTurn()) {
-            this.alertWindow("NOT YOUR TURN!")
-            return
-        }
+        // NOT DIRECT USE BY BUTTON
+        // if (!this.localState.isGameOver) {
+        //     this.alertWindow("GAME IS OVER!")
+        //     return
+        // }
+        // if (! this.isCurrentTurn()) {
+        //     this.alertWindow("NOT YOUR TURN!")
+        //     return
+        // }
         const https = require('http')
         const options = {
         hostname: this.hostname,
@@ -804,8 +833,12 @@ class NetworkShogun extends Game {
     }
 
     apiYieldEdo(edoString) {
-        if (! this.isCurrentTurn()) {
-            this.alertWindow("NOT YOUR TURN!")
+        if (this.localState.isGameOver) {
+            this.alertWindow("GAME IS OVER!")
+            return
+        }
+        if (this.currentPlayerNumber !== this.localState.edo) {
+            this.alertWindow("Player in Edo must click yield button!")
             return
         }
         const https = require('http')
@@ -829,7 +862,7 @@ class NetworkShogun extends Game {
                 if (body.length > 0) {
                     this.alertWindow(body)
                 }
-                this.apiGetGameState();
+                this.apiDoneYielding();
             })
 
         })
@@ -842,6 +875,10 @@ class NetworkShogun extends Game {
     }
 
     apiClearBuy() {
+        if (this.localState.isGameOver) {
+            this.alertWindow("GAME IS OVER!")
+            return
+        }
         if (! this.isCurrentTurn()) {
             this.alertWindow("NOT YOUR TURN!")
             return
@@ -919,7 +956,7 @@ class NetworkShogun extends Game {
             <div className={classes.shogunbody}>
                 <Container>
                     <Row>
-                        <Col className={"col-8"}>
+                        <Col className={"col-sm-8 col-12"}>
                             {/* <h1 className={classes.bigblue}>Shogun of Edo</h1> */}
                             <h1 className={classes.shoguntitle}>Shogun of Edo</h1>
                             <button id="dice0" class={this.state.saved[0] ? "btn-secondary" : "btn-warning"} onClick={() => {this.apiToggleDiceSave(0)}}>{this.state.dice[0]}</button>
@@ -935,27 +972,28 @@ class NetworkShogun extends Game {
                                 <div>Current Turn: Player {this.state.currentTurn}</div>
                                 
                                 <div>You Are Currently Player {this.currentPlayerNumber} <a href="#playerArea">Change</a></div>
+                                {this.withDebug ? <button id="advancePlayerNumber" onClick={() => this.advancePlayerNumber()}>Advance Player Number</button> : <div></div>}
                                 <div>Remaining Rolls: {this.state.remainingRolls}</div>
                                 <div>Player In Edo: {(this.state.edo === 0) ? "empty" : this.state.edo}</div>
                                 {(this.state.playersInGame.length > 4) && <p>Player In Edo Bay: {this.state.bayEdo}</p>}
                             </div>
                             <div>
-                                <button id="roll" class={(this.localState.buttonPhase === 0 && this.state.remainingRolls > 0) ? "btn-success" : "btn-danger"} onClick={() => {this.apiRoll()}}>Roll</button>
+                                <button id="roll" class={(this.localState.buttonPhase === 0 && this.state.remainingRolls > 0 && this.currentPlayerNumber === this.localState.currentTurn && !this.localState.isGameOver) ? "btn-success" : "btn-danger"} onClick={() => {this.apiRoll()}}>Roll</button>
                             </div>
-                            <button id="resolveRoll" class={(this.localState.buttonPhase === 0) ? "btn-success" : "btn-danger"} onClick={() => {this.apiResolveRoll()}}>Lock-in Roll</button>
+                            <button id="resolveRoll" class={(this.localState.buttonPhase === 0 && this.currentPlayerNumber === this.localState.currentTurn && !this.localState.isGameOver) ? "btn-success" : "btn-danger"} onClick={() => {this.apiResolveRoll()}}>Lock-in Roll</button>
                             <div>
-                            <button id="yieldEdo" class={(this.localState.buttonPhase === 1) ? "btn-success" : "btn-danger"} onClick={() => {this.apiYieldEdo('edo')}}>Yield Edo</button>
-                            {(this.state.playersInGame.length > 4) && <button id="yieldBay" class={(this.localState.buttonPhase === 1) ? "btn-success" : "btn-danger"} onClick={() => {this.apiYieldEdo('bay')}}>Yield Edo Bay</button>}
-                            <button id="doneYielding" class={(this.localState.buttonPhase === 1) ? "btn-success" : "btn-danger"} onClick={() => {this.apiDoneYielding()}}>Done Yielding</button>
+                            <button id="yieldEdo" class={(this.localState.buttonPhase === 1 && this.currentPlayerNumber === this.localState.edo && !this.localState.isGameOver) ? "btn-success" : "btn-danger"} onClick={() => {this.apiYieldEdo('edo')}}>Yield Edo</button>
+                            {/* {(this.state.playersInGame.length > 4) && <button id="yieldBay" class={(this.localState.buttonPhase === 1) ? "btn-success" : "btn-danger"} onClick={() => {this.apiYieldEdo('bay')}}>Yield Edo Bay</button>} */}
+                            <button id="doneYielding" class={(this.localState.buttonPhase === 1 && this.currentPlayerNumber === this.localState.edo && !this.localState.isGameOver) ? "btn-success" : "btn-danger"} onClick={() => {this.apiDoneYielding()}}>Done Yielding</button>
                             </div>
                             <div>
-                                <button id="clearBuy" class={(this.localState.buttonPhase === 2 && this.localState.energy[this.localState.currentTurn - 1] > 2) ? "btn-success" : "btn-danger"} onClick={() => {this.apiClearBuy()}}>Pay 2 to Clear Buy Cards</button>
-                                <button id="doneBuying" class={(this.localState.buttonPhase === 2) ? "btn-success" : "btn-danger"} onClick={() => {this.apiBuy(10)}}>Done Buying</button>
+                                <button id="clearBuy" class={(this.localState.buttonPhase === 2 && this.localState.energy[this.localState.currentTurn - 1] > 2 && this.currentPlayerNumber === this.localState.currentTurn && !this.localState.isGameOver) ? "btn-success" : "btn-danger"} onClick={() => {this.apiClearBuy()}}>Pay 2 to Clear Buy Cards</button>
+                                <button id="doneBuying" class={(this.localState.buttonPhase === 2 && this.currentPlayerNumber === this.localState.currentTurn && !this.localState.isGameOver) ? "btn-success" : "btn-danger"} onClick={() => {this.apiBuy(10)}}>Done Buying</button>
                                 <Row>
                                     <Col>
                                         <div className={classes.scorecard}>
                                             <div>{this.renderCardInfo(0)}</div>
-                                            <button id="buy0" class={((this.localState.buttonPhase === 2 && (this.localState.deck[0] && this.localState.deck[0].cost) <= this.localState.energy[this.localState.currentTurn - 1])) ? "btn-success" : "btn-danger"} onClick={() => {this.apiBuy(0)}}>Buy</button>
+                                            <button id="buy0" class={((this.localState.buttonPhase === 2 && (this.localState.deck[0] && this.localState.deck[0].cost) <= this.localState.energy[this.localState.currentTurn - 1]) && this.currentPlayerNumber === this.localState.currentTurn && !this.localState.isGameOver) ? "btn-success" : "btn-danger"} onClick={() => {this.apiBuy(0)}}>Buy</button>
                                         </div>
                                     </Col>
                                 </Row>
@@ -963,7 +1001,7 @@ class NetworkShogun extends Game {
                                     <Col>
                                         <div className={classes.scorecard}>
                                     <div>{this.renderCardInfo(1)}</div>
-                                    <button id="buy1" class={((this.localState.buttonPhase === 2 && (this.localState.deck[1] && this.localState.deck[1].cost <= this.localState.energy[this.localState.currentTurn - 1]))) ? "btn-success" : "btn-danger"} onClick={() => {this.apiBuy(1)}}>Buy</button>
+                                    <button id="buy1" class={((this.localState.buttonPhase === 2 && (this.localState.deck[1] && this.localState.deck[1].cost <= this.localState.energy[this.localState.currentTurn - 1])) && this.currentPlayerNumber === this.localState.currentTurn && !this.localState.isGameOver) ? "btn-success" : "btn-danger"} onClick={() => {this.apiBuy(1)}}>Buy</button>
                                         </div>
                                     </Col>
                                 </Row>
@@ -971,7 +1009,7 @@ class NetworkShogun extends Game {
                                     <Col>
                                         <div className={classes.scorecard}>
                                         <div>{this.renderCardInfo(2)}</div>
-                                        <button id="buy2" class={((this.localState.buttonPhase === 2) && (this.localState.deck[2] && this.localState.deck[2].cost <= this.localState.energy[this.localState.currentTurn - 1])) ? "btn-success" : "btn-danger"} onClick={() => {this.apiBuy(2)}}>Buy</button>
+                                        <button id="buy2" class={((this.localState.buttonPhase === 2) && (this.localState.deck[2] && this.localState.deck[2].cost <= this.localState.energy[this.localState.currentTurn - 1]) && this.currentPlayerNumber === this.localState.currentTurn && !this.localState.isGameOver) ? "btn-success" : "btn-danger"} onClick={() => {this.apiBuy(2)}}>Buy</button>
                                         </div>
                                     </Col>
                                 </Row>
@@ -985,13 +1023,12 @@ class NetworkShogun extends Game {
                                     <div>
                                         <button onClick={() => {this.apiResetGame(2)}}>Reset to 2 Players</button>
                                         <button onClick={() => {this.apiResetGame(4)}}>Reset to 4 Players</button>
-                                        <button onClick={() => {this.apiResetGame(5)}}>Reset to 5 Players</button>
+                                        {/* <button onClick={() => {this.apiResetGame(5)}}>Reset to 5 Players</button> */}
                                     </div>
                                     <div>
                                         <button onClick={() => {this.printState()}}>Print State</button>
                                         <button onClick={() => this.printLocalState()}>Print Local State</button>
                                         <button id="resetTests" onClick={() => this.apiResetTests()}>Reset Tests</button>
-                                        <button id="advancePlayerNumber" onClick={() => this.advancePlayerNumber()}>Advance Player Number</button>
                                     </div>
                                     <div>
                                         <button id="spoof3" onClick={() => this.spoofDice(["3","3","3","1","2","2"])}>Spoof Dice 333</button>
@@ -1016,12 +1053,12 @@ class NetworkShogun extends Game {
                             </div>
                             <div className={classes.gamestate}>
                                 <h3>Game History</h3>
-                                <p>Message  0: {this.state.message[0]}</p>
-                                <p>Message -1: {this.state.message[1]}</p>
-                                <p>Message -2: {this.state.message[2]}</p>
-                                <p>Message -3: {this.state.message[3]}</p>
-                                <p>Message -4: {this.state.message[4]}</p>
-                                <p>Message -5: {this.state.message[5]}</p>
+                                <p>Message  0: {this.state.message[5]}</p>
+                                <p>Message -1: {this.state.message[4]}</p>
+                                <p>Message -2: {this.state.message[3]}</p>
+                                <p>Message -3: {this.state.message[2]}</p>
+                                <p>Message -4: {this.state.message[1]}</p>
+                                <p>Message -5: {this.state.message[0]}</p>
                             </div>
                         </Col>
                         </Row>
