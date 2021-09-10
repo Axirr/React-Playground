@@ -17,6 +17,29 @@
     margin-bottom: 1px;
 }
 
+.blink_me {
+  animation: blinker 1s linear infinite;
+  color: red;
+}
+
+.red {
+    color: red;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
+
+.phasemessage {
+    background-color: navajowhite;
+}
+
+.secondphasemessage {
+    background-color: orange;
+}
+
 .shogunbody {
     background-color: tan;
     background-image: url('woodGrain.jpg');
