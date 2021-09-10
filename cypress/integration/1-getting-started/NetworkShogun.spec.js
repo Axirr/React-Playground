@@ -65,6 +65,60 @@ describe('Network Shogun of Edo app', () => {
 
   })
 
+  it("all players eliminated, who wins?", () => {
+
+  })
+
+  it("high altitude bomb with eliminations, including last player in game", () => {
+    cy.visit('localhost:3000/netshogun')
+    cy.get("#resetTests").click()
+    cy.wait(500)
+    cy.get("#gameArea").clear().type("8")
+    cy.get("#gameAreaButton").click()
+    cy.wait(300)
+    cy.get("#healthInput").clear().type("2")
+    cy.get("#maxHealthButton").click()
+    cy.wait(300)
+    cy.get("#spoof6Energy").click()
+    cy.wait(300)
+    cy.get("#buy2").click()
+    cy.wait(300)
+  })
+
+  it("normal gas refinery", () => {
+    cy.visit('localhost:3000/netshogun')
+    cy.get("#resetTests").click()
+    cy.wait(500)
+    cy.get("#gameArea").clear().type("8")
+    cy.get("#gameAreaButton").click()
+    cy.wait(300)
+    cy.get("#spoof6Energy").click()
+    cy.wait(300)
+    cy.get("#buy1").click()
+    cy.wait(300)
+    cy.contains("Player 1Score: 2Health: 10Energy: 0")
+    cy.contains("Player 2Score: 0Health: 7Energy: 0")
+    cy.contains("Player 3Score: 0Health: 7Energy: 0")
+    cy.contains("Player 4Score: 0Health: 7Energy: 0")
+  })
+
+  it("normal high altitude bomb", () => {
+    cy.visit('localhost:3000/netshogun')
+    cy.get("#resetTests").click()
+    cy.wait(500)
+    cy.get("#gameArea").clear().type("8")
+    cy.get("#gameAreaButton").click()
+    cy.wait(300)
+    cy.get("#spoof6Energy").click()
+    cy.wait(300)
+    cy.get("#buy2").click()
+    cy.wait(300)
+    cy.contains("Player 1Score: 0Health: 7Energy: 2")
+    cy.contains("Player 2Score: 0Health: 7Energy: 0")
+    cy.contains("Player 3Score: 0Health: 7Energy: 0")
+    cy.contains("Player 4Score: 0Health: 7Energy: 0")
+  })
+
   it("test regeneration", () => {
     cy.visit('localhost:3000/netshogun')
     cy.get("#resetTests").click()
@@ -790,7 +844,7 @@ describe('Network Shogun of Edo app', () => {
     cy.get("#advancePlayerNumber").click()
     cy.get("#spoof6Claw").click()
     cy.wait(300)
-    cy.contains("Edo: 3")
+    cy.contains("EdoPlayer 3")
   })
 
 
@@ -832,7 +886,7 @@ describe('Network Shogun of Edo app', () => {
     cy.get("#setEdo").click()
     cy.get("#yieldEdo").click()
     cy.wait(300)
-    cy.contains("Edo: 4")
+    cy.contains("EdoPlayer 4")
   })
 
   it("tests normal buying card", () => {

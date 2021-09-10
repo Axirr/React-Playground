@@ -17,19 +17,38 @@
     margin-bottom: 1px;
 }
 
+.gameStateNoRound {
+    background-color:navajowhite;
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+
 .blink_me {
-  animation: blinker 1s linear infinite;
-  color: red;
+    animation: blinker 1s linear infinite;
+    color: red;
+    font-weight: bold;
+    font-size: xx-large;
 }
 
 .red {
     color: red;
+    font-weight: bold;
+    font-size: large;
+}
+
+.hidden {
+    visibility: hidden;
 }
 
 @keyframes blinker {
-  50% {
-    opacity: 0;
-  }
+    50% {
+        opacity: 0.2;
+    }
+}
+
+.diceUnsaved {
+    color: yellow;
+    padding: 1px;
 }
 
 .phasemessage {
