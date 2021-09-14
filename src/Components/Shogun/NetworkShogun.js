@@ -4,6 +4,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import TokyoRules from './9b-king-of-tokyo-rulebook.pdf'
 import Game from '../Game'
 import classes from './Shogun.module.css'
+import 'react-perfect-scrollbar/dist/css/styles.css';
+import PerfectScrollbar from 'react-perfect-scrollbar'
 
 class NetworkShogun extends Game {
     //
@@ -32,6 +34,8 @@ class NetworkShogun extends Game {
     gameId = 1
     currentPlayerNumber = 1
     phaseColorToggle = true
+
+    messages = [];
 
     cards = [
         {'name': 'Friend of Children', 'cost':	3, 'type': 'keep', 'ability':	'when you gain energy, gain an additional energy.'},
@@ -708,13 +712,14 @@ class NetworkShogun extends Game {
         //         doMessage = true;
         //     }
         // }
+        let newMessages = this.getArrayForCsvString(data.message)
         this.localState.dice = this.getArrayForCsvString(data.dice)
         this.localState.saved = this.getBooleanArrayForCsvString(data.notDirectUseSaved)
         this.localState.playersInGame = this.getNumericalArrayForCsvString(data.notDirectUsePlayersInGame)
         this.localState.currentTurn = data.currentTurn
         this.localState.hands = data.hands
         this.localState.deck = data.deck
-        this.localState.message = this.getArrayForCsvString(data.message)
+        this.localState.message = newMessages
         this.localState.doShuffle = data.doShuffle
         this.localState.points = this.getNumericalArrayForCsvString(data.notDirectUsePoints)
         this.localState.health = this.getNumericalArrayForCsvString(data.notDirectUseHealth)
@@ -731,6 +736,8 @@ class NetworkShogun extends Game {
         this.localState.buttonPhase = data.buttonPhase
         this.localState.maxPlayers = data.maxPlayers
         this.localState.isGameOver = data.isGameOver
+
+        this.mergeMessages(newMessages)
         // if (doMessage) {
         //     this.alertWindow("Your turn started!")
         //     this.playTurnSound()
@@ -1019,6 +1026,7 @@ class NetworkShogun extends Game {
     }
 
     renderBuyCard(cardNumber) {
+        // BUG: Disabling button doesn't take into account alien metabolism cost reduction, potential other card effects
         return(
         <Row>
             <Col>
@@ -1038,6 +1046,66 @@ class NetworkShogun extends Game {
         </Row>
         )
     }
+
+    renderMessages() {
+        return (
+            <div>
+            {this.messages.slice(0).reverse().map((myMessage) => {
+            return(<div className={this.stylingForPlayerNumber(myMessage[1])}>{myMessage[0]}</div>)})}
+            </div>
+        )
+    }
+
+    stylingForPlayerNumber(playerNumber) {
+        let returnStyle = classes.red;
+        switch (playerNumber) {
+            case 1:
+                returnStyle = classes.red;
+                break;
+            case 2:
+                returnStyle = classes.blue;
+                break;
+            case 3:
+                returnStyle = classes.green;
+                break;
+            case 4:
+                returnStyle = classes.orange;
+                break;
+            case 5:
+                returnStyle = classes.pink;
+                break;
+            case 6:
+                returnStyle = classes.brown;
+                break;
+            default:
+                returnStyle = classes.purple;
+        }
+        return returnStyle;
+    }
+
+    mergeMessages(newMessages) {
+        let messagesOnly = this.messages.slice(0).reverse().map((messagePair) => {
+        // let messagesOnly = this.messages.map((messagePair) => {
+            console.log(messagePair);
+            return(messagePair[0]);
+        })
+        for (let i = newMessages.length - 1; i >= 0;  i--) {
+        // for (let i = 0; i < newMessages.length;  i++) {
+            let wasFound = false;
+            for (let j = 0; j < Math.min(messagesOnly.length, 6); j++) {
+                if (messagesOnly[j] === newMessages[i]) {
+                    wasFound = true;
+                    break;
+                }
+            }
+            if (wasFound) { break; }
+            if (newMessages[i] !== "none") {
+                this.messages.push([newMessages[i], this.localState.currentTurn])
+            }
+        }
+    }
+
+    // ACUTAL RENDER START
 
     render() {
         return(
@@ -1160,12 +1228,17 @@ class NetworkShogun extends Game {
                             </div>
                             <div className={classes.gamestate}>
                                 <h3>Game History</h3>
-                                <p>Message  0: {this.state.message[5]}</p>
+                                <div className={classes.scollbox}>
+                                <PerfectScrollbar component="div">
+                                    {this.renderMessages()}
+                                </PerfectScrollbar>
+                                </div>
+                                {/* <p>Message  0: {this.state.message[5]}</p>
                                 <p>Message -1: {this.state.message[4]}</p>
                                 <p>Message -2: {this.state.message[3]}</p>
                                 <p>Message -3: {this.state.message[2]}</p>
                                 <p>Message -4: {this.state.message[1]}</p>
-                                <p>Message -5: {this.state.message[0]}</p>
+                                <p>Message -5: {this.state.message[0]}</p> */}
                             </div>
                         </Col>
                         </Row>

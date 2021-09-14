@@ -40,6 +40,36 @@
     font-weight: bold;
 }
 
+.green {
+    color: green;
+    font-weight: bold;
+}
+
+.orange {
+    color: orange;
+    font-weight: bold;
+}
+
+.pink {
+    color: pink;
+    font-weight: bold;
+}
+
+.brown {
+    color: brown;
+    font-weight: bold;
+}
+
+.purple {
+    color: purple;
+    font-weight: bold;
+}
+
+.scollbox {
+    width: 400px;
+    height: 300px;
+}
+
 .hidden {
     visibility: hidden;
 }
