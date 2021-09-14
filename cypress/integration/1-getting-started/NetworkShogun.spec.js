@@ -49,8 +49,21 @@ describe('Network Shogun of Edo app', () => {
 
   })
 
-  it("test fire blast", () => {
-
+  it("test fire blast, some eliminations", () => {
+    cy.visit('localhost:3000/netshogun')
+    cy.get("#gameArea").clear().type("6")
+    cy.get("#gameAreaButton").click()
+    cy.wait(300)
+    cy.get("#resetTests").click()
+    cy.wait(300)
+    cy.get("#healthInput").clear().type("2")
+    cy.get("#maxHealthButton").click()
+    cy.wait(300)
+    cy.get("#spoof6Energy").click()
+    cy.wait(300)
+    cy.get("#buy1").click()
+    cy.wait(300)
+    cy.contains("Player 1 wins!")
   })
 
   it("check killed by jets don't win", () => {
@@ -69,7 +82,7 @@ describe('Network Shogun of Edo app', () => {
 
   })
 
-  it("high altitude bomb with eliminations, including last player in game", () => {
+  it("high altitude bomb with eliminations, including last player in game, CHECK SOMETHING", () => {
     cy.visit('localhost:3000/netshogun')
     cy.get("#resetTests").click()
     cy.wait(500)
@@ -922,26 +935,27 @@ describe('Network Shogun of Edo app', () => {
     cy.contains('Player 1Score: 0Health: 10Energy: 0')
   })
 
-  it("tests tries to buy empty card", () => {
-    cy.visit('localhost:3000/netshogun')
-    cy.get("#gameArea").clear().type("4")
-    cy.get("#gameAreaButton").click()
-    cy.wait(300)
-    cy.get("#resetTests").click()
-    cy.wait(300)
-    const stub = cy.stub()  
-    cy.on ('window:alert', stub)
-    cy.get("#spoof6Energy").click()
-    cy.wait(300)
-    cy.get("#buy0").click()
-    cy.wait(300)
-    cy.get("#buy2").click().then(
-      () => {
-        expect(stub.getCall(1)).to.be.calledWith("Cannot buy card 3 because it doesn't exist.")
-      }
-    )
+  // Test deprecated, buy button no longer exists for empty card
+  // it("tests tries to buy empty card", () => {
+  //   cy.visit('localhost:3000/netshogun')
+  //   cy.get("#gameArea").clear().type("4")
+  //   cy.get("#gameAreaButton").click()
+  //   cy.wait(300)
+  //   cy.get("#resetTests").click()
+  //   cy.wait(300)
+  //   const stub = cy.stub()  
+  //   cy.on ('window:alert', stub)
+  //   cy.get("#spoof6Energy").click()
+  //   cy.wait(300)
+  //   cy.get("#buy0").click()
+  //   cy.wait(300)
+  //   cy.get("#buy2").click().then(
+  //     () => {
+  //       expect(stub.getCall(1)).to.be.calledWith("Cannot buy card 3 because it doesn't exist.")
+  //     }
+  //   )
 
-  })
+  // })
 
   it("test basic heal", () => {
     cy.visit('localhost:3000/netshogun')

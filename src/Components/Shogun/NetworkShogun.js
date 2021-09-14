@@ -288,7 +288,7 @@ class NetworkShogun extends Game {
                     <div>{" Type: " + this.localState.deck[number]['type']}</div>
                     <div>{" Ability: " + this.localState.deck[number]['ability'] }</div>
                 </div>
-                : "none:"}
+                : null }
             </div>
         )
     }
@@ -1028,9 +1028,10 @@ class NetworkShogun extends Game {
                     <div>{this.renderCardInfo(cardNumber)}</div>
                 </div>
                     </Col>
+                    {this.localState.deck[cardNumber] ? 
                     <div className="col my-auto">
                     <button id={"buy" + cardNumber} class={((this.localState.buttonPhase === 2 && (this.localState.deck[cardNumber] && this.localState.deck[cardNumber].cost) <= this.localState.energy[this.localState.currentTurn - 1]) && this.currentPlayerNumber === this.localState.currentTurn && !this.localState.isGameOver) ? "btn-success" : "btn-danger"} onClick={() => {this.apiBuy(cardNumber)}}>Buy</button>
-                    </div>
+                    </div> : null}
 
                 </Row>
             </Col>
@@ -1044,7 +1045,7 @@ class NetworkShogun extends Game {
                 <Container>
                     <Row>
                         <Col className={"col-sm-8 col-12"}>
-                            <div className={this.phaseColorToggle ? classes.phasemessage : classes.secondphasemessage}>Current Phase Is {this.getCurrentPhaseName()} For Player {this.getCurrentPlayerForUpdateMessage()}.</div>
+                            <div className={this.phaseColorToggle ? classes.phasemessage : classes.secondphasemessage}>Current Phase Is <span className={classes.red}>{this.getCurrentPhaseName()}</span> For <span className={classes.blue}>Player {this.getCurrentPlayerForUpdateMessage()}</span>.</div>
                             <Row>
                                 <Col>
                                 {(this.currentPlayerNumber === this.state.currentTurn) ? <div className={classes.blink_me}>Your Turn</div> : <div className={classes.hidden}>Your turn.</div>}
@@ -1077,10 +1078,40 @@ class NetworkShogun extends Game {
                             <div>
                             <button id="resolveRoll" class={(this.localState.buttonPhase === 0 && this.currentPlayerNumber === this.localState.currentTurn && !this.localState.isGameOver) ? "btn-success" : "btn-danger"} onClick={() => {this.apiResolveRoll()}}>Lock-in Roll</button>
                             </div>
-                            {this.withDebug ? <button id="advancePlayerNumber" onClick={() => this.advancePlayerNumber()}>Advance Player Number</button> : <div></div>}
-                            {this.withDebug ? <button id="setEdo" onClick={() => {this.setEdoPlayer()}}>Set Edo Player</button> : <div></div>}
-                            {this.withDebug ? <button id= "setCurrent" onClick={() => {this.setCurrentTurnPlayer()}}>Set Current Player</button> : <div></div>}
-                            {this.withDebug ? <button onClick={() => {this.apiResetGame(0)}}>Reset Game</button> : <div></div>}
+                            <div>
+                                {this.withDebug && 
+                                <div>
+                                    <button className={classes.tanStyledButton} id="advancePlayerNumber" onClick={() => this.advancePlayerNumber()}>Advance Player Number</button>
+                                    <button className={classes.tanStyledButton} id="setEdo" onClick={() => {this.setEdoPlayer()}}>Set Edo Player</button>
+                                    <button className={classes.tanStyledButton} id= "setCurrent" onClick={() => {this.setCurrentTurnPlayer()}}>Set Current Player</button>
+                                    <button className={classes.tanStyledButton} onClick={() => {this.apiResetGame(0)}}>Reset Game</button>
+                                    <p>Change player numbers and restart game.</p>
+                                    <div>
+                                        <button className={classes.tanStyledButton} onClick={() => {this.apiResetGame(2)}}>Reset to 2 Players</button>
+                                        <button className={classes.tanStyledButton} onClick={() => {this.apiResetGame(4)}}>Reset to 4 Players</button>
+                                        {/* <button onClick={() => {this.apiResetGame(5)}}>Reset to 5 Players</button> */}
+                                    </div>
+                                    <div>
+                                        <button className={classes.tanStyledButton} onClick={() => {this.printState()}}>Print State</button>
+                                        <button className={classes.tanStyledButton} onClick={() => this.printLocalState()}>Print Local State</button>
+                                        <button className={classes.tanStyledButton} id="resetTests" onClick={() => this.apiResetTests()}>Reset Tests</button>
+                                    </div>
+                                    <div>
+                                        <button className={classes.tanStyledButton} id="spoof3" onClick={() => this.spoofDice(["3","3","3","1","2","2"])}>Spoof Dice 333</button>
+                                        <button className={classes.tanStyledButton} id="spoofClaw" onClick={() => this.spoofDice(["claw","3","3","1","2","2"])}>Spoof Dice One Claw</button>
+                                        <button className={classes.tanStyledButton} id="spoofNone" onClick={() => this.spoofDice(["1","1","2","2","3","3"])}>Spoof None</button>
+                                        <button className={classes.tanStyledButton} id="spoof6Claw" onClick={() => this.spoofDice(["claw","claw","claw","claw","claw","claw"])}>Spoof Six Claw</button>
+                                        <button className={classes.tanStyledButton} id="spoofHeart" onClick={() => this.spoofDice(["heart","1","1","2","2","3"])}>Spoof Heart</button>
+                                        <button className={classes.tanStyledButton} id="spoof6Energy" onClick={() => this.spoofDice(["energy","energy","energy","energy","energy","energy"])}>Spoof 6 Energy</button>
+                                        <button className={classes.tanStyledButton} id="spoofCompleteDestruction" onClick={() => this.spoofDice(["energy","claw","heart","1","2","3"])}>Spoof Complete Destruction</button>
+                                        <button className={classes.tanStyledButton} id="spoof3Points3Energy" onClick={() => this.spoofDice(["energy","energy","energy","3","3","3"])}>Spoof 3 Energy, 3 Points</button>
+                                        <button className={classes.tanStyledButton} id="spoof2Energy" onClick={() => this.spoofDice(["energy","energy","1","1","3","3"])}>Spoof 2 Energy</button>
+                                        <button className={classes.tanStyledButton} id="spoof5Energy1Claw" onClick={() => this.spoofDice(["energy","energy","energy","energy","energy","claw"])}>Spoof 5 Energy, 1 Claw</button>
+                                        <button className={classes.tanStyledButton} id="spoof2Claw" onClick={() => this.spoofDice(["claw","claw","1","1","2","2"])}>Spoof 2 Claw</button>
+                                    </div>
+                                </div>
+                                }
+                            </div>
                             </Col>
                                 <Col>
                                 <div className={classes.gamestate}>
@@ -1116,42 +1147,12 @@ class NetworkShogun extends Game {
                             </div>
                             {this.renderHands()}
                             {/* <div className={classes.gamestate}>Players in game: {JSON.stringify(this.state.playersInGame)}</div> */}
-                            <div>
-                                {this.withDebug && 
-                                <div>
-                                    <p>Change player numbers and restart game.</p>
-                                    <div>
-                                        <button onClick={() => {this.apiResetGame(2)}}>Reset to 2 Players</button>
-                                        <button onClick={() => {this.apiResetGame(4)}}>Reset to 4 Players</button>
-                                        {/* <button onClick={() => {this.apiResetGame(5)}}>Reset to 5 Players</button> */}
-                                    </div>
-                                    <div>
-                                        <button onClick={() => {this.printState()}}>Print State</button>
-                                        <button onClick={() => this.printLocalState()}>Print Local State</button>
-                                        <button id="resetTests" onClick={() => this.apiResetTests()}>Reset Tests</button>
-                                    </div>
-                                    <div>
-                                        <button id="spoof3" onClick={() => this.spoofDice(["3","3","3","1","2","2"])}>Spoof Dice 333</button>
-                                        <button id="spoofClaw" onClick={() => this.spoofDice(["claw","3","3","1","2","2"])}>Spoof Dice One Claw</button>
-                                        <button id="spoofNone" onClick={() => this.spoofDice(["1","1","2","2","3","3"])}>Spoof None</button>
-                                        <button id="spoof6Claw" onClick={() => this.spoofDice(["claw","claw","claw","claw","claw","claw"])}>Spoof Six Claw</button>
-                                        <button id="spoofHeart" onClick={() => this.spoofDice(["heart","1","1","2","2","3"])}>Spoof Heart</button>
-                                        <button id="spoof6Energy" onClick={() => this.spoofDice(["energy","energy","energy","energy","energy","energy"])}>Spoof 6 Energy</button>
-                                        <button id="spoofCompleteDestruction" onClick={() => this.spoofDice(["energy","claw","heart","1","2","3"])}>Spoof Complete Destruction</button>
-                                        <button id="spoof3Points3Energy" onClick={() => this.spoofDice(["energy","energy","energy","3","3","3"])}>Spoof 3 Energy, 3 Points</button>
-                                        <button id="spoof2Energy" onClick={() => this.spoofDice(["energy","energy","1","1","3","3"])}>Spoof 2 Energy</button>
-                                        <button id="spoof5Energy1Claw" onClick={() => this.spoofDice(["energy","energy","energy","energy","energy","claw"])}>Spoof 5 Energy, 1 Claw</button>
-                                        <button id="spoof2Claw" onClick={() => this.spoofDice(["claw","claw","1","1","2","2"])}>Spoof 2 Claw</button>
-                                    </div>
-                                </div>
-                                }
-                            </div>
                         </Col>
                         <Col>
                                 <div className={classes.gamestate}>
                                 {/* <div>Current Turn: Player {this.state.currentTurn}</div> */}
                                 
-                                <div>You Are Currently Player {this.currentPlayerNumber} <a href="#playerArea">Change</a></div>
+                                <div>You Are Currently <span className={classes.blue}>Player {this.currentPlayerNumber}</span> <a href="#playerArea">Change</a></div>
 
                                 </div>
                             <div>
@@ -1172,44 +1173,49 @@ class NetworkShogun extends Game {
                             <Col className={"col-sm-8 col-12"}>
                             <div className={classes.gamestate}>
                                 <div><b>Configure Game</b></div>
-                                Change Player Number
-                                <input type="text" id="playerArea"></input>
-                                <button id="playerAreaButton" onClick={() => this.setPlayerNumber(document.getElementById("playerArea").value)}>Set Player Number</button>
+                                <span className={classes.blue}>Change Player Number</span>
+                                <input className={classes.styledTextInput} type="text" id="playerArea"></input>
+                                <button className={classes.tanStyledButton} id="playerAreaButton" onClick={() => this.setPlayerNumber(document.getElementById("playerArea").value)}>Set Player Number</button>
+                            </div>
+                            <div className={classes.gamestate}>
+                            <Col>
                                 <div>
-                                    <button onClick={() => {this.apiCreateNewGame()}}>Create New Game</button>
+                                        Join Game Number
+                                        <input className={classes.styledTextInput} type="text" id="gameArea"></input>
+                                        <button className={classes.tanStyledButton} id="gameAreaButton" onClick={() => this.apiSetGameId(document.getElementById("gameArea").value)}>Set Game ID</button>
+                                    </div>
+                                    <div>
+                                        <button className={classes.tanStyledButton} onClick={() => {this.apiResetGame(0)}}>Reset Current Game</button>
+                                    </div>
+                            </Col>
+                            <Col>
+                                <div>
+                                    <button className={classes.tanStyledButton} onClick={() => {this.apiCreateNewGame()}}>Create New Game</button>
                                 </div>
+                            </Col>
                             </div>
                             <div className={classes.gamestate}>
                                 <div>
-                                        Join Game Number
-                                        <input type="text" id="gameArea"></input>
-                                        <button id="gameAreaButton" onClick={() => this.apiSetGameId(document.getElementById("gameArea").value)}>Set Game ID</button>
-                                    </div>
-                                    <div>
-                                        <button onClick={() => {this.apiResetGame(0)}}>Reset Game</button>
-                                    </div>
-                                    <div>
-                                        <button onClick={() => {this.apiGetGameState()}}>Get Game State</button>
-                                    </div>
-                                </div>
-                            <div className={classes.gamestate}>
-                                <div>
                                     Play To Victory Points
-                                    <input type="text" id="pointArea"></input>
-                                    <button onClick={() => this.apiSetVictoryPointTarget(document.getElementById("pointArea").value)}>Set Point Target</button>
+                                    <input className={classes.styledTextInput} type="text" id="pointArea"></input>
+                                    <button className={classes.tanStyledButton} onClick={() => this.apiSetVictoryPointTarget(document.getElementById("pointArea").value)}>Set Point Target</button>
                                 </div>
                                 <div>
                                     Max Health:
-                                    <input type="text" id="healthInput"></input>
-                                    <button id="maxHealthButton" onClick={() => this.apiSetMaxHealth(document.getElementById("healthInput").value)}>Set Max Health</button>
+                                    <input className={classes.styledTextInput} type="text" id="healthInput"></input>
+                                    <button className={classes.tanStyledButton} id="maxHealthButton" onClick={() => this.apiSetMaxHealth(document.getElementById("healthInput").value)}>Set Max Health</button>
                                 </div>
                                 <div>
                                     Number of Players:
-                                    <input type="text" id="playerInput"></input>
-                                    <button onClick={() => this.setMaxPlayers(document.getElementById("playerInput").value)}>Set Max Players</button>
+                                    <input className={classes.styledTextInput} type="text" id="playerInput"></input>
+                                    <button className={classes.tanStyledButton} onClick={() => this.setMaxPlayers(document.getElementById("playerInput").value)}>Set Max Players</button>
                                 </div>
-                                <button onClick={() => {this.setup(this.maxPlayers)}}>Restart Game With New Settings</button>
-                                <button onClick={() => {this.withDebug = !this.withDebug}}>Toggle Debug</button>
+                                <div>
+                                    <button className={classes.tanStyledButton} onClick={() => {this.setup(this.maxPlayers)}}>Restart Game With New Settings</button>
+                                </div>
+                                <div>
+                                    <button className={classes.tanStyledButton} onClick={() => {this.withDebug = !this.withDebug}}>Toggle Debug Buttons</button>
+                                </div>
                             </div>
                         </Col>
                             <Col>

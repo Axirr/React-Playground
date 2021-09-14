@@ -33,7 +33,11 @@
 .red {
     color: red;
     font-weight: bold;
-    font-size: large;
+}
+
+.blue {
+    color: blue;
+    font-weight: bold;
 }
 
 .hidden {
@@ -73,11 +77,23 @@
     color: green;
 }
 
+.tanStyledButton {
+    background-color: burlywood;
+    border: 2px solid tan;
+}
+
+.styledTextInput {
+    background-color: tan;
+    opacity: 0.5;
+}
+
 .scorecard {
     border-radius: 25px;
     background-image: url('paperTexture.jpg');
     margin-top: 1px;
     margin-bottom: 1px;
+    margin-left: 5px;
+    margin-right: 2px;
 }
 
 @keyframes buffer-icon-spin {
