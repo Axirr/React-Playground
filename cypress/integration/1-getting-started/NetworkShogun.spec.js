@@ -8,6 +8,14 @@ describe('Network Shogun of Edo app', () => {
 
   })
 
+  it("urbavore, get 1 extra point for starting in Edo", () => {
+
+  })
+
+  it("alient metabolism, can purchase card that a normal player wouldn't be able to (button doesn't disable)", () => {
+
+  })
+
   it("normal yield edo", () => {
 
   })

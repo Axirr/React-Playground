@@ -2,8 +2,8 @@ import '../../App.css';
 import { Container, Col, Row} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import TokyoRules from './9b-king-of-tokyo-rulebook.pdf'
-import Game from '../Game'
-import classes from './Shogun.module.css'
+import Game from '../Game/Game'
+import classes from '../Game/Game.module.css'
 import 'react-perfect-scrollbar/dist/css/styles.css';
 import PerfectScrollbar from 'react-perfect-scrollbar'
 
@@ -34,8 +34,6 @@ class NetworkShogun extends Game {
     gameId = 1
     currentPlayerNumber = 1
     phaseColorToggle = true
-
-    messages = [];
 
     cards = [
         {'name': 'Friend of Children', 'cost':	3, 'type': 'keep', 'ability':	'when you gain energy, gain an additional energy.'},
@@ -1038,7 +1036,7 @@ class NetworkShogun extends Game {
                     </Col>
                     {this.localState.deck[cardNumber] ? 
                     <div className="col my-auto">
-                    <button id={"buy" + cardNumber} class={((this.localState.buttonPhase === 2 && (this.localState.deck[cardNumber] && this.localState.deck[cardNumber].cost) <= this.localState.energy[this.localState.currentTurn - 1]) && this.currentPlayerNumber === this.localState.currentTurn && !this.localState.isGameOver) ? "btn-success" : "btn-danger"} onClick={() => {this.apiBuy(cardNumber)}}>Buy</button>
+                    <button id={"buy" + cardNumber} class={((this.localState.buttonPhase === 2 && this.localState.deck[cardNumber] && this.getCostForCard(this.localState.currentTurn, cardNumber) <= this.localState.energy[this.localState.currentTurn - 1]) && this.currentPlayerNumber === this.localState.currentTurn && !this.localState.isGameOver) ? "btn-success" : "btn-danger"} onClick={() => {this.apiBuy(cardNumber)}}>Buy</button>
                     </div> : null}
 
                 </Row>
@@ -1047,69 +1045,28 @@ class NetworkShogun extends Game {
         )
     }
 
-    renderMessages() {
-        return (
-            <div>
-            {this.messages.slice(0).reverse().map((myMessage) => {
-            return(<div className={this.stylingForPlayerNumber(myMessage[1])}>{myMessage[0]}</div>)})}
-            </div>
-        )
+    getCostForCard(player, cardNumber) {
+        let cost = this.localState.deck[cardNumber].cost
+        if (this.hasCard(player, 'Alien Metabolism')) { cost -= 1}
+        return Math.max(cost, 0)
     }
 
-    stylingForPlayerNumber(playerNumber) {
-        let returnStyle = classes.red;
-        switch (playerNumber) {
-            case 1:
-                returnStyle = classes.red;
-                break;
-            case 2:
-                returnStyle = classes.blue;
-                break;
-            case 3:
-                returnStyle = classes.green;
-                break;
-            case 4:
-                returnStyle = classes.orange;
-                break;
-            case 5:
-                returnStyle = classes.pink;
-                break;
-            case 6:
-                returnStyle = classes.brown;
-                break;
-            default:
-                returnStyle = classes.purple;
+    hasCard(player, cardName) {
+        const playerHand = this.localState.hands[player - 1]
+        for (let i = 0; i < playerHand.length; i++) {
+            if (playerHand[i]['name'] === cardName) {
+                return true
+            }
         }
-        return returnStyle;
+        return false
     }
 
-    mergeMessages(newMessages) {
-        let messagesOnly = this.messages.slice(0).reverse().map((messagePair) => {
-        // let messagesOnly = this.messages.map((messagePair) => {
-            console.log(messagePair);
-            return(messagePair[0]);
-        })
-        for (let i = newMessages.length - 1; i >= 0;  i--) {
-        // for (let i = 0; i < newMessages.length;  i++) {
-            let wasFound = false;
-            for (let j = 0; j < Math.min(messagesOnly.length, 6); j++) {
-                if (messagesOnly[j] === newMessages[i]) {
-                    wasFound = true;
-                    break;
-                }
-            }
-            if (wasFound) { break; }
-            if (newMessages[i] !== "none") {
-                this.messages.push([newMessages[i], this.localState.currentTurn])
-            }
-        }
-    }
 
     // ACUTAL RENDER START
 
     render() {
         return(
-            <div className={classes.shogunbody}>
+            <div className={classes.gamebody}>
                 <Container>
                     <Row>
                         <Col className={"col-sm-8 col-12"}>
@@ -1119,7 +1076,7 @@ class NetworkShogun extends Game {
                                 {(this.currentPlayerNumber === this.state.currentTurn) ? <div className={classes.blink_me}>Your Turn</div> : <div className={classes.hidden}>Your turn.</div>}
                                 </Col>
                                 <Col>
-                            <h1 className={classes.shoguntitle}>Shogun of Edo</h1>
+                            <h1 className={classes.gametitle}>Shogun of Edo</h1>
                                 </Col>
                                 <Col>
                                 {(this.currentPlayerNumber === this.state.edo && this.state.buttonPhase === 1) ? <div className={classes.blink_me}>Yielding?</div> : <div className={classes.hidden}>Decide On Yielding Edo.</div>}
@@ -1228,7 +1185,7 @@ class NetworkShogun extends Game {
                             </div>
                             <div className={classes.gamestate}>
                                 <h3>Game History</h3>
-                                <div className={classes.scollbox}>
+                                <div className={classes.scrollbox}>
                                 <PerfectScrollbar component="div">
                                     {this.renderMessages()}
                                 </PerfectScrollbar>
@@ -1299,7 +1256,7 @@ class NetworkShogun extends Game {
                                 <div>Roll dice up 3 (default) times, and then resolve when done. Dice can be saved between rolls.</div>
                                 <div>Triple+ # dice get you points (diceValue + # over triple). Claws attack the area you're not in (Edo vs Outside) and put you in Edo if unoccupied or occupant yields to you.</div>
                                 <div>Hearts heal, but not in Edo. Energy is money to buy cards.</div>
-                                <div>If attacked in Edo, have the option to yield. Must press "Done Yielding" to finish phase either way.</div>
+                                <div>If attacked in Edo, have the option to yield.</div>
                                 <div>Get 1 point when go into Edo. Get 2 points if start your turn in Edo.</div>
                                 <div>Buy cards with energy. Discard cards have an immediate effect. Keep cards have a persistent effect. Click "Done Buying" to end turn.</div>
                             </div>

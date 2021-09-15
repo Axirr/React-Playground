@@ -200,7 +200,7 @@ describe('Network Love Letter tests', () => {
     cy.get("#hand1").click()
     cy.wait(100)
     cy.contains('Player 3 discards their hand.')
-    cy.contains('Message -5: Player 3 hand card was a baron.')
+    cy.contains('Player 3 hand card was a baron.')
   })
 
   it("prince, non-self target, discard princess, eliminated", () => {

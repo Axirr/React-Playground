@@ -2,7 +2,7 @@ import React from 'react';
 import { Container, Col, Row} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import TokyoRules from './9b-king-of-tokyo-rulebook.pdf'
-import Game from '../Game'
+import Game from '../Game/Game'
 
 class Shogun extends Game {
 

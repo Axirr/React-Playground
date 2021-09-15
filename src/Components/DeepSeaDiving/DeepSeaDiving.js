@@ -1,5 +1,5 @@
 import React from 'react';
-import Game from '../Game'
+import Game from '../Game/Game'
 import { Container, Col, Row} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 

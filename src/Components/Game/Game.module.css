@@ -1,0 +1,170 @@
+.redMessage {
+    color: red;
+    font-weight: bold;
+}
+
+.blueMessage {
+    color: blue;
+    font-weight: bold;
+}
+
+.greenMessage {
+    color: green;
+    font-weight: bold;
+}
+
+.orangeMessage {
+    color: orange;
+    font-weight: bold;
+}
+
+.pinkMessage {
+    color: pink;
+    font-weight: bold;
+}
+
+.brownMessage {
+    color: brown;
+    font-weight: bold;
+}
+
+.purpleMessage {
+    color: purple;
+    font-weight: bold;
+}
+
+.gametitle {
+    color: rgb(26, 21, 15);
+    font-family: Arial;
+    text-align: center;
+}
+
+.buffer {
+    animation-name: buffer-icon-spin;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+}
+
+.gamestate {
+    background-color:navajowhite;
+    border-radius: 25px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+
+.gameStateNoRound {
+    background-color:navajowhite;
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+
+.blink_me {
+    animation: blinker 1s linear infinite;
+    color: red;
+    font-weight: bold;
+    font-size: xx-large;
+}
+
+.red {
+    color: red;
+    font-weight: bold;
+}
+
+.blue {
+    color: blue;
+    font-weight: bold;
+}
+
+.green {
+    color: green;
+    font-weight: bold;
+}
+
+.orange {
+    color: orange;
+    font-weight: bold;
+}
+
+.pink {
+    color: pink;
+    font-weight: bold;
+}
+
+.brown {
+    color: brown;
+    font-weight: bold;
+}
+
+.purple {
+    color: purple;
+    font-weight: bold;
+}
+
+.scrollbox {
+    height: 300px;
+}
+
+.hidden {
+    visibility: hidden;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0.2;
+    }
+}
+
+.diceUnsaved {
+    color: yellow;
+    padding: 1px;
+}
+
+.phasemessage {
+    background-color: navajowhite;
+}
+
+.secondphasemessage {
+    background-color: orange;
+}
+
+.gamebody {
+    background-color: tan;
+    background-image: url('woodGrain.jpg');
+}
+
+.hands {
+    background-color: navajowhite;
+    border-radius: 25px;
+}
+
+.energy {
+    color: green;
+}
+
+.tanStyledButton {
+    background-color: burlywood;
+    border: 2px solid tan;
+}
+
+.styledTextInput {
+    background-color: tan;
+    opacity: 0.5;
+}
+
+.scorecard {
+    border-radius: 25px;
+    background-image: url('paperTexture.jpg');
+    margin-top: 1px;
+    margin-bottom: 1px;
+    margin-left: 5px;
+    margin-right: 2px;
+}
+
+@keyframes buffer-icon-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

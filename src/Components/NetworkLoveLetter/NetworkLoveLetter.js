@@ -9,7 +9,10 @@ import princeCard from '../LoveLetter/CardImages/prince.png'
 import kingCard from '../LoveLetter/CardImages/king.png'
 import countessCard from '../LoveLetter/CardImages/countess.png'
 import princessCard from '../LoveLetter/CardImages/princess.png'
-import Game from '../Game';
+import Game from '../Game/Game';
+import 'react-perfect-scrollbar/dist/css/styles.css';
+import PerfectScrollbar from 'react-perfect-scrollbar'
+import classes from '../Game/Game.module.css'
 
 class NetworkLoveLetter extends Game {
 
@@ -25,7 +28,7 @@ class NetworkLoveLetter extends Game {
     // portNumber = 8000;
     // hostname = '0.0.0.0';
     // withDebug = true
-    // waitTime = 3000
+    // waitTime = 1000
 
     // hostname = '44.230.70.0';
 
@@ -51,7 +54,7 @@ class NetworkLoveLetter extends Game {
         "handmaiden", "prince", "prince", "king", "countess", "princess"],
         playersInGame: [1, 2, 3, 4],
         isHandMaiden: [false, false, false, false],
-        message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
+        message: ["none", "none", "none", "none", "none", "none"],
         setAsideCard: "none",
         isDisplayed: [false, false, false, false, false, false],
         useDefaultDeck: true,
@@ -70,7 +73,7 @@ class NetworkLoveLetter extends Game {
         "handmaiden", "prince", "prince", "king", "countess", "princess"],
         playersInGame: [1, 2, 3, 4],
         isHandMaiden: [false, false, false, false],
-        message: ["blank message", "blank message", "blank message", "blank message", "blank message", "blank message"],
+        message: ["none", "none", "none", "none", "none", "none"],
         setAsideCard: "none",
         isDisplayed: [false, false, false, false, false, false],
         useDefaultDeck: true,
@@ -270,7 +273,7 @@ class NetworkLoveLetter extends Game {
                         <div class="col-12">Hand {number}{true && 
                             <div>
                                 <div>
-                                    <button id={"hand"+number}> 
+                                    <button className={classes.tanStyledButton} id={"hand"+number}> 
                                         <img src={this.getLinkForCard(this.localState.hands[number - 1])} alt={this.localState.hands[number - 1]} width="100" 
                                         onClick={(() => { this.apiPlayCard(this.localState.hands[number - 1], number) })}/>
                                     </button> 
@@ -288,7 +291,7 @@ class NetworkLoveLetter extends Game {
                         <div class="col-12">Hand {number}{(this.playerNumber === number) && 
                             <div>
                                 <div>
-                                    <button id={"hand"+number}> 
+                                    <button className={classes.tanStyledButton} id={"hand"+number}> 
                                         <img src={this.getLinkForCard(this.localState.hands[number - 1])} alt={this.localState.hands[number - 1]} width="100" 
                                         onClick={(() => { this.apiPlayCard(this.localState.hands[number - 1], number) })}/>
                                     </button> 
@@ -627,18 +630,20 @@ class NetworkLoveLetter extends Game {
     }
 
     setLocalStateFromApiData(data) {
+        let newMessages = this.getArrayForCsvString(data.message);
         this.localState.hands = this.getArrayForCsvString(data.hands);
         this.localState.drawCard = data.drawCard;
         this.localState.currentTurn = data.currentTurn;
         this.localState.deck = this.getArrayForCsvString(data.deck);
         this.localState.playersInGame = this.getNumericalArrayForCsvString(data.playersInGame);
         this.localState.isHandMaiden = this.getBooleanArrayForCsvString(data.isHandMaiden);
-        this.localState.message = this.getArrayForCsvString(data.message);
+        this.localState.message = newMessages;
         this.localState.setAsideCard = data.setAsideCard;
         this.localState.isDisplayed = this.getBooleanArrayForCsvString(data.isDisplayed);
         this.localState.useDefaultDeck = data.useDefaultDeck;
         this.localState.totalNumberOfPlayers = data.totalNumberOfPlayers;
         this.localState.playedCards = this.getArrayForCsvString(data.playedCards);
+        this.mergeMessages(newMessages)
     }
 
     apiAdvanceTurn() {
@@ -890,23 +895,25 @@ class NetworkLoveLetter extends Game {
 
     render() {
         return (
+            <div className={classes.gamebody}>
             <Container>
                 <Row>
-                    <Col>
+                    <div className="col col-sm-8 col-12">
+                        <div className={classes.gamestate}>
                     <div>Current Player Id: {this.playerNumber}</div>
                     <div>
                         Player Number
-                        <input type="text" id="playerArea"></input>
-                        <button id="playerAreaButton" onClick={() => this.setPlayerNumber(document.getElementById("playerArea").value)}>Set Player Number</button>
+                        <input className={classes.styledTextInput} type="text" id="playerArea"></input>
+                        <button className={classes.tanStyledButton} id="playerAreaButton" onClick={() => this.setPlayerNumber(document.getElementById("playerArea").value)}>Set Player Number</button>
                     </div>
-                    <button id="playAiTurn" onClick={() => {this.playTurn(this.localState.currentTurn)}}>Play AI Turn</button>
+                    <button className={classes.tanStyledButton} id="playAiTurn" onClick={() => {this.playTurn(this.localState.currentTurn)}}>Play AI Turn</button>
                     <div>Current Turn: Player {this.state.currentTurn}</div>
                     <div>Cards Left in the Deck: {this.state.deck.length}</div>
                     <Row className="border">
                         <Col>
                     <div>
                         <div>Current Draw Card</div>
-                        {(this.playerNumber === this.localState.currentTurn || this.withDebug) && <button id="drawCard" onClick={ () => { this.apiPlayCard(this.state.drawCard, 0)}}>
+                        {(this.playerNumber === this.localState.currentTurn || this.withDebug) && <button className={classes.tanStyledButton} id="drawCard" onClick={ () => { this.apiPlayCard(this.state.drawCard, 0)}}>
                         <img src={this.getLinkForCard(this.localState.drawCard)} alt={this.localState.drawCard} width="100" />
                         </button> }
                         {this.renderHands()}
@@ -938,49 +945,63 @@ class NetworkLoveLetter extends Game {
                     </div>
                         </Col>
                     </Row>
-                    <p>...</p>
                     <Row>
                     <Col>{this.renderLivePlayers()}</Col>
                     <Col>{this.renderHandmaidenStatus()}</Col>
                     </Row>
-                    <button id="showHide" onClick = {() => { this.toggleDebug()}}>Show/Hide All Cards</button>
-                    {/* <button onClick = {() => { this.showCurrentPlayerCards()}}>Show Current Player Cards</button>
-                    <button onClick={() => { this.hideAllCards()}}>Hide All Cards</button>
-                    <button onClick={() => { this.showAllCards()}}>Show All Cards</button>
-                    <button onClick={() => {this.apiGetGameState()}}>Get Game State</button>
-                    <button onClick={() => {this.apiAdvanceTurn()}}>Advance Turn</button>
-                    <button onClick={() => {this.apiDeal(4)}}>Restart Game for 4</button>
-                    <button onClick={() => {this.apiPlayCard("handmaiden")}}>Play Card Test</button> */}
-                    <div><b>Configure Game</b></div>
+                    <button className={classes.tanStyledButton} id="showHide" onClick = {() => { this.toggleDebug()}}>Show/Hide All Cards</button>
+                        <div>
+                            <button className={classes.tanStyledButton} onClick={() => {this.withDebug = !this.withDebug}}>Toggle Debug Buttons</button>
+                        </div>
                     {this.withDebug ? 
                     <div>
-                        <button onClick={() => {this.printState()}}>Print State</button>
-                        <button onClick={() => {this.rerenderState()}}>Rerender State</button>
-                        <button id="resetTests" onClick={() => {this.apiResetTests()}}>Reset Test Games</button>
-                        <button id="advancePlayerNumber" onClick={() => this.advancePlayerNumber()}>Advance Player Number</button>
+                        <button className={classes.tanStyledButton} onClick={() => {this.printState()}}>Print State</button>
+                        <button className={classes.tanStyledButton} onClick={() => {this.rerenderState()}}>Rerender State</button>
+                        <button className={classes.tanStyledButton} id="resetTests" onClick={() => {this.apiResetTests()}}>Reset Test Games</button>
+                        <button className={classes.tanStyledButton} id="advancePlayerNumber" onClick={() => this.advancePlayerNumber()}>Advance Player Number</button>
                     </div> : <p></p>}
-                    </Col>
-                    <Col>
-                        <h3>Game History</h3>
-                        <p>Message  0: {this.state.message[0]}</p>
-                        <p>Message -1: {this.state.message[1]}</p>
-                        <p>Message -2: {this.state.message[2]}</p>
-                        <p>Message -3: {this.state.message[3]}</p>
-                        <p>Message -4: {this.state.message[4]}</p>
-                        <p>Message -5: {this.state.message[5]}</p>
+                    </div>
+                    </div>
+                    <div className="col col-sm-4 col-12">
+                        <PerfectScrollbar>
+                            <div className={classes.gamestate}>
+                            <h3>Game History</h3>
+                            <div className={classes.scrollbox}>
+                                    <PerfectScrollbar component="div">
+                                        {/* {this.renderMessages()} */}
+                                        <div>{this.localState.message[5]}</div>
+                                        <div>{this.localState.message[4]}</div>
+                                        <div>{this.localState.message[3]}</div>
+                                        <div>{this.localState.message[2]}</div>
+                                        <div>{this.localState.message[1]}</div>
+                                        <div>{this.localState.message[0]}</div>
+                                    </PerfectScrollbar>
+                            </div>
+                            </div>
+                        </PerfectScrollbar>
+                        </div>
+                    </Row>
+                    <Row>
+                        <div className="col col-sm-8 col-12">
+                        <div className={classes.gamestate}>
                         <div><b>Configure Game</b></div>
-                        <div>
+                        <div className="col col-sm-8 col-12">
                             Game Number
-                            <input type="text" id="gameArea"></input>
-                            <button id="gameAreaButton" onClick={() => this.apiSetGameId(document.getElementById("gameArea").value)}>Set Game ID</button>
+                            <input className={classes.styledTextInput} type="text" id="gameArea"></input>
+                            <button className={classes.tanStyledButton} id="gameAreaButton" onClick={() => this.apiSetGameId(document.getElementById("gameArea").value)}>Set Game ID</button>
                         </div>
                         <div>
-                            <button onClick={() => this.apiCreateNewGame(4)}>Create New Game</button>
+                            <button className={classes.tanStyledButton} onClick={() => this.apiCreateNewGame(4)}>Create New Game</button>
                         </div>
                         <div>
-                            <button onClick={() => {this.apiResetCurrentGame(this.gameId)}}>Reset Game</button>
+                            <button className={classes.tanStyledButton} onClick={() => {this.apiResetCurrentGame(this.gameId)}}>Reset Game</button>
                         </div>
-                        <h3 className="bg-primary">If deck runs out, player with the highest value card wins! Or win by being the last remaining player.</h3>
+                        </div>
+                    </div>
+                        <div className="col col-sm-4 col-12">
+                            <div className={classes.gamestate}>
+                        <h3><u>Rules</u></h3>
+                        <h3>If deck runs out, player with the highest value card wins! Or win by being the last remaining player.</h3>
                         <h4>Reference Card (Name (# in deck)):</h4>
                         <p>Princess (1): If played/discarded, player is eliminated. (Value: 8)</p>
                         <p>Countess (1): Must play if your other card is a king or prince. (Value: 7)</p>
@@ -991,15 +1012,17 @@ class NetworkLoveLetter extends Game {
                         <p>Priest (2): Look at another player's hand card. (Value: 2)</p>
                         <p>Guard (5): Guess another player's card. If correct, they are eliminated. Cannot guess 'Guard'. (Value: 1)</p>
                     <h3>Choose Number of Players and Restart Game</h3>
-                    <button onClick={() => {this.apiCreateNewGame(2)} }>2 Players</button>
-                    <button onClick={() => {this.apiCreateNewGame(3)} }>3 Players</button>
-                    <button onClick={() => {this.apiCreateNewGame(4)} }>4 Players</button>
-                    <button onClick={() => {this.apiCreateNewGame(5)} }>5 Players</button>
+                    <button className={classes.tanStyledButton} onClick={() => {this.apiCreateNewGame(2)} }>2 Players</button>
+                    <button className={classes.tanStyledButton} onClick={() => {this.apiCreateNewGame(3)} }>3 Players</button>
+                    <button className={classes.tanStyledButton} onClick={() => {this.apiCreateNewGame(4)} }>4 Players</button>
+                    <button className={classes.tanStyledButton} onClick={() => {this.apiCreateNewGame(5)} }>5 Players</button>
                     <p></p>
                     <a href="https://github.com/Axirr/React-Playground/blob/main/src/Components/NetworkLoveLetter/NetworkLoveLetter.js">Network Love Letter Source Code</a>
-                    </Col>
-                </Row>
+                    </div>
+                    </div>
+                    </Row>
             </Container>
+            </div>
         );
     }
 }

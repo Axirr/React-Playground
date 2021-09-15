@@ -1,4 +1,4 @@
-import Game from '../Game';
+import Game from '../Game/Game';
 import { Container, Col, Row} from 'react-bootstrap';
 
 class RPS extends Game {
