@@ -35,6 +35,8 @@ class NetworkShogun extends Game {
     currentPlayerNumber = 1
     phaseColorToggle = true
 
+    gameName = 'shogun'
+
     cards = [
         {'name': 'Friend of Children', 'cost':	3, 'type': 'keep', 'ability':	'when you gain energy, gain an additional energy.'},
         {'name': 'Acid Attack', 'cost':	6, 'type': 'keep', 'ability':	"Deal one extra damage (even when you don't attack)"},
@@ -295,11 +297,6 @@ class NetworkShogun extends Game {
         )
     }
 
-    alertWindow(message) {
-        if (!this.isAI || this.localState.currentTurn === 1) {
-            window.alert(message)
-        }
-    }
 
     advancePlayerNumber() {
         let nextClosestPlayer;
@@ -329,20 +326,20 @@ class NetworkShogun extends Game {
         this.rerenderState()
     }
 
-    setPlayerNumber(playerNumber) {
-        const parsedInt = parseInt(playerNumber, 10)
-        if(isNaN(parsedInt) || !Number.isInteger(parsedInt)) {
-            window.alert("Player number must be a valid integer.")
-            return
-        }
-        if (parsedInt <= 0 || parsedInt > this.localState.totalNumberOfPlayers) {
-            window.alert("Player number must within player range.");
-            return
-        }
-        this.currentPlayerNumber = parsedInt;
-        this.alertWindow("Player number has been set to " + parsedInt + ".");
-        this.rerenderState();
-    }
+    // setPlayerNumber(playerNumber) {
+    //     const parsedInt = parseInt(playerNumber, 10)
+    //     if(isNaN(parsedInt) || !Number.isInteger(parsedInt)) {
+    //         window.alert("Player number must be a valid integer.")
+    //         return
+    //     }
+    //     if (parsedInt <= 0 || parsedInt > this.localState.totalNumberOfPlayers) {
+    //         window.alert("Player number must within player range.");
+    //         return
+    //     }
+    //     this.currentPlayerNumber = parsedInt;
+    //     this.alertWindow("Player number has been set to " + parsedInt + ".");
+    //     this.rerenderState();
+    // }
 
     getCurrentPhaseName() {
         let phasename = "";
@@ -601,104 +598,104 @@ class NetworkShogun extends Game {
         req.end()
     }
 
-    apiCreateNewGame() {
-        const https = require('http')
-        const options = {
-        hostname: this.hostname,
-        port: this.portNumber,
-        path: '/shogun/creategame/',
-        method: 'GET'
-        }
+    // apiCreateNewGame() {
+    //     const https = require('http')
+    //     const options = {
+    //     hostname: this.hostname,
+    //     port: this.portNumber,
+    //     path: '/shogun/creategame/',
+    //     method: 'GET'
+    //     }
 
-        const req = https.request(options, res => {
-            console.log(`statusCode: ${res.statusCode}`)
-            var body = '';
+    //     const req = https.request(options, res => {
+    //         console.log(`statusCode: ${res.statusCode}`)
+    //         var body = '';
 
-            res.on('data', function(chunk){
-                body += chunk;
-            });
+    //         res.on('data', function(chunk){
+    //             body += chunk;
+    //         });
 
-            res.on('end', () => {
-                console.log("Response " + body);
-                this.alertWindow("New game created! Game ID is " + body);
-                this.gameId = body;
-                this.apiGetGameState();
-            })
+    //         res.on('end', () => {
+    //             console.log("Response " + body);
+    //             this.alertWindow("New game created! Game ID is " + body);
+    //             this.gameId = body;
+    //             this.apiGetGameState();
+    //         })
 
-        })
+    //     })
 
-        req.on('error', error => {
-            console.error(error)
-        })
+    //     req.on('error', error => {
+    //         console.error(error)
+    //     })
 
-        req.end()
-    }
+    //     req.end()
+    // }
 
-    apiResetGame(numberPlayers=0) {
-        const https = require('http')
-        const options = {
-        hostname: this.hostname,
-        port: this.portNumber,
-        path: '/shogun/resetgame/' + this.gameId + "/" + numberPlayers + "/",
-        method: 'GET'
-        }
+    // apiResetGame(numberPlayers=0) {
+    //     const https = require('http')
+    //     const options = {
+    //     hostname: this.hostname,
+    //     port: this.portNumber,
+    //     path: '/shogun/resetgame/' + this.gameId + "/" + numberPlayers + "/",
+    //     method: 'GET'
+    //     }
 
-        const req = https.request(options, res => {
-            console.log(`statusCode: ${res.statusCode}`)
+    //     const req = https.request(options, res => {
+    //         console.log(`statusCode: ${res.statusCode}`)
 
-            res.on('end', () => {
-                this.alertWindow("Game reset.");
-                this.apiGetGameState();
-            })
+    //         res.on('end', () => {
+    //             this.alertWindow("Game reset.");
+    //             this.apiGetGameState();
+    //         })
 
-        })
+    //     })
 
-        req.on('error', error => {
-            console.error(error)
-        })
+    //     req.on('error', error => {
+    //         console.error(error)
+    //     })
 
-        req.end()
-    }
+    //     req.end()
+    // }
 
-    apiGetGameState(isRefresh=false) {
-        const https = require('http')
-        const options = {
-        hostname: this.hostname,
-        port: this.portNumber,
-        path: '/shogun/gamestate/' + this.gameId + "/",
-        method: 'GET'
-        }
+    // apiGetGameState(isRefresh=false) {
+    //     const https = require('http')
+    //     const options = {
+    //     hostname: this.hostname,
+    //     port: this.portNumber,
+    //     path: '/shogun/gamestate/' + this.gameId + "/",
+    //     method: 'GET'
+    //     }
 
-        const req = https.request(options, res => {
-            console.log(`statusCode: ${res.statusCode}`)
-            var body = '';
+    //     const req = https.request(options, res => {
+    //         console.log(`statusCode: ${res.statusCode}`)
+    //         var body = '';
 
-            res.on('data', function(chunk){
-                body += chunk;
-            });
+    //         res.on('data', function(chunk){
+    //             body += chunk;
+    //         });
 
-            res.on('end', () => {
-                const result = JSON.parse(body);
-                if (this.withDebug) {
-                    console.log(result[0].fields);
-                }
-                this.updateMessage("Game state received.");
-                this.setLocalStateFromApiData(result[0].fields)
-                // console.log("Hands " + this.localState.hands)
-                this.rerenderState();
-                if (isRefresh) {
-                    setTimeout(() => {this.apiGetGameState(true)}, this.waitTime);
-                }
-            })
+    //         res.on('end', () => {
+    //             const result = JSON.parse(body);
+    //             if (this.withDebug) {
+    //                 console.log(result[0].fields);
+    //             }
+    //             this.updateMessage("Game state received.");
+    //             this.setLocalStateFromApiData(result[0].fields)
+    //             // console.log("Hands " + this.localState.hands)
+    //             this.rerenderState();
+    //             if (isRefresh) {
+    //                 setTimeout(() => {this.apiGetGameState(true)}, this.waitTime);
+    //             }
+    //         })
 
-        })
+    //     })
 
-        req.on('error', error => {
-            console.error(error)
-        })
+    //     req.on('error', error => {
+    //         console.error(error)
+    //     })
 
-        req.end()
-    }
+    //     req.end()
+    // }
 
     setLocalStateFromApiData(data) {
         // let doMessage = false;
@@ -742,47 +739,47 @@ class NetworkShogun extends Game {
         // }
     }
 
-    apiSetGameId(gameId) {
-        const parsedInt = parseInt(gameId, 10)
-        if(isNaN(parsedInt) || !Number.isInteger(parsedInt)) {
-            window.alert("Game ID must be a valid integer.")
-            return
-        }
-        const http = require('http')
-        const options = {
-        hostname: this.hostname,
-        port: this.portNumber,
-        path: '/shogun/' + gameId + "/checkId/",
-        method: 'GET'
-        }
+    // apiSetGameId(gameId) {
+    //     const parsedInt = parseInt(gameId, 10)
+    //     if(isNaN(parsedInt) || !Number.isInteger(parsedInt)) {
+    //         window.alert("Game ID must be a valid integer.")
+    //         return
+    //     }
+    //     const http = require('http')
+    //     const options = {
+    //     hostname: this.hostname,
+    //     port: this.portNumber,
+    //     path: '/shogun/' + gameId + "/checkId/",
+    //     method: 'GET'
+    //     }
 
-        const req = http.request(options, res => {
-            console.log(`statusCode: ${res.statusCode}`)
-            var body = '';
+    //     const req = http.request(options, res => {
+    //         console.log(`statusCode: ${res.statusCode}`)
+    //         var body = '';
 
-            res.on('data', function(chunk){
-                body += chunk;
-            });
+    //         res.on('data', function(chunk){
+    //             body += chunk;
+    //         });
 
-            res.on('end', () => {
-                console.log("Response " + body);
-                if (body === "ID GOOD") {
-                    this.alertWindow("Game ID updated to " + gameId);
-                    this.gameId = gameId;
-                    this.apiGetGameState();
-                } else if (body === "ID BAD") {
-                    this.alertWindow("GAME ID BAD. NOT UPDATED");
-                }
-            })
+    //         res.on('end', () => {
+    //             console.log("Response " + body);
+    //             if (body === "ID GOOD") {
+    //                 this.alertWindow("Game ID updated to " + gameId);
+    //                 this.gameId = gameId;
+    //                 this.apiGetGameState();
+    //             } else if (body === "ID BAD") {
+    //                 this.alertWindow("GAME ID BAD. NOT UPDATED");
+    //             }
+    //         })
 
-        })
+    //     })
 
-        req.on('error', error => {
-            console.error(error)
-        })
+    //     req.on('error', error => {
+    //         console.error(error)
+    //     })
 
-        req.end()
-    }
+    //     req.end()
+    // }
 
     apiDoneYielding() {
         // NOT DIRECT USE BY BUTTON
@@ -1062,7 +1059,7 @@ class NetworkShogun extends Game {
     }
 
 
-    // ACUTAL RENDER START
+    // ACTUAL RENDER START
 
     render() {
         return(
@@ -1261,7 +1258,21 @@ class NetworkShogun extends Game {
                                 <div>Buy cards with energy. Discard cards have an immediate effect. Keep cards have a persistent effect. Click "Done Buying" to end turn.</div>
                             </div>
                             </Col>
-                        <a href="https://github.com/Axirr/React-Playground/blob/main/src/Components/Shogun/NetworkShogun.js">Network Shogun of Edo Source Code</a>
+                    </Row>
+                    <Row>
+                        <div className="col">
+                            <div className="float-end">
+                            <div className={classes.gameStateNoRound}>
+                            <h5><u>Source Code</u></h5>
+                            <div>
+                            <a href="https://github.com/Axirr/React-Playground/blob/main/src/Components/Shogun/NetworkShogun.js">Front End</a>
+                            </div>
+                            <div>
+                            <a href="https://github.com/Axirr/games-backend/blob/main/hello_world/shogun.py">Back End</a>
+                            </div>
+                            </div>
+                            </div>
+                        </div>
                     </Row>
                 </Container>
             </div>
