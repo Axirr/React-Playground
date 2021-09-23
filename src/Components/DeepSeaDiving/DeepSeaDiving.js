@@ -2,8 +2,36 @@ import React from 'react';
 import Game from '../Game/Game'
 import { Container, Col, Row} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import classes from '../Game/Game.module.css'
 
 class DeepSeaDiving extends Game {
+    //
+    //
+    // CHANGE THESE FOR PRODUCTION 
+
+    portnumber ='';
+    hostname = 'www.scottsherlock.one';
+    withDebug = false
+    waitTime = 1000
+
+    // portNumber = 8000;
+    // hostname = '0.0.0.0';
+    // withDebug = true
+    // waitTime = 1000
+
+    // hostname = '44.230.70.0';
+
+
+
+    // END CHANGE FOR PRODUCTION
+    //
+    //
+
+    isAI = false
+    gameId = 1
+    currentPlayerNumber = 1
+    phaseColorToggle = true
+
     withDebug = true
     withSpoof = false
     maxPlayers = 2
@@ -12,6 +40,8 @@ class DeepSeaDiving extends Game {
     buttonPhase = 0
     maxOxygen = 2;
     doRemove = false;
+
+    gameName = 'deepsea'
 
     constructor(props) {
         super(props)
@@ -32,7 +62,12 @@ class DeepSeaDiving extends Game {
         isUp: [false, false, false, false],
         treasureBoard: [1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4],
         oxygenCounter: this.maxOxygen,
-        remainingRounds: this.maxRemainingRounds
+        remainingRounds: this.maxRemainingRounds,
+        maxPlayers: this.maxPlayers,
+        doShuffle: this.doShuffle,
+        maxRemainingRounds: this.maxRemainingRounds,
+        buttonPhase: this.state.buttonPhase,
+        maxOxygen: this.maxOxygen,
     }
 
     state = {
@@ -47,11 +82,17 @@ class DeepSeaDiving extends Game {
         isUp: [false, false, false, false],
         treasureBoard: [1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4],
         oxygenCounter: this.maxOxygen,
-        remainingRounds: this.maxRemainingRounds
+        remainingRounds: this.maxRemainingRounds,
+        maxPlayers: this.maxPlayers,
+        doShuffle: this.doShuffle,
+        maxRemainingRounds: this.maxRemainingRounds,
+        buttonPhase: this.state.buttonPhase,
+        maxOxygen: this.maxOxygen,
     }
 
     componentDidMount() {
-        this.setup(this.maxPlayers);
+        // this.setup(this.maxPlayers);
+        this.apiGetGameState(true);
     }
 
     setup(playerNumber) {
@@ -97,7 +138,7 @@ class DeepSeaDiving extends Game {
     }
 
     advanceTurn() {
-        this.buttonPhase = 0;
+        this.state.buttonPhase = 0;
         let nextClosestPlayer;
         var currentIndex = this.localState.playersInGame.indexOf(this.state.currentTurn)
         if (currentIndex === -1) {
@@ -137,7 +178,7 @@ class DeepSeaDiving extends Game {
         if (this.localState.oxygenCounter <= 0) {
             this.localState.remainingRounds -= 1;
             if (this.localState.remainingRounds === 0) {
-                this.buttonPhase = -1;
+                this.state.buttonPhase = -1;
                 this.determineWinner();
             } else {
                 this.createNewRound();
@@ -184,37 +225,37 @@ class DeepSeaDiving extends Game {
         }
     }
 
-    determineWinner() {
-        let singlePoints = [0,0,1,1,2,2,3,3];
-        let doublePoints = [4,4,5,5,6,6,7,7];
-        let triplePoints = [8,8,9,9,10,10,11,11];
-        let quadPoints = [12,12,13,13,14,14,15,15];
-        let points = [];
-        for (let i = 0; i < this.maxPlayers; i++) {
-            points.push(0);
-        }
-        for (let i = 0; i < this.maxPlayers; i++) {
-            let treasures = this.localState.savedTreasure[i];
-            for (let j = 0; j < treasures.length; j++) {
-                if (treasures[j] === 1) {
-                    points[i] = points[i] + singlePoints.splice(Math.floor(Math.random() * singlePoints.length), 1);
-                } else {
-                    console.log("Not equal to 1. Is this right?");
-                }
-            }
-        }
-        let maxPlayerNumber = -1;
-        let maxPointValue = -1;
-        for (let i = 0; i < points.length; i++) {
-            if (points[i] > maxPointValue) {
-                maxPlayerNumber = i;
-                maxPointValue = points[i];
-            }
-        }
-        this.updateMessage("Player " + (maxPlayerNumber + 1) + " wins with " + maxPointValue + " points!");
-        this.updateMessage("IMPLEMENT TIE.")
-        this.rerenderState();
-    }
+    // determineWinner() {
+    //     let singlePoints = [0,0,1,1,2,2,3,3];
+    //     let doublePoints = [4,4,5,5,6,6,7,7];
+    //     let triplePoints = [8,8,9,9,10,10,11,11];
+    //     let quadPoints = [12,12,13,13,14,14,15,15];
+    //     let points = [];
+    //     for (let i = 0; i < this.maxPlayers; i++) {
+    //         points.push(0);
+    //     }
+    //     for (let i = 0; i < this.maxPlayers; i++) {
+    //         let treasures = this.localState.savedTreasure[i];
+    //         for (let j = 0; j < treasures.length; j++) {
+    //             if (treasures[j] === 1) {
+    //                 points[i] = points[i] + singlePoints.splice(Math.floor(Math.random() * singlePoints.length), 1);
+    //             } else {
+    //                 console.log("Not equal to 1. Is this right?");
+    //             }
+    //         }
+    //     }
+    //     let maxPlayerNumber = -1;
+    //     let maxPointValue = -1;
+    //     for (let i = 0; i < points.length; i++) {
+    //         if (points[i] > maxPointValue) {
+    //             maxPlayerNumber = i;
+    //             maxPointValue = points[i];
+    //         }
+    //     }
+    //     this.updateMessage("Player " + (maxPlayerNumber + 1) + " wins with " + maxPointValue + " points!");
+    //     this.updateMessage("IMPLEMENT TIE.")
+    //     this.rerenderState();
+    // }
 
     subtractOxygen() {
         let treasureNumber = this.getCurrentTreasureNumberForPlayer();
@@ -306,17 +347,13 @@ class DeepSeaDiving extends Game {
         return value;
     }
 
-    spoofDice(diceArray) {
-        this.localState.dice = diceArray;
-        this.playTurn(false, true);
-    }
 
     roll() {
         this.localState.dice = [
             Math.floor(Math.random() * 3 + 1),
             Math.floor(Math.random() * 3 + 1)
         ]
-        this.buttonPhase = 2;
+        this.state.buttonPhase = 2;
         this.updateMessage("Player " + this.localState.currentTurn + " rolls " + (this.localState.dice[0] + this.localState.dice[1]) + ".");
     }
 
@@ -327,7 +364,7 @@ class DeepSeaDiving extends Game {
         } else {
             this.updateMessage("Player " + this.localState.currentTurn + " continues on!");
         }
-        this.buttonPhase = 1;
+        this.state.buttonPhase = 1;
         this.rerenderState()
     }
 
@@ -351,13 +388,13 @@ class DeepSeaDiving extends Game {
         this.advanceTurn();
     }
 
-    dropTreasure() {
-        let playerIndex = this.localState.board.indexOf(this.localState.currentTurn);
-        // this.localState.heldTreasure[this.localState.currentTurn - 1].push(this.localState.treasureBoard[playerIndex]);
-        // this.localState.treasureBoard[playerIndex] = "x";
-        // this.updateMessage("Player " + this.localState.currentTurn + " drops a treasure with " + this.localState.treasureBoard[playedIndex] + " pips.")
-        this.advanceTurn();
-    }
+    // dropTreasure() {
+    //     let playerIndex = this.localState.board.indexOf(this.localState.currentTurn);
+    //     // this.localState.heldTreasure[this.localState.currentTurn - 1].push(this.localState.treasureBoard[playerIndex]);
+    //     // this.localState.treasureBoard[playerIndex] = "x";
+    //     // this.updateMessage("Player " + this.localState.currentTurn + " drops a treasure with " + this.localState.treasureBoard[playedIndex] + " pips.")
+    //     this.advanceTurn();
+    // }
 
     renderScoreBoards() {
         return(
@@ -383,7 +420,19 @@ class DeepSeaDiving extends Game {
         )
     }
 
-    renderPlayerTreasure() {
+    renderHeldTreasure() {
+        return(
+            <div>
+                {this.state.playersInGame.map((playerNumber) => {
+                    return (<div>
+                        {"Player " + playerNumber + " Held Treasure: " + this.state.heldTreasure[playerNumber - 1]}
+                        </div>)
+                })}
+            </div>
+        )
+    }
+
+    renderSavedTreasure() {
         return(
             <div>
                 {this.state.playersInGame.map((playerNumber) => {
@@ -395,53 +444,467 @@ class DeepSeaDiving extends Game {
         )
     }
 
+    setLocalStateFromApiData(data) {
+        // if (this.localState.buttonPhase !== data.buttonPhase) {
+        //     this.phaseColorToggle = !this.phaseColorToggle
+        // }
+        this.localState.playersInGame = data.playersInGame;
+        this.localState.currentTurn = data.currentTurn;
+        this.localState.savedTreasure = data.savedTreasure;
+        this.localState.heldTreasure = data.heldTreasure;
+        this.localState.dice = data.dice;
+        this.localState.message = data.message;
+        this.localState.points = data.points;
+        this.localState.board = data.board;
+        this.localState.isUp = data.isUp;
+        this.localState.treasureBoard = data.treasureBoard;
+        this.localState.oxygenCounter = data.oxygenCounter;
+        this.localState.remainingRounds = data.remainingRounds;
+        this.localState.maxPlayers = data.maxPlayers;
+        this.localState.doShuffle = data.doShuffle;
+        this.localState.maxRemainingRounds = data.maxRemainingRounds;
+        this.localState.buttonPhase = data.buttonPhase;
+        this.localState.maxOxygen = data.maxOxygen;
+
+        // this.mergeMessages(newMessages)
+    }
+
+    toggleDebug() {
+        this.withDebug = !this.withDebug;
+    }
+
+
+
+    /// BEGIN API CALLS
+
+
+    // apiGetGameState(isRefresh=false) {
+    //     const https = require('http')
+    //     const options = {
+    //     hostname: this.hostname,
+    //     port: this.portNumber,
+    //     path: '/deepsea/gamestate/' + this.gameId + "/",
+    //     method: 'GET'
+    //     }
+
+    //     const req = https.request(options, res => {
+    //         console.log(`statusCode: ${res.statusCode}`)
+    //         var body = '';
+
+    //         res.on('data', function(chunk){
+    //             body += chunk;
+    //         });
+
+    //         res.on('end', () => {
+    //             const result = JSON.parse(body);
+    //             if (this.withDebug) {
+    //                 console.log(result[0].fields);
+    //             }
+    //             // this.updateMessage("Game state received.");
+    //             this.setLocalStateFromApiData(result[0].fields)
+    //             // console.log("Hands " + this.localState.hands)
+    //             this.rerenderState();
+    //             if (isRefresh) {
+    //                 setTimeout(() => {this.apiGetGameState(true)}, this.waitTime);
+    //             }
+    //         })
+
+    //     })
+
+    //     req.on('error', error => {
+    //         console.error(error)
+    //     })
+
+    //     req.end()
+    // }
+
+    apiChangeDirection(isChangingDirection) {
+        let changeDirectionText = '0'
+        if (isChangingDirection) changeDirectionText = '1'
+        const https = require('http')
+        const options = {
+        hostname: this.hostname,
+        port: this.portNumber,
+        path: '/' + this.gameName + '/changedirection/' + this.gameId + "/" + this.currentPlayerNumber + "/" + changeDirectionText + "/",
+        method: 'GET'
+        }
+
+        const req = https.request(options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+            var body = '';
+
+            res.on('data', function(chunk){
+                body += chunk;
+            });
+
+            res.on('end', () => {
+                console.log("Response " + body);
+                if (body.length > 0) {
+                    this.alertWindow(body)
+                }
+                this.apiGetGameState();
+            })
+
+        })
+
+        req.on('error', error => {
+            console.error(error)
+        })
+
+        req.end()
+    }
+
+    apiRoll() {
+        const https = require('http')
+        const options = {
+        hostname: this.hostname,
+        port: this.portNumber,
+        path: '/' + this.gameName + '/roll/' + this.gameId + "/",
+        method: 'GET'
+        }
+
+        const req = https.request(options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+            var body = '';
+
+            res.on('data', function(chunk){
+                body += chunk;
+            });
+
+            res.on('end', () => {
+                console.log("Response " + body);
+                if (body.length > 0) {
+                    this.alertWindow(body)
+                }
+                this.apiGetGameState();
+            })
+
+        })
+
+        req.on('error', error => {
+            console.error(error)
+        })
+
+        req.end()
+    }
+
+    apiTakeTreasure() {
+        const https = require('http')
+        const options = {
+        hostname: this.hostname,
+        port: this.portNumber,
+        path: '/' + this.gameName + '/taketreasure/' + this.gameId + "/",
+        method: 'GET'
+        }
+
+        const req = https.request(options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+            var body = '';
+
+            res.on('data', function(chunk){
+                body += chunk;
+            });
+
+            res.on('end', () => {
+                console.log("Response " + body);
+                if (body.length > 0) {
+                    this.alertWindow(body)
+                }
+                this.apiGetGameState();
+            })
+
+        })
+
+        req.on('error', error => {
+            console.error(error)
+        })
+
+        req.end()
+    }
+
+    apiDropTreasure() {
+        const https = require('http')
+        const options = {
+        hostname: this.hostname,
+        port: this.portNumber,
+        path: '/' + this.gameName + '/droptreasure/' + this.gameId + "/",
+        method: 'GET'
+        }
+
+        const req = https.request(options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+            var body = '';
+
+            res.on('data', function(chunk){
+                body += chunk;
+            });
+
+            res.on('end', () => {
+                console.log("Response " + body);
+                if (body.length > 0) {
+                    this.alertWindow(body)
+                }
+                this.apiGetGameState();
+            })
+
+        })
+
+        req.on('error', error => {
+            console.error(error)
+        })
+
+        req.end()
+    }
+
+    apiAdvanceTurn() {
+        const https = require('http')
+        const options = {
+        hostname: this.hostname,
+        port: this.portNumber,
+        path: '/' + this.gameName + '/advanceturn/' + this.gameId + "/",
+        method: 'GET'
+        }
+
+        const req = https.request(options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+            var body = '';
+
+            res.on('data', function(chunk){
+                body += chunk;
+            });
+
+            res.on('end', () => {
+                console.log("Response " + body);
+                if (body.length > 0) {
+                    this.alertWindow(body)
+                }
+                this.apiGetGameState();
+            })
+
+        })
+
+        req.on('error', error => {
+            console.error(error)
+        })
+
+        req.end()
+    }
+
+    apiSpoofDice(diceValue) {
+        const https = require('http')
+        const options = {
+        hostname: this.hostname,
+        port: this.portNumber,
+        path: '/' + this.gameName + '/spoofdice/' + this.gameId + "/" + diceValue + "/",
+        method: 'GET'
+        }
+
+        const req = https.request(options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+            var body = '';
+
+            res.on('data', function(chunk){
+                body += chunk;
+            });
+
+            res.on('end', () => {
+                console.log("Response " + body);
+                if (body.length > 0) {
+                    this.alertWindow(body)
+                }
+                this.apiGetGameState();
+            })
+
+        })
+
+        req.on('error', error => {
+            console.error(error)
+        })
+
+        req.end()
+    }
+
+    apiResetTests() {
+        const https = require('http')
+        const options = {
+        hostname: this.hostname,
+        port: this.portNumber,
+        path: '/' + this.gameName + "/resettests/",
+        method: 'GET'
+        }
+
+        const req = https.request(options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+            var body = '';
+
+            res.on('data', function(chunk){
+                body += chunk;
+            });
+
+            res.on('end', () => {
+                console.log("Response " + body);
+                if (body.length > 0) {
+                    this.alertWindow(body)
+                }
+                this.apiGetGameState();
+            })
+
+        })
+
+        req.on('error', error => {
+            console.error(error)
+        })
+
+        req.end()
+    }
+
+    apiSetOxygen(maxOxygen) {
+        const parsedInt = parseInt(maxOxygen, 10)
+        if(isNaN(parsedInt) || !Number.isInteger(parsedInt)) {
+            this.alertWindow("Must be a valid integer.")
+            return
+        }
+        const https = require('http')
+        const options = {
+        hostname: this.hostname,
+        port: this.portNumber,
+        path: '/' + this.gameName +  "/setmaxoxygen/" + this.gameId + '/' + parsedInt + "/",
+        method: 'GET'
+        }
+
+        const req = https.request(options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+            var body = '';
+
+            res.on('data', function(chunk){
+                body += chunk;
+            });
+
+            res.on('end', () => {
+                console.log("Response " + body);
+                if (body.length > 0) {
+                    this.alertWindow(body)
+                }
+                this.apiGetGameState();
+            })
+
+        })
+
+        req.on('error', error => {
+            console.error(error)
+        })
+
+        req.end()
+    }
+
+    apiSetRounds(maxRounds) {
+        const parsedInt = parseInt(maxRounds, 10)
+        if(isNaN(parsedInt) || !Number.isInteger(parsedInt)) {
+            this.alertWindow("Must be a valid integer.")
+            return
+        }
+        const https = require('http')
+        const options = {
+        hostname: this.hostname,
+        port: this.portNumber,
+        path: '/' + this.gameName +  "/setmaxrounds/" + this.gameId + '/' + parsedInt + "/",
+        method: 'GET'
+        }
+
+        const req = https.request(options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+            var body = '';
+
+            res.on('data', function(chunk){
+                body += chunk;
+            });
+
+            res.on('end', () => {
+                console.log("Response " + body);
+                if (body.length > 0) {
+                    this.alertWindow(body)
+                }
+                this.apiGetGameState();
+            })
+
+        })
+
+        req.on('error', error => {
+            console.error(error)
+        })
+
+        req.end()
+    }
+
+    /// END API CALLS
+
+    // ACTUAL RENDER START
+
     render() {
         return(
-            <div>
+            <div className={classes.gamebody}>
                 <Container>
                     <Row>
                         <Col>
+                        <div className={classes.gamestate}>
                             <h1>Deep Sea Diving</h1>
                             {this.renderScoreBoards()}
                             <div>Oxygen Counter {this.state.oxygenCounter}</div>
-                            <div>Remaining Rounds {this.state.remainingRounds}</div>
+                            <div>Remaining Rounds (Excluding Current Round) {this.state.remainingRounds}</div>
                             <div>Current Turn: Player {this.state.currentTurn}</div>
                             {this.state.isUp[this.state.currentTurn - 1] ? <div>Current Direction Up</div> : <div>Current Direction Down</div>}
                             <div>{this.state.dice[0]}</div>
                             <div>{this.state.dice[1]}</div>
                             <div>
-                                {(this.buttonPhase === 0) ? <button id="continueOn" className="bg-success" onClick={() => {this.changeDirection(false)}}>Continue On</button> : <button id="turnAround" className="bg-danger" disabled>Continue On</button> }
+                                {/* {(this.state.buttonPhase === 0) ? <button id="continue" className="bg-success" onClick={() => {this.apiChangeDirection(false)}}>Continue On</button> : <button id="turnAround" className="bg-danger" disabled>Continue On</button> } */}
+                                {(this.state.buttonPhase === 0) ? <button id="continue" className="bg-success" onClick={() => {this.apiChangeDirection(false)}}>Continue On</button> : null }
                             </div>
                             <div>
-                                {(!this.state.isUp[this.state.currentTurn - 1] && this.buttonPhase === 0) ? <button id="turnAround" className="bg-success" onClick={() => {this.changeDirection(true)}}>Turn Around</button> : <button id="turnAround" className="bg-danger" disabled>Turn Around</button> }
+                                {(!this.state.isUp[this.state.currentTurn - 1] && this.state.buttonPhase === 0) ? <button id="turnAround" className="bg-success" onClick={() => {this.apiChangeDirection(true)}}>Turn Around</button> : <button id="turnAround" className="bg-danger" disabled>Turn Around</button> }
                             </div>
                             <div>
-                                {(this.buttonPhase === 1) ? <button className="bg-success" onClick={() => {this.playTurn()}}>Roll</button> : <button className="bg-danger" disabled>Roll</button>}
+                                {(this.state.buttonPhase === 1) ? <button className="bg-success" onClick={() => {this.apiRoll()}}>Roll</button> : <button className="bg-danger" disabled>Roll</button>}
+                            </div>
+                            {this.withDebug ? 
+                            <div>
+                                <button id="spoof2" onClick={() => {this.apiSpoofDice(2)}} className={classes.tanStyledButton}>Spoof 2</button>
+                                <button id="spoof3" onClick={() => {this.apiSpoofDice(3)}} className={classes.tanStyledButton}>Spoof 3</button>
+                                <button id="spoof4" onClick={() => {this.apiSpoofDice(4)}} className={classes.tanStyledButton}>Spoof 4</button>
+                                <button id="spoof5" onClick={() => {this.apiSpoofDice(5)}} className={classes.tanStyledButton}>Spoof 5</button>
+                                <button id="spoof6" onClick={() => {this.apiSpoofDice(6)}} className={classes.tanStyledButton}>Spoof 6</button>
+                                <div>
+                                    <button id="resetTests" onClick={() => {this.apiResetTests()}} className={classes.tanStyledButton}>Reset Tests</button>
+                                </div>
+                            </div>
+                            : null}
+                            <div>
+                                {(this.state.buttonPhase === 2 && this.spaceHasTreasure()) ? <button id="takeTreasure" className="bg-success" onClick={() => {this.apiTakeTreasure()}}>Take Treasure</button> : <button className="bg-danger" disabled>Take Treasure</button>}
                             </div>
                             <div>
-                                {(this.buttonPhase === 2 && this.spaceHasTreasure()) ? <button className="bg-success" onClick={() => {this.takeTreasure()}}>Take Treasure</button> : <button className="bg-danger" disabled>Take Treasure</button>}
+                                {(this.state.buttonPhase === 2 && !this.spaceHasTreasure && this.playerIsHoldingTreasure()) ? <button id="dropTreasure" className="bg-success" onClick={() => {this.apiDropTreasure()}}>Drop Lowest Treasure</button> : <button className="bg-danger" disabled>Drop Lowest Treasure</button>}
                             </div>
                             <div>
-                                {(this.buttonPhase === 2 && !this.spaceHasTreasure && this.playerIsHoldingTreasure()) ? <button className="bg-success" onClick={() => {this.dropTreasure()}}>Drop Lowest Treasure</button> : <button className="bg-danger" disabled>Drop Lowest Treasure</button>}
-                            </div>
-                            <div>
-                                {(this.buttonPhase === 2) ? <button className="bg-success" onClick={() => {this.advanceTurn()}}>No Action</button> : <button className="bg-danger" disabled>No Action</button>}
+                                {(this.state.buttonPhase === 2) ? <button id="noAction" className="bg-success" onClick={() => {this.apiAdvanceTurn()}}>No Action</button> : <button className="bg-danger" disabled>No Action</button>}
                             </div>
                             <div>{this.renderPath()}</div>
                             <div>{this.renderTreasurePath()}</div>
-                            {this.renderPlayerTreasure()}
+                            <div>Players In Game</div>
+                            <div>{this.state.playersInGame}</div>
+                            {this.renderSavedTreasure()}
+                            {this.renderHeldTreasure()}
                             <div>
                                 {this.withSpoof && 
                                 <div>
                                 <p>Change player numbers and restart game.</p>
                                 <button onClick={() => {this.setup(2)}}>2 Players</button>
                                 <button onClick={() => {this.setup(5)}}>5 Players</button>
-                                <button id="spoof33" onClick={() => this.spoofDice(["3","3"])}>Spoof Dice 3 3</button>
                                 </div>
     }
                             </div>
+                            </div>
                         </Col>
                         <Col>
+                        <div className={classes.gamestate}>
                             <div>
                                 <h3>Game History</h3>
                                 <p>Message  0: {this.state.message[0]}</p>
@@ -465,6 +928,41 @@ class DeepSeaDiving extends Game {
                             </div>
                             <div>
                                 <h3>Configure Game</h3>
+                                <span className={classes.blue}>Change Player Number</span>
+                                <input className={classes.styledTextInput} type="text" id="playerArea"></input>
+                                <button className={classes.tanStyledButton} id="playerAreaButton" onClick={() => this.setPlayerNumber(document.getElementById("playerArea").value)}>Set Player Number</button>
+                                <button className={classes.tanStyledButton} onClick={() => {this.apiCreateNewGame()}}>Create Game</button>
+                                <button className={classes.tanStyledButton} onClick={() => {this.apiResetGame()}}>Reset Game</button>
+                                <div>
+                                        Join Game Number
+                                        <input className={classes.styledTextInput} type="text" id="gameArea"></input>
+                                        <button className={classes.tanStyledButton} id="gameAreaButton" onClick={() => this.apiSetGameId(document.getElementById("gameArea").value)}>Set Game ID</button>
+                                </div>
+                                <div>
+                                    <button className={classes.tanStyledButton} onClick={() => {this.toggleDebug()}}>Toogle Debug</button>
+                                </div>
+                                {this.withDebug ? 
+                                <div>
+                                    <div>
+                                    <input className={classes.styledTextInput} type="text" id="oxygenArea"></input>
+                                    <button className={classes.tanStyledButton} onClick={() => {this.apiSetOxygen(document.getElementById("oxygenArea").value)}}>Set Max Oxygen</button>
+                                    </div>
+                                    <div>
+                                    <input className={classes.styledTextInput} type="text" id="roundsArea"></input>
+                                    <button className={classes.tanStyledButton} onClick={() => {this.apiSetRounds(document.getElementById("roundsArea").value)}}>Set Max Rounds</button>
+                                    </div>
+                                </div>
+                                : null}
+                            </div>
+                            </div>
+                            <div>
+                            <h5><u>Source Code</u></h5>
+                            <div>
+                            <a href="https://github.com/Axirr/React-Playground/blob/main/src/Components/DeepSeaDiving/DeepSeaDiving.js">Front End</a>
+                            </div>
+                            <div>
+                            <a href="https://github.com/Axirr/games-backend/blob/main/hello_world/deepSea.py">Back End</a>
+                            </div>
                             </div>
                         </Col>
                     </Row>
