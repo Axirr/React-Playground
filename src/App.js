@@ -10,6 +10,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import DeepSeaDiving from './Components/DeepSeaDiving/DeepSeaDiving';
 import NetworkLoveLetter from './Components/NetworkLoveLetter/NetworkLoveLetter'
 import NetworkShogun from './Components/Shogun/NetworkShogun'
+import Home from './Components/Home/Home'
 
 class App extends Component {
 
@@ -20,7 +21,7 @@ class App extends Component {
         <BrowserRouter>
           <Switch>
             <Route exact path="/">
-              <h3>Home Page</h3>
+              <Home />
             </Route>
             <Route path="/rps">
               <RPS />
@@ -369,6 +370,8 @@ class App extends Component {
                 bayEdo: 0,
                 remainingRolls: 3
               }}/>
+            </Route>
+            <Route component={ Home }>
             </Route>
           </Switch>
         </BrowserRouter>

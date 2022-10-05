@@ -9,15 +9,15 @@ class DeepSeaDiving extends Game {
     //
     // CHANGE THESE FOR PRODUCTION 
 
-    portnumber ='';
-    hostname = 'www.scottsherlock.one';
-    withDebug = false
-    waitTime = 1000
-
-    // portNumber = 8000;
-    // hostname = '0.0.0.0';
-    // withDebug = true
+    // portnumber ='';
+    // hostname = 'www.scottsherlock.one';
+    // withDebug = false
     // waitTime = 1000
+
+    portNumber = 8000;
+    hostname = '0.0.0.0';
+    withDebug = true
+    waitTime = 1000
 
     // hostname = '44.230.70.0';
 
@@ -368,7 +368,7 @@ class DeepSeaDiving extends Game {
         this.rerenderState()
     }
 
-    spaceHasTreasure() {
+    currentPlayerSpaceHasTreasure() {
         let playerIndex = this.localState.board.indexOf(this.localState.currentTurn);
         if (playerIndex === -1) {
             return false;
@@ -415,15 +415,19 @@ class DeepSeaDiving extends Game {
     renderTreasurePath() {
         return(
             <div>
-                {this.state.treasureBoard}
+                {JSON.stringify(this.state.treasureBoard)}
             </div>
         )
     }
 
     renderHeldTreasure() {
+        let fullPlayerList = []
+        for (let i = 1; i <= this.localState.maxPlayers; i++) {
+            fullPlayerList.push(i)
+        }
         return(
             <div>
-                {this.state.playersInGame.map((playerNumber) => {
+                {fullPlayerList.map((playerNumber) => {
                     return (<div>
                         {"Player " + playerNumber + " Held Treasure: " + this.state.heldTreasure[playerNumber - 1]}
                         </div>)
@@ -433,9 +437,13 @@ class DeepSeaDiving extends Game {
     }
 
     renderSavedTreasure() {
+        let fullPlayerList = []
+        for (let i = 1; i <= this.localState.maxPlayers; i++) {
+            fullPlayerList.push(i)
+        }
         return(
             <div>
-                {this.state.playersInGame.map((playerNumber) => {
+                {fullPlayerList.map((playerNumber) => {
                     return (<div>
                         {"Player " + playerNumber + " Saved Treasure: " + this.state.savedTreasure[playerNumber - 1]}
                         </div>)
@@ -852,18 +860,18 @@ class DeepSeaDiving extends Game {
                             <div>Oxygen Counter {this.state.oxygenCounter}</div>
                             <div>Remaining Rounds (Excluding Current Round) {this.state.remainingRounds}</div>
                             <div>Current Turn: Player {this.state.currentTurn}</div>
+                            <div className={classes.redMessage}>You Are Player {this.currentPlayerNumber}</div>
                             {this.state.isUp[this.state.currentTurn - 1] ? <div>Current Direction Up</div> : <div>Current Direction Down</div>}
                             <div>{this.state.dice[0]}</div>
                             <div>{this.state.dice[1]}</div>
                             <div>
-                                {/* {(this.state.buttonPhase === 0) ? <button id="continue" className="bg-success" onClick={() => {this.apiChangeDirection(false)}}>Continue On</button> : <button id="turnAround" className="bg-danger" disabled>Continue On</button> } */}
-                                {(this.state.buttonPhase === 0) ? <button id="continue" className="bg-success" onClick={() => {this.apiChangeDirection(false)}}>Continue On</button> : null }
+                                {(this.currentPlayerNumber === this.state.currentTurn) && (this.state.buttonPhase === 0) ? <button id="continue" className="bg-success" onClick={() => {this.apiChangeDirection(false)}}>Continue On</button> : <button id="continue" className="bg-danger" disabled>Continue On</button>}
                             </div>
                             <div>
-                                {(!this.state.isUp[this.state.currentTurn - 1] && this.state.buttonPhase === 0) ? <button id="turnAround" className="bg-success" onClick={() => {this.apiChangeDirection(true)}}>Turn Around</button> : <button id="turnAround" className="bg-danger" disabled>Turn Around</button> }
+                                {(this.currentPlayerNumber === this.state.currentTurn) && (!this.state.isUp[this.state.currentTurn - 1] && this.state.buttonPhase === 0 && (this.state.board.indexOf(this.state.currentTurn) !== -1)) ? <button id="turnAround" className="bg-success" onClick={() => {this.apiChangeDirection(true)}}>Turn Around</button> : <button id="turnAround" className="bg-danger" disabled>Turn Around</button> }
                             </div>
                             <div>
-                                {(this.state.buttonPhase === 1) ? <button className="bg-success" onClick={() => {this.apiRoll()}}>Roll</button> : <button className="bg-danger" disabled>Roll</button>}
+                                {(this.currentPlayerNumber === this.state.currentTurn) && (this.state.buttonPhase === 1) ? <button className="bg-success" onClick={() => {this.apiRoll()}}>Roll</button> : <button className="bg-danger" disabled>Roll</button>}
                             </div>
                             {this.withDebug ? 
                             <div>
@@ -874,19 +882,20 @@ class DeepSeaDiving extends Game {
                                 <button id="spoof6" onClick={() => {this.apiSpoofDice(6)}} className={classes.tanStyledButton}>Spoof 6</button>
                                 <div>
                                     <button id="resetTests" onClick={() => {this.apiResetTests()}} className={classes.tanStyledButton}>Reset Tests</button>
+                                    <button id="setCurrentPlayer" onClick={() => {this.currentPlayerNumber = this.state.currentTurn; this.rerenderState();}} className={classes.tanStyledButton}>Set Current Turn</button>
                                 </div>
                             </div>
                             : null}
                             <div>
-                                {(this.state.buttonPhase === 2 && this.spaceHasTreasure()) ? <button id="takeTreasure" className="bg-success" onClick={() => {this.apiTakeTreasure()}}>Take Treasure</button> : <button className="bg-danger" disabled>Take Treasure</button>}
+                                {(this.currentPlayerNumber === this.state.currentTurn) && (this.state.buttonPhase === 2 && this.currentPlayerSpaceHasTreasure()) ? <button id="takeTreasure" className="bg-success" onClick={() => {this.apiTakeTreasure()}}>Take Treasure</button> : <button className="bg-danger" disabled>Take Treasure</button>}
                             </div>
                             <div>
-                                {(this.state.buttonPhase === 2 && !this.spaceHasTreasure && this.playerIsHoldingTreasure()) ? <button id="dropTreasure" className="bg-success" onClick={() => {this.apiDropTreasure()}}>Drop Lowest Treasure</button> : <button className="bg-danger" disabled>Drop Lowest Treasure</button>}
+                                {(this.currentPlayerNumber === this.state.currentTurn) && (this.state.buttonPhase === 2 && !this.currentPlayerSpaceHasTreasure() && this.playerIsHoldingTreasure()) ? <button id="dropTreasure" className="bg-success" onClick={() => {this.apiDropTreasure()}}>Drop Lowest Treasure</button> : <button className="bg-danger" disabled>Drop Lowest Treasure</button>}
                             </div>
                             <div>
-                                {(this.state.buttonPhase === 2) ? <button id="noAction" className="bg-success" onClick={() => {this.apiAdvanceTurn()}}>No Action</button> : <button className="bg-danger" disabled>No Action</button>}
+                                {(this.currentPlayerNumber === this.state.currentTurn) && (this.state.buttonPhase === 2) ? <button id="noAction" className="bg-success" onClick={() => {this.apiAdvanceTurn()}}>No Action</button> : <button className="bg-danger" disabled>No Action</button>}
                             </div>
-                            <div>{this.renderPath()}</div>
+                            <div>{this.renderPath()} Length {this.state.board.length}</div>
                             <div>{this.renderTreasurePath()}</div>
                             <div>Players In Game</div>
                             <div>{this.state.playersInGame}</div>
@@ -945,7 +954,7 @@ class DeepSeaDiving extends Game {
                                 <div>
                                     <div>
                                     <input className={classes.styledTextInput} type="text" id="oxygenArea"></input>
-                                    <button className={classes.tanStyledButton} onClick={() => {this.apiSetOxygen(document.getElementById("oxygenArea").value)}}>Set Max Oxygen</button>
+                                    <button id="oxygenAreaButton" className={classes.tanStyledButton} onClick={() => {this.apiSetOxygen(document.getElementById("oxygenArea").value)}}>Set Max Oxygen</button>
                                     </div>
                                     <div>
                                     <input className={classes.styledTextInput} type="text" id="roundsArea"></input>

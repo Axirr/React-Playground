@@ -65,6 +65,18 @@
     font-size: xx-large;
 }
 
+.blink_me_small {
+    animation: blinker 1s linear infinite;
+    color: red;
+    font-weight: bold;
+}
+
+.blink_button {
+    animation: blinker 1s linear infinite;
+    color: red;
+    font-weight: bold;
+}
+
 .red {
     color: red;
     font-weight: bold;
@@ -143,7 +155,7 @@
 
 .tanStyledButton {
     background-color: burlywood;
-    border: 2px solid tan;
+    border: 1px solid black;
 }
 
 .styledTextInput {
@@ -158,6 +170,20 @@
     margin-bottom: 1px;
     margin-left: 5px;
     margin-right: 2px;
+}
+
+.rules {
+    background-color: azure;
+    border-radius: 25px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+
+.setup {
+    background-color:ivory;
+    border-radius: 25px;
+    margin-top: 1px;
+    margin-bottom: 1px;
 }
 
 @keyframes buffer-icon-spin {

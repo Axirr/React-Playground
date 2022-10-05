@@ -11,17 +11,17 @@ class NavigationBar extends Component {
         <div>
             <Navbar bg="success" expand="lg">
             <Container>
-              <Navbar.Brand href="/home">Lime Co.</Navbar.Brand>
+              <Navbar.Brand href="/">Scott Sherlock</Navbar.Brand>
               <Navbar.Toggle aria-controls="basic-navbar-nav" />
               <Navbar.Collapse id="basic-navbar-nav">
                 <Nav className="me-auto">
-                  <Nav.Link href="/">Home</Nav.Link>
+                  {(window.location.pathname === "/" || window.location.pathname === "/home") ? <div></div> : <Nav.Link href="/">Home</Nav.Link>}
                   <NavDropdown title="Projects" id="basic-nav-dropdown">
                     <NavDropdown.Item href="/rps">Rock Paper Scissors</NavDropdown.Item>
-                    <NavDropdown.Item href="/loveletter">Love Letter</NavDropdown.Item>
+                    <NavDropdown.Item href="/loveletter">Love Letter vs Computer Opponents</NavDropdown.Item>
                     <NavDropdown.Item href="/shogun">Shogun of Edo</NavDropdown.Item>
                     <NavDropdown.Item href="/netloveletter">Multiplayer Love Letter</NavDropdown.Item>
-                    <NavDropdown.Item href="/deepseadiving">Multiplayer Deep Sea Diving</NavDropdown.Item>
+                    <NavDropdown.Item href="/deepseadiving">Multiplayer Deep Sea Diving (In Progress)</NavDropdown.Item>
                     <NavDropdown.Item href="/netshogun">Multiplayer Shogun of Edo</NavDropdown.Item>
                   </NavDropdown>
                 </Nav>
