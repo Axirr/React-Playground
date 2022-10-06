@@ -113,16 +113,20 @@ class Game extends Component {
             });
 
             res.on('end', () => {
-                const result = JSON.parse(body);
-                if (this.withDebug) {
-                    console.log(result[0].fields);
-                }
-                this.updateMessage("Game state received.");
-                this.setLocalStateFromApiData(result[0].fields)
-                // console.log("Hands " + this.localState.hands)
-                this.rerenderState();
-                if (isRefresh) {
-                    setTimeout(() => {this.apiGetGameState(true)}, this.waitTime);
+                try {
+                    const result = JSON.parse(body);
+                    if (this.withDebug) {
+                        console.log(result[0].fields);
+                    }
+                    this.updateMessage("Game state received.");
+                    this.setLocalStateFromApiData(result[0].fields)
+                    // console.log("Hands " + this.localState.hands)
+                    this.rerenderState();
+                    if (isRefresh) {
+                        setTimeout(() => {this.apiGetGameState(true)}, this.waitTime);
+                    }
+                } catch(e) {
+                    console.log(e.message)
                 }
             })
 
