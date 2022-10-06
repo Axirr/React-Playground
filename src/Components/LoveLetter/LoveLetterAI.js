@@ -12,12 +12,14 @@ import countessCard from './CardImages/countess.png'
 import princessCard from './CardImages/princess.png'
 import cardBack from './CardImages/cardback.svg'
 import classes from '../Game/Game.module.css'
+import tombstone from './CardImages/tombstone.jpg'
 
 class LoveLetterAI extends Component{
     isAI = true
     isGameOver = false
     withDebug = false
-    allAI = false
+    allAI = true
+    // allAI = false
     doShowAllCards = false
 
     localState = {
@@ -260,7 +262,7 @@ class LoveLetterAI extends Component{
         switch(card) {
             case 'princess':
                 this.eliminatePlayer(this.localState.currentTurn)
-                this.replaceCard(0)
+                this.replaceDrawCard()
                 this.advanceTurn()
                 break;
             case 'countess':
@@ -274,14 +276,16 @@ class LoveLetterAI extends Component{
                 handsCopy[this.localState.currentTurn - 1] = playerOriginalHand
                 this.localState['hands'] = handsCopy
                 if (!isDrawCardPlayed) {
-                    this.replaceCard(0)
+                    this.replaceDrawCard()
                     this.advanceTurn()
                 } else {
-                    this.replaceCard(0)
+                    this.replaceDrawCard()
                     this.advanceTurn()
                 }
                 break;
             case 'prince':
+                // BUG: playing prince draw card you end up with the prince in your hand instead of your original hand
+                //      Possibly fixed
                 this.updateMessage("Player " + myTarget + " discards their hand.")
                 this.updateMessage("Player " + myTarget + " hand card was a " + this.localState.hands[myTarget - 1] + ".")
                 var deckCopy = [...this.localState.deck]
@@ -298,17 +302,20 @@ class LoveLetterAI extends Component{
                     handsCopy[myTarget - 1] = this.localState.setAsideCard
                 }
                 this.localState['hands'] = handsCopy
-                if (myTarget === this.localState.currentTurn) {
-                    this.replaceCard(0)
-                    this.advanceTurn()
-                } else {
-                    this.replaceCard(this.localState.currentTurn)
-                    this.advanceTurn()
-                }
                 if (discardedCard === "princess") {
                     this.eliminatePlayer(myTarget)
-                    this.advanceTurn()
+                    // Double advance turn in case of princess seems wrong?
+                    // this.advanceTurn()
                 } 
+                // BUG player eliminated by princess discard gets a replacement card I believe
+                if (myTarget === this.localState.currentTurn) {
+                    this.replaceDrawCard()
+                    this.advanceTurn()
+                } else {
+                    this.replaceCard(this.localState.currentTurn - 1)
+                    // this.replaceCard(this.localState.currentTurn)
+                    this.advanceTurn()
+                }
                 break;
             case 'handmaiden':
                 this.updateMessage("Player " + this.localState.currentTurn + " is immune until their next turn.")
@@ -341,7 +348,7 @@ class LoveLetterAI extends Component{
                 if (!isDrawCardPlayed) {
                     this.replaceCard(this.localState.currentTurn)
                 } else {
-                    this.replaceCard(0)
+                    this.replaceDrawCard()
                 }
                     this.advanceTurn()
                 break;
@@ -398,7 +405,7 @@ class LoveLetterAI extends Component{
         if (!isDrawCardPlayed) {
             this.replaceCard(this.localState.currentTurn)
         } else {
-            this.replaceCard(0)
+            this.replaceDrawCard()
         }
         this.advanceTurn()
     }
@@ -493,6 +500,10 @@ class LoveLetterAI extends Component{
         return true
     }
 
+    replaceDrawCard() {
+        this.replaceCard(0)
+    }
+
     replaceCard(playerNumber) {
         // var deckCopy = [...this.localState.deck]
         var drawnCard;
@@ -522,6 +533,7 @@ class LoveLetterAI extends Component{
         }
     }
 
+    // BUG double win message if elimination of second last player happens when deck runs out?
     evaluateShowdownWin() {
         this.updateMessage("SHOWDOWN! Players compare card values, highest wins.")
         this.showAllCards()
@@ -652,63 +664,104 @@ class LoveLetterAI extends Component{
             <div class="col-12">Hand 
                 <div>
                     <div>
-                <button id={"hand"+1}> 
-                <img alt="" src={this.getLinkForCard(this.localState.hands[0])} width="100" 
-                onClick={(() => { this.playerPlayCard(1, this.localState.hands[0]) })}/>
-                </button> 
+                        <img alt="" src={this.getLinkForCard(this.localState.hands[0])} width="100" />
+                        <button className={classes.tanStyledButton} id={"hand"+1} onClick={(() => { this.playerPlayCard(1, this.localState.hands[0]) })}>Play Hand Card</button> 
                     </div>
                 </div>
             </div>
-            : this.state.playersInGame.includes(1) ? 
-                <div class="col-12">Hand 
-                    <div>
-                        <div>
-                    <button id={"hand"+1}> 
-                    <img alt="" src={this.getLinkForCard(this.localState.hands[0])} width="100" 
-                    onClick={(() => { this.playerPlayCard(1, this.localState.hands[0]) })}/>
-                    </button> 
-                        </div>
-                    </div>
-                </div>
-                : <div>
-                    You have been eliminated!
-                    <img alt="" src={cardBack} width="100" ></img>
-                    </div> 
+            : 
+            <div>
+                <p>You have been eliminated!</p>
+                <img alt="" src={tombstone} width="100" ></img>
+            </div> 
         );
+    }
+    
+    renderDraw() {
+        return(
+            (this.state.isDisplayed[this.state.totalNumberOfPlayers] || this.doShowAllCards) ?
+            <div>
+                <div>Current Draw Card for Player {this.state.currentTurn}</div>
+                <img alt="" src={this.getLinkForCard(this.localState.drawCard)} width="100" /> 
+                {this.state.currentTurn === 1 ? 
+                <button className={classes.tanStyledButton} id="drawCard" onClick={ () => { this.playCard(this.state.drawCard, 0)}}>Play Draw Card</button> 
+                : 
+                <div></div>}
+            </div>  
+            :
+            <div>
+                <div>Current Draw Card for Player {this.state.currentTurn}</div>
+                <img alt="" src={cardBack} width="100" />
+            </div>  
+        )
     }
 
     renderHands() {
         return(
             <Row>
-                {this.doShowAllCards ? 
-                this.state.playersInGame.map((number) => {
+                {this.__handsHtml(this.localState, this.doShowAllCards)}
+            </Row>
+        );
+    }
+
+    __handsHtml(passedLocalState, passedDoShowAllCards) {
+        return(
+                passedDoShowAllCards ? this.__showHandsHtml(passedLocalState, passedDoShowAllCards) : this.__dontShowOpponentHandsHtml(passedLocalState)
+        );
+    }
+
+    __showHandsHtml(passedLocalState, passedDoShowAllCards) {
+        return(
+                this.ownRange(passedLocalState.totalNumberOfPlayers + 1, 2).map((number) => {
                     return( number === 1 ? "" :
-                        <Col>Hand {number}{ 
-                            <div>
-                                <div>
-                            <button id={"hand"+number}> 
-                            <img alt="" src={this.getLinkForCard(this.localState.hands[number - 1])} width="100" 
-                            onClick={(() => { this.playerPlayCard(number, this.localState.hands[number - 1]) })}/>
-                            </button> 
-                                </div>
-                            </div>}
+                        <Col>Hand {number} 
+                        {this.__targetHtml(passedLocalState, number)}
+                                {passedLocalState.playersInGame.includes(number) ? 
+                                <img alt="" src={this.getLinkForCard(this.localState.hands[number - 1])} width="100" />
+                                : 
+                                <img alt="" src={tombstone} width="100" ></img>}
                         </Col>
                     );
-                }) :
-                this.state.playersInGame.map((number) => {
-                    return( number === 1 ? 
-                        ""
-                        :
+                        }))
+    }
+
+    __dontShowOpponentHandsHtml(passedLocalState) {
+        return(
+            (this.ownRange(passedLocalState.totalNumberOfPlayers + 1, 2)).map((number) => {
+                return( number === 1 ? 
+                    ""
+                    : 
                     <Col>Hand {number}{ 
                         <div>
                             <div>
-                        <img alt="" src={cardBack} width="100" ></img>
+                                {this.__targetHtml(passedLocalState, number)}
+                                {passedLocalState.playersInGame.includes(number) ? 
+                                <img alt="" src={cardBack} width="100" ></img>
+                                : 
+                                <img alt="" src={tombstone} width="100" ></img>}
                             </div>
                         </div>}
                     </Col>);
-                })}
-            </Row>
-        );
+            })
+        )
+    }
+
+    __targetHtml(passedLocalState, number) {
+        return(
+            passedLocalState.isHandMaiden[number - 1] || (!passedLocalState.playersInGame.includes(number)) ?
+            <div className={classes.red}>Untargetable</div>
+            :
+            <div className={classes.green}>Targetable</div>
+        )
+    }
+
+    ownRange(endExclusive, startInclusive=0) {
+        var resultArray = []
+        for (var i = startInclusive; i < endExclusive; i++) {
+            resultArray.push(i)
+        }
+        console.log(resultArray)
+        return resultArray;
     }
 
     getLinkForCard(card) {
@@ -882,12 +935,13 @@ class LoveLetterAI extends Component{
 
     renderLivePlayers() {
         return(
-            <div>
-                <div>Current Live Players: </div>
-                {this.localState.playersInGame.map(number => {
-                    return(<div>Player {number}</div>)
-                })}
-            </div>
+            <div></div>
+            // <div>
+            //     <div>Current Live Players: </div>
+            //     {this.localState.playersInGame.map(number => {
+            //         return(<div>Player {number}</div>)
+            //     })}
+            // </div>
         )
     }
 
@@ -908,29 +962,23 @@ class LoveLetterAI extends Component{
                 <Container>
                     <Row>
                         <Col>
-                            <Row className={classes.gamestate}>
+                            <div className={classes.gamestate + " row align-items-center"}>
                                 <Col>
                                     <p>You are Player 1</p>
                                     {(this.state.currentTurn === 1) ? <div className={classes.blink_me_small}>Current Turn: Player 1 (Your Turn)</div> : <div><b>Current Turn: Player {this.state.currentTurn}</b></div> }
                                     <p>Cards in the Deck: {this.state.deck.length}</p>
                                 </Col>
-                                <Col>
+                                <div className='col align-right'>
                                     {this.state.currentTurn !== 1 ?
                                     <button className={classes.blink_button} id="playAiTurn" onClick={() => {this.playTurn(this.localState.currentTurn)}}>Play AI Turn</button>
                                     : 
                                     <button className={classes.tanStyledButton} id="playAiTurn" onClick={() => {this.playTurn(this.localState.currentTurn)}}>Play AI Turn</button>
                                     }
-                                </Col>
-                            </Row>
+                                </div>
+                            </div>
                             <Row className="border">
                                 <Col className={classes.gamestate}>
-                                    {(this.state.isDisplayed[this.state.totalNumberOfPlayers] || this.doShowAllCards) && 
-                                    <div>
-                                        <div>Current Draw Card</div>
-                                        <button id="drawCard" onClick={ () => { this.playCard(this.state.drawCard, 0)}}>
-                                        <img alt="" src={this.getLinkForCard(this.localState.drawCard)} width="100" />
-                                        </button> 
-                                    </div> }
+                                    {this.renderDraw()}
                                     {this.renderSelf()}
                                 </Col>
                                 <Col>
@@ -962,13 +1010,12 @@ class LoveLetterAI extends Component{
                                 <h4>Opponent's Hands</h4>
                                 {this.renderHands()}
                             </Row>
-                            <p>...</p>
-                            <div className={classes.gamestate}>
+                            <div>
                                 <p>{this.renderLivePlayers()}</p>
-                                <p>{this.renderHandmaidenStatus()}</p>
-                                <button className={classes.tanStyledButton} onClick = {() => { this.showCurrentPlayerCards()}}>Show Current Player Cards</button>
-                                <button className={classes.tanStyledButton} onClick={() => { this.hideAllCards()}}>Hide All Cards</button>
-                                <button className={classes.tanStyledButton} onClick={() => { this.showAllCards()}}>Show All Cards</button>
+                                {/* <p>{this.renderHandmaidenStatus()}</p> */}
+                                {/* <button className={classes.tanStyledButton} onClick = {() => { this.showCurrentPlayerCards()}}>Show Current Player Cards</button> */}
+                                <button className={classes.tanStyledButton} onClick={() => { this.hideAllCards()}}>Hide Opponent Cards</button>
+                                <button className={classes.tanStyledButton} onClick={() => { this.showAllCards()}}>Show Opponent Cards</button>
                                 <button className={classes.tanStyledButton} onClick={() => { this.allAI = !this.allAI; } }>Toggle ALL AI</button>
                                 {this.withDebug ? <div>
                                 <p>Debug</p>
