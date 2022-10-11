@@ -158,6 +158,11 @@
     border: 1px solid black;
 }
 
+.grayStyledButton {
+    background-color: gray;
+    border: 1px solid black;
+}
+
 .styledTextInput {
     background-color: tan;
     opacity: 0.5;

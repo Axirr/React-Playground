@@ -21,6 +21,8 @@ class LoveLetterAI extends Component{
     allAI = true
     // allAI = false
     doShowAllCards = false
+    cardWidth = "100"
+    cardHeight = "130"
 
     localState = {
         hands: ["none", "none", "none", "none"],
@@ -661,38 +663,62 @@ class LoveLetterAI extends Component{
 
     renderSelf() {
         return( this.state.playersInGame.includes(1) ?
-            <div class="col-12">Hand 
-                <div>
-                    <div>
-                        <img alt="" src={this.getLinkForCard(this.localState.hands[0])} width="100" />
-                        <button className={classes.tanStyledButton} id={"hand"+1} onClick={(() => { this.playerPlayCard(1, this.localState.hands[0]) })}>Play Hand Card</button> 
-                    </div>
-                </div>
-            </div>
+            <Row>
+                <Col>
+                    <p>Hand</p>
+                    <img alt="" src={this.getLinkForCard(this.localState.hands[0])} width={this.cardWidth} height={this.cardHeight}/>
+                </Col>
+                <Col>
+                    {this.localState.currentTurn === 1 ? 
+                    <button className={classes.tanStyledButton} id={"hand"+1} onClick={(() => { this.playerPlayCard(1, this.localState.hands[0]) })}>Play Hand Card</button> 
+                    :
+                    <button className={classes.tanStyledButton} id={"hand"+1} disabled>Play Hand Card</button> 
+                    }
+                </Col>
+            </Row>
             : 
-            <div>
-                <p>You have been eliminated!</p>
-                <img alt="" src={tombstone} width="100" ></img>
-            </div> 
+            <Row>
+                <Col>
+                    <p>Eliminated!</p>
+                    <img alt="" src={tombstone} width={this.cardWidth} height={this.cardHeight}></img>
+                </Col>
+                <Col>
+                    <button className={classes.tanStyledButton} id={"hand"+1} disabled>Play Hand Card</button> 
+                </Col>
+            </Row> 
         );
     }
     
     renderDraw() {
         return(
             (this.state.isDisplayed[this.state.totalNumberOfPlayers] || this.doShowAllCards) ?
-            <div>
+            <Row>
+            <Col>
                 <div>Current Draw Card for Player {this.state.currentTurn}</div>
-                <img alt="" src={this.getLinkForCard(this.localState.drawCard)} width="100" /> 
+                <img alt="" src={this.getLinkForCard(this.localState.drawCard)} width={this.cardWidth} height={this.cardHeight} /> 
+            </Col>
+            <Col>
                 {this.state.currentTurn === 1 ? 
                 <button className={classes.tanStyledButton} id="drawCard" onClick={ () => { this.playCard(this.state.drawCard, 0)}}>Play Draw Card</button> 
                 : 
-                <div></div>}
-            </div>  
+                <button className={classes.tanStyledButton} id="drawCard" disabled>Play Draw Card</button> 
+                }
+            </Col>
+            </Row>
             :
-            <div>
-                <div>Current Draw Card for Player {this.state.currentTurn}</div>
-                <img alt="" src={cardBack} width="100" />
-            </div>  
+            <Row>
+                <Col>
+                    <div>Current Draw Card for Player {this.state.currentTurn}</div>
+                    <img alt="" src={cardBack} width={this.cardWidth} height={this.cardHeight} />
+                </Col>
+                <Col>
+                {this.state.currentTurn === 1 ? 
+                <button className={classes.tanStyledButton} id="drawCard" onClick={ () => { this.playCard(this.state.drawCard, 0)}}>Play Draw Card</button> 
+                : 
+                <button className={classes.tanStyledButton} id="drawCard" disabled>Play Draw Card</button> 
+                }
+                </Col>
+            </Row>  
         )
     }
 
@@ -717,9 +743,9 @@ class LoveLetterAI extends Component{
                         <Col>Hand {number} 
                         {this.__targetHtml(passedLocalState, number)}
                                 {passedLocalState.playersInGame.includes(number) ? 
-                                <img alt="" src={this.getLinkForCard(this.localState.hands[number - 1])} width="100" />
+                                <img alt="" src={this.getLinkForCard(this.localState.hands[number - 1])} width={this.cardWidth} height={this.cardHeight} />
                                 : 
-                                <img alt="" src={tombstone} width="100" ></img>}
+                                <img alt="" src={tombstone} width={this.cardWidth} height={this.cardHeight} ></img>}
                         </Col>
                     );
                         }))
@@ -736,9 +762,9 @@ class LoveLetterAI extends Component{
                             <div>
                                 {this.__targetHtml(passedLocalState, number)}
                                 {passedLocalState.playersInGame.includes(number) ? 
-                                <img alt="" src={cardBack} width="100" ></img>
+                                <img alt="" src={cardBack} width={this.cardWidth} height={this.cardHeight}></img>
                                 : 
-                                <img alt="" src={tombstone} width="100" ></img>}
+                                <img alt="" src={tombstone} width={this.cardWidth} height={this.cardHeight} ></img>}
                             </div>
                         </div>}
                     </Col>);
@@ -961,14 +987,14 @@ class LoveLetterAI extends Component{
             <div className={classes.gamebody}>
                 <Container>
                     <Row>
-                        <Col>
+                        <div className='col-sm-6 col-xs-12'>
                             <div className={classes.gamestate + " row align-items-center"}>
-                                <Col>
+                                <div className='col-sm-6 col-xs-12'>
                                     <p>You are Player 1</p>
                                     {(this.state.currentTurn === 1) ? <div className={classes.blink_me_small}>Current Turn: Player 1 (Your Turn)</div> : <div><b>Current Turn: Player {this.state.currentTurn}</b></div> }
                                     <p>Cards in the Deck: {this.state.deck.length}</p>
-                                </Col>
-                                <div className='col align-right'>
+                                </div>
+                                <div className='col-sm-6 col-xs-12 align-right'>
                                     {this.state.currentTurn !== 1 ?
                                     <button className={classes.blink_button} id="playAiTurn" onClick={() => {this.playTurn(this.localState.currentTurn)}}>Play AI Turn</button>
                                     : 
@@ -978,8 +1004,10 @@ class LoveLetterAI extends Component{
                             </div>
                             <Row className="border">
                                 <Col className={classes.gamestate}>
-                                    {this.renderDraw()}
-                                    {this.renderSelf()}
+                                    <Row>
+                                        {this.renderDraw()}
+                                        {this.renderSelf()}
+                                    </Row>
                                 </Col>
                                 <Col>
                                     <div className={classes.gamestate}>
@@ -1023,8 +1051,8 @@ class LoveLetterAI extends Component{
                                 <button onClick={() => {this.rerenderState()}}>Rerender State</button>
                                 </div> : <p></p>}
                             </div>
-                        </Col>
-                        <Col>
+                        </div>
+                        <div className='col-sm-6 col-xs-12'>
                             <div className={classes.gamestate}>
                                 <h3>Game History</h3>
                                 <p>Message  0: {this.state.message[0]}</p>
@@ -1054,7 +1082,7 @@ class LoveLetterAI extends Component{
                                 <p></p>
                                 <a href="https://github.com/Axirr/React-Playground/blob/main/src/Components/LoveLetter/LoveLetterAI.js">Love Letter Source Code</a>
                             </div>
-                        </Col>
+                        </div>
                     </Row>
                 </Container>
             </div>
