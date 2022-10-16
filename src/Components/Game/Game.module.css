@@ -50,6 +50,7 @@
     border-radius: 25px;
     margin-top: 1px;
     margin-bottom: 1px;
+    border: 3px;
 }
 
 .gameStateNoRound {
@@ -75,6 +76,16 @@
     animation: blinker 1s linear infinite;
     color: red;
     font-weight: bold;
+}
+
+.blink_border {
+    border: 3px;
+    animation: border_blinker_animation 3s linear infinite;
+    border-style: solid;
+    background-color:navajowhite;
+    border-radius: 25px;
+    margin-top: 1px;
+    margin-bottom: 1px;
 }
 
 .red {
@@ -126,6 +137,12 @@
     }
 }
 
+@keyframes border_blinker_animation {
+    50% {
+        border-color: tan;
+    }
+}
+
 .diceUnsaved {
     color: yellow;
     padding: 1px;
@@ -161,6 +178,11 @@
 .grayStyledButton {
     background-color: gray;
     border: 1px solid black;
+}
+
+.disabledTan {
+    background-color: tan;
+    opacity: 0.7;
 }
 
 .styledTextInput {

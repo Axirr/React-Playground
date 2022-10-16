@@ -15,14 +15,21 @@ import classes from '../Game/Game.module.css'
 import tombstone from './CardImages/tombstone.jpg'
 
 class LoveLetterAI extends Component{
+    // UI globals
     isAI = true
-    isGameOver = false
     withDebug = false
-    allAI = true
-    // allAI = false
     doShowAllCards = false
     cardWidth = "100"
     cardHeight = "130"
+    isTargeting = false
+    isGuardTarget = false
+    currentPlayerUI = 1
+
+    isGameOver = false
+    allAI = true
+    // allAI = false
+    selectedCard = ""
+    cardsThatTarget = ['king', 'prince', 'baron', 'priest', 'guard']
 
     localState = {
         hands: ["none", "none", "none", "none"],
@@ -86,6 +93,10 @@ class LoveLetterAI extends Component{
     
     deal(numberPlayers) {
         this.isGameOver = false
+        this.doShowAllCards = false;
+        this.isTargeting = false;
+        this.isGuardTarget = false;
+        this.selectedCard = "";
         var newDeck = []
         if (!this.props.deck) {
             newDeck = ["guard", "guard", "guard", "guard", "guard", "priest", "priest", "baron", "baron", "handmaiden",
@@ -118,7 +129,7 @@ class LoveLetterAI extends Component{
         isDisplayed.push(true)
 
         // Remove if don't want Player 1 card displayed by default
-        isDisplayed[0] = true
+        isDisplayed[this.currentPlayerUI - 1] = true
 
         var drawCard = deckCopy.pop()
         var setAsideCard = deckCopy.pop()
@@ -135,20 +146,13 @@ class LoveLetterAI extends Component{
             totalNumberOfPlayers: numberPlayers,
             playedCards: []}, () => {
                 this.localState = JSON.parse(JSON.stringify(this.state))
-                // this.hideAllCards()
                 this.rerenderState()
             } )
     }
 
     redeal(numberPlayers) {
-        // if (this.localState.useDefaultDeck) {
-        //     this.localState['deck'] = [...this.localState.defaultDeck]
-        //     this.deal(numberPlayers)
-        // }
         this.localState['deck'] = [...this.localState.defaultDeck]
         this.deal(numberPlayers)
-        this.doShowAllCards = false;
-        // this.rerenderState()
     }
 
     returnShuffledDeck(deck) {
@@ -166,16 +170,39 @@ class LoveLetterAI extends Component{
         return shuffledDeck
     }
 
-    playerPlayCard(playerNumber, card) {
+    playerPlayCardOrStartTarget(playerNumber, card) {
         if (this.isGameOver) {
             window.alert("Game is over.")
             return
         }
-        if (playerNumber !== this.localState.currentTurn) {
+        // if (playerNumber !== this.localState.currentTurn) {
+        if (this.currentPlayerUI !== this.localState.currentTurn) {
             this.alertWindow("Not your turn")
             return
         }
-        this.playCard(card, playerNumber)
+        if (this.isTargeting) {
+            this.playCard(this.selectedCard, playerNumber)
+            
+            // BUG: would be nice to make this conditional on the play going through
+            //      as is, it automatically cancels on invalid target without letting player repick
+            this.cancelTarget()
+        } else if (this.cardsThatTarget.includes(card)) {
+            this.isTargeting = true;
+            this.selectedCard = card;
+            if (card === 'guard') {
+                this.isGuardTarget = true
+            }
+            this.rerenderState();
+        } else {
+            this.playCard(card, playerNumber)
+        }
+    }
+
+    cancelTarget() {
+        this.isTargeting = false;
+        this.isGuardTarget = false;
+        this.selectedCard = "";
+        this.rerenderState();
     }
 
     alertWindow(message) {
@@ -184,43 +211,46 @@ class LoveLetterAI extends Component{
         }
     }
 
-    playCard(card, playerNumber) {
-        if (playerNumber === 0 & this.isGameOver) {
+    playCard(card, playerNumber, target=-1) {
+        // if (playerNumber === 0 & this.isGameOver) {
+        if (this.isGameOver) {
             window.alert("Game is over.")
-            return
+            return false
         }
 
         if (this.localState.currentTurn === -1 ) {
             this.alertWindow("Game is over")
-            return
+            return false
         }
 
-        this.removeSelfHandmaiden()
+        this.removeCurrentTurnHandMaiden()
 
-        if (!this.isValidMove(card)) {
-            return
+        // BUG not sure which
+        if (target === -1) {
+            if (!this.isValidMove(card)) {
+                return
+            }
         }
-        console.log(this.localState.isDisplayed)
-        console.log(this.state.isDisplayed)
+        // if (!this.isValidMove(card)) {
+        //     return false
+        // }
 
-        if (["king", "prince", "guard", "priest", "baron"].indexOf(card) !== -1 && this.isOnlyHandmaidenTargets()) {
+        if (this.cardsThatTarget.indexOf(card) !== -1 && this.isOnlyHandmaidenTargets(card)) {
             this.updateMessage("Player " + this.localState.currentTurn + " played a " + card + " but had no valid targets.")
+            // BUG This assumes draw card play if both are equal, but that is not correct?
+            // Does it matter?
             var isDrawCardPlayed = (card === this.localState.drawCard)
             this.normalDrawAndAdvance(isDrawCardPlayed)
-            // this.removeSelfHandmaiden( () => {
-            //     this.normalDrawAndAdvance(isDrawCardPlayed)
-            // })
         } else {
-            this.isElimCardEffect(card)
+            this.isElimCardEffect(card, target)
         }
-        console.log(this.localState.isDisplayed)
-        console.log(this.state.isDisplayed)
+        return true
     }
 
     isOnlyHandmaidenTargets(card) {
         var onlyHandmaidens = false
         if (card === "prince") {
-            return onlyHandmaidens
+            return false
         }
         for (var i = 0; i < this.localState.playersInGame.length; i++) {
             var potentialTarget = this.localState.playersInGame[i]
@@ -238,14 +268,19 @@ class LoveLetterAI extends Component{
         return onlyHandmaidens
     }
 
-    removeSelfHandmaiden() {
+    removeCurrentTurnHandMaiden() {
         var handmaidenCopy = this.localState.isHandMaiden
         handmaidenCopy[this.localState.currentTurn - 1] = false
         this.localState['isHandMaiden'] = handmaidenCopy
     }
 
-    isElimCardEffect(card) {
-        var myTarget = this.getTargetPlayerNumber()
+    isElimCardEffect(card, target=-1) {
+        var myTarget;
+        if (target === -1) {
+            myTarget = this.getTargetPlayerNumber()
+        } else {
+            myTarget = target;
+        }
         this.localState.playedCards.push(card)
         if (["guard","priest","baron", "prince", "king"].indexOf(card) !== -1) {
             this.updateMessage("Player " + this.localState.currentTurn + " played a " + card + " targeting Player " + myTarget + ".")
@@ -254,6 +289,8 @@ class LoveLetterAI extends Component{
         } else {
             this.updateMessage("Player " + this.localState.currentTurn + " played a " + card + " with no direct effect.")
         }
+        // BUG: assumes draw card played if card is the same as draw card
+        //      not valid assumption
         var isDrawCardPlayed = (card === this.localState.drawCard)
         var notPlayedCard;
         if (isDrawCardPlayed) {
@@ -385,7 +422,6 @@ class LoveLetterAI extends Component{
     }
 
     updateMessage(newMessage) {
-        // console.log("Updating message")
         var messageCopy = this.localState.message
         for (var i = 0; i < (messageCopy.length - 1); i++) {
             messageCopy[i] = messageCopy[i+1]
@@ -451,7 +487,7 @@ class LoveLetterAI extends Component{
         } 
 
         // Valid target check
-        if (['king', 'guard', 'prince', 'baron', 'priest', 'guard'].indexOf(card) !== -1) {
+        if (this.cardsThatTarget.includes(card)) {
             if (!this.isValidTarget(card)) {
                 return false
             }
@@ -472,6 +508,11 @@ class LoveLetterAI extends Component{
     isValidTarget(card) {
         //Get current target
         var myTarget = this.getTargetPlayerNumber()
+
+        if (myTarget === this.state.currentTurn) {
+            this.alertWindow("CAN'T TARGET SELF.")
+            return false
+        }
 
         // Check still in game
         if (this.localState.playersInGame.indexOf(myTarget) === -1) {
@@ -594,6 +635,9 @@ class LoveLetterAI extends Component{
         this.rerenderState()
     }
 
+    // BUG: If player eliminated by playing hand card, hand card is not updated to be draw card before 'discarded' message is displayed
+    //      so it looks like the played card was discarded
+    //      Need to rework how card playing works
     eliminatePlayer(playerNumber) {
         var copyPlayers = [...this.localState.playersInGame]
         let index = copyPlayers.indexOf(playerNumber)
@@ -629,11 +673,6 @@ class LoveLetterAI extends Component{
 
     hideAllCards() {
         this.doShowAllCards = false
-        // var displayCopy = this.localState.isDisplayed
-        // for (var i = 0; i < displayCopy.length; i++) {
-        //     displayCopy[i] = false
-        // }
-        // this.localState['isDisplayed'] = displayCopy
         this.rerenderState()
     }
 
@@ -646,11 +685,6 @@ class LoveLetterAI extends Component{
 
     showAllCards() {
         this.doShowAllCards = true
-        // var displayCopy = this.localState.isDisplayed
-        // for (var i = 0; i < displayCopy.length; i++) {
-        //     displayCopy[i] = true
-        // }
-        // this.localState['isDisplayed'] = displayCopy
         this.rerenderState()
     }
 
@@ -662,64 +696,85 @@ class LoveLetterAI extends Component{
     }
 
     renderSelf() {
-        return( this.state.playersInGame.includes(1) ?
-            <Row>
+        return( this.state.currentTurn === this.currentPlayerUI && !this.isTargeting ?
+            <div className={'row ' + classes.blink_border}>
                 <Col>
-                    <p>Hand</p>
-                    <img alt="" src={this.getLinkForCard(this.localState.hands[0])} width={this.cardWidth} height={this.cardHeight}/>
+                    {this.__targetHtml(this.localState, 1)}
+                    {this.renderSelfCardImage()}
                 </Col>
                 <Col>
-                    {this.localState.currentTurn === 1 ? 
-                    <button className={classes.tanStyledButton} id={"hand"+1} onClick={(() => { this.playerPlayCard(1, this.localState.hands[0]) })}>Play Hand Card</button> 
+                    {this.localState.currentTurn === this.currentPlayerUI ? 
+                    <button className={classes.tanStyledButton} id={"hand"+1} onClick={(() => { this.playerPlayCardOrStartTarget(1, this.localState.hands[0]) })}>Play Hand Card</button> 
                     :
                     <button className={classes.tanStyledButton} id={"hand"+1} disabled>Play Hand Card</button> 
                     }
                 </Col>
-            </Row>
+            </div>
             : 
-            <Row>
+            <div className={'row ' + classes.gamestate}>
                 <Col>
-                    <p>Eliminated!</p>
-                    <img alt="" src={tombstone} width={this.cardWidth} height={this.cardHeight}></img>
+                    {this.__targetHtml(this.localState, 1)}
+                    {this.renderSelfCardImage()}
                 </Col>
                 <Col>
                     <button className={classes.tanStyledButton} id={"hand"+1} disabled>Play Hand Card</button> 
                 </Col>
-            </Row> 
+            </div> 
         );
+    }
+
+    renderSelfCardImage() {
+        return( this.state.playersInGame.includes(this.currentPlayerUI) ?
+        <div>
+            <p>Hand</p>
+            <img alt="" src={this.getLinkForCard(this.localState.hands[0])} width={this.cardWidth} height={this.cardHeight}/>
+        </div>
+            : 
+        <div>
+            <p>Eliminated!</p>
+            <img alt="" src={tombstone} width={this.cardWidth} height={this.cardHeight}></img>
+        </div>
+        )
     }
     
     renderDraw() {
-        return(
-            (this.state.isDisplayed[this.state.totalNumberOfPlayers] || this.doShowAllCards) ?
-            <Row>
+        // These only differ by the starting div
+        // Is there a way to only change that line programmatically? Run into "single parent element" error the way I'm doing it
+        return(this.state.currentTurn === this.currentPlayerUI && !this.isTargeting ?
+            <div className={'row ' + classes.blink_border}> :
+
             <Col>
                 <div>Current Draw Card for Player {this.state.currentTurn}</div>
-                <img alt="" src={this.getLinkForCard(this.localState.drawCard)} width={this.cardWidth} height={this.cardHeight} /> 
+                {/* <img alt="" src={this.getLinkForCard(this.localState.drawCard)} width={this.cardWidth} height={this.cardHeight} />  */}
+                {this.renderDrawCardImage()}
             </Col>
             <Col>
-                {this.state.currentTurn === 1 ? 
-                <button className={classes.tanStyledButton} id="drawCard" onClick={ () => { this.playCard(this.state.drawCard, 0)}}>Play Draw Card</button> 
+                {this.state.currentTurn === this.currentPlayerUI ? 
+                <button className={classes.tanStyledButton} id="drawCard" onClick={ () => { this.playerPlayCardOrStartTarget(1, this.state.drawCard)}}>Play Draw Card</button> 
                 : 
-                <button className={classes.tanStyledButton} id="drawCard" disabled>Play Draw Card</button> 
+                <button className={classes.tanStyledButton} id="drawCard" onClick={ () => { this.playCard(this.state.drawCard, 0)}}>Play Draw Card</button> 
                 }
             </Col>
-            </Row>
+            </div>
             :
-            <Row>
+            <div className={'row ' + classes.gamestate}>
                 <Col>
                     <div>Current Draw Card for Player {this.state.currentTurn}</div>
-                    <img alt="" src={cardBack} width={this.cardWidth} height={this.cardHeight} />
+                    {/* <img alt="" src={cardBack} width={this.cardWidth} height={this.cardHeight} /> */}
+                    {this.renderDrawCardImage()}
                 </Col>
                 <Col>
-                {this.state.currentTurn === 1 ? 
-                <button className={classes.tanStyledButton} id="drawCard" onClick={ () => { this.playCard(this.state.drawCard, 0)}}>Play Draw Card</button> 
-                : 
                 <button className={classes.tanStyledButton} id="drawCard" disabled>Play Draw Card</button> 
-                }
                 </Col>
-            </Row>  
+            </div>  
         )
+    }
+
+    renderDrawCardImage() {
+        return((this.state.isDisplayed[this.state.totalNumberOfPlayers] || this.doShowAllCards || this.state.currentTurn === this.currentPlayerUI)) ?
+                <img alt="" src={this.getLinkForCard(this.localState.drawCard)} width={this.cardWidth} height={this.cardHeight} /> 
+                :
+                <img alt="" src={cardBack} width={this.cardWidth} height={this.cardHeight} />
     }
 
     renderHands() {
@@ -740,7 +795,7 @@ class LoveLetterAI extends Component{
         return(
                 this.ownRange(passedLocalState.totalNumberOfPlayers + 1, 2).map((number) => {
                     return( number === 1 ? "" :
-                        <Col>Hand {number} 
+                        <Col>Player {number} 
                         {this.__targetHtml(passedLocalState, number)}
                                 {passedLocalState.playersInGame.includes(number) ? 
                                 <img alt="" src={this.getLinkForCard(this.localState.hands[number - 1])} width={this.cardWidth} height={this.cardHeight} />
@@ -757,7 +812,7 @@ class LoveLetterAI extends Component{
                 return( number === 1 ? 
                     ""
                     : 
-                    <Col>Hand {number}{ 
+                    <Col>Player {number}{ 
                         <div>
                             <div>
                                 {this.__targetHtml(passedLocalState, number)}
@@ -829,16 +884,89 @@ class LoveLetterAI extends Component{
         for (let i = 1; i <= this.localState.totalNumberOfPlayers; i++) {
             allPlayers.push(i)
         }
-        return(
+        return(this.isTargeting ? 
             <div>
-                {allPlayers.map((number) => {
-                    return(
-                        <div class="col-12">
-                            <input type="radio" value={number} name="target" defaultChecked/>Player {number}
-                        </div>
-                )})}
+                <div className={classes.blink_border}>
+                    Target of Card
+                    {allPlayers.map((number) => {
+                        return(
+                            <div className="col-12">
+                                <input type="radio" value={number} name="target" defaultChecked/>Player {number}
+                            </div>
+                    )})}
+                </div>
+            </div>
+            :
+            <div>
+                <div className={classes.disabledTan}>
+                    Target of Card
+                    {allPlayers.map((number) => {
+                        return(
+                            <div className="col-12">
+                                <input type="radio" value={number} name="target" disabled/>Player {number}
+                            </div>
+                    )})}
+                </div>
             </div>
         );
+    }
+    
+    renderGuardGuesses() {
+        return(
+            (this.isTargeting && this.isGuardTarget) ? 
+                <div className={classes.blink_border}>
+                    Guess for Guard
+                    <Row>
+                        <Col>
+                            <input type="radio" value="priest" name="guardGuess" defaultChecked/>Priest
+                            <input type="radio" value="baron" name="guardGuess" />Baron
+                            <input type="radio" value="handmaiden" name="guardGuess" />Handmaiden
+                            <input type="radio" value="prince" name="guardGuess" />Prince
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            <input type="radio" value="king" name="guardGuess" />King
+                            <input type="radio" value="countess" name="guardGuess" />Countess
+                            <input type="radio" value="princess" name="guardGuess" />Princess
+                        </Col>
+                    </Row>
+                </div>
+                :
+                <div className={classes.disabledTan}>
+                    Guess for Guard
+                    <Row>
+                        <Col>
+                            <input type="radio" value="priest" name="guardGuess" disabled/>Priest
+                            <input type="radio" value="baron" name="guardGuess" disabled/>Baron
+                            <input type="radio" value="handmaiden" name="guardGuess" disabled/>Handmaiden
+                            <input type="radio" value="prince" name="guardGuess" disabled/>Prince
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            <input type="radio" value="king" name="guardGuess" disabled/>King
+                            <input type="radio" value="countess" name="guardGuess" disabled/>Countess
+                            <input type="radio" value="princess" name="guardGuess" disabled/>Princess
+                        </Col>
+                    </Row>
+                </div>
+        )
+    }
+
+    renderConfirmCardPlayButton() {
+        return(
+            this.isTargeting ?
+            <div className={classes.blink_border}>
+                <button className={classes.tanStyledButton} onClick={()=>{this.playerPlayCardOrStartTarget(1, this.selectedCard)}} >Confirm Target and Play</button>
+                <button className={classes.tanStyledButton} onClick={()=>{this.cancelTarget()}} >Cancel</button>
+            </div>
+            :
+            <div className={classes.disabledTan}>
+                <button className={classes.tanStyledButton} disabled>Confirm Target and Play</button>
+                <button className={classes.tanStyledButton} disabled>Cancel Play</button>
+            </div>
+        )
     }
 
     playTurn(player) {
@@ -863,12 +991,15 @@ class LoveLetterAI extends Component{
                 break
             }
         }
-        this.setTarget(playerTarget)
+
+        // Explicitly passing now instead of relying on UI
+        // this.setTarget(playerTarget)
 
         this.setRandomGoodGuess()
 
         this.rerenderState(() => {
-            this.playerPlayCard(this.localState.currentTurn, chosenCard)
+            // this.playerPlayCardOrStartTarget(this.localState.currentTurn, chosenCard)
+            this.playCard(chosenCard, this.localState.currentTurn, playerTarget)
         })
     }
     
@@ -959,29 +1090,6 @@ class LoveLetterAI extends Component{
         }
     }
 
-    renderLivePlayers() {
-        return(
-            <div></div>
-            // <div>
-            //     <div>Current Live Players: </div>
-            //     {this.localState.playersInGame.map(number => {
-            //         return(<div>Player {number}</div>)
-            //     })}
-            // </div>
-        )
-    }
-
-    renderHandmaidenStatus() {
-        return(
-            <div className="border">
-                Can Target Player (Handmaiden Status):
-                {this.localState.playersInGame.map((number) => {
-                    return(<div>{this.localState.isHandMaiden[number - 1] ? <div className="bg-danger">Player {number} </div> : <div><div className="bg-success">Player {number} </div></div>}</div>)
-                })}
-            </div>
-        )
-    }
-
     render() {
         return (
             <div className={classes.gamebody}>
@@ -1003,35 +1111,16 @@ class LoveLetterAI extends Component{
                                 </div>
                             </div>
                             <Row className="border">
-                                <Col className={classes.gamestate}>
+                                <Col>
                                     <Row>
-                                        {this.renderDraw()}
                                         {this.renderSelf()}
+                                        {this.renderDraw()}
                                     </Row>
                                 </Col>
                                 <Col>
-                                    <div className={classes.gamestate}>
-                                        Target of Card
-                                        {this.renderTargets()}
-                                    </div>
-                                    <div className={classes.gamestate}>
-                                        Guess for Guard
-                                        <Row>
-                                            <Col>
-                                                <input type="radio" value="priest" name="guardGuess" defaultChecked/>Priest
-                                                <input type="radio" value="baron" name="guardGuess" />Baron
-                                                <input type="radio" value="handmaiden" name="guardGuess" />Handmaiden
-                                                <input type="radio" value="prince" name="guardGuess" />Prince
-                                            </Col>
-                                        </Row>
-                                        <Row>
-                                            <Col>
-                                                <input type="radio" value="king" name="guardGuess" />King
-                                                <input type="radio" value="countess" name="guardGuess" />Countess
-                                                <input type="radio" value="princess" name="guardGuess" />Princess
-                                            </Col>
-                                        </Row>
-                                    </div>
+                                    {this.renderTargets()}
+                                    {this.renderGuardGuesses()}
+                                    {this.renderConfirmCardPlayButton()}
                                 </Col>
                             </Row>
                             <Row className={classes.gamestate}>
@@ -1039,9 +1128,6 @@ class LoveLetterAI extends Component{
                                 {this.renderHands()}
                             </Row>
                             <div>
-                                <p>{this.renderLivePlayers()}</p>
-                                {/* <p>{this.renderHandmaidenStatus()}</p> */}
-                                {/* <button className={classes.tanStyledButton} onClick = {() => { this.showCurrentPlayerCards()}}>Show Current Player Cards</button> */}
                                 <button className={classes.tanStyledButton} onClick={() => { this.hideAllCards()}}>Hide Opponent Cards</button>
                                 <button className={classes.tanStyledButton} onClick={() => { this.showAllCards()}}>Show Opponent Cards</button>
                                 <button className={classes.tanStyledButton} onClick={() => { this.allAI = !this.allAI; } }>Toggle ALL AI</button>

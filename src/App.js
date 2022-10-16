@@ -36,10 +36,6 @@ class App extends Component {
               <NetworkLoveLetter doShuffle={true}/>
             </Route>
             <Route path="/loveletter">
-              {/* <LoveLetter doShuffle={true}/> */}
-              <LoveLetterAI doShuffle={true}/>
-            </Route>
-            <Route path="/loveletterai">
               <LoveLetterAI doShuffle={true}/>
             </Route>
             <Route path="/lovelettertest">
