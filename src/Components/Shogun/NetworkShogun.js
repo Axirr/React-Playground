@@ -12,17 +12,19 @@ class NetworkShogun extends Game {
     //
     // CHANGE THESE FOR PRODUCTION 
 
-    // portnumber ='';
-    // hostname = 'www.scottsherlock.one';
-    // withDebug = false
+    appUrl = (process.env.NODE_ENV === 'development') ? 'development' : 'production';
+
+    portnumber ='';
+    hostname = 'www.scottsherlock.one';
+    withDebug = false
+    waitTime = 1000
+    // hostname = '44.230.70.0';
+
+    // portNumber = 8000;
+    // hostname = '0.0.0.0';
+    // withDebug = true
     // waitTime = 1000
 
-    portNumber = 8000;
-    hostname = '0.0.0.0';
-    withDebug = true
-    waitTime = 1000
-
-    // hostname = '44.230.70.0';
 
 
 
@@ -128,6 +130,12 @@ class NetworkShogun extends Game {
     }
 
     componentDidMount() {
+        if (this.appUrl === 'development') {
+            this.portNumber = 8000;
+            this.hostname = '0.0.0.0';
+            this.withDebug = true
+            this.waitTime = 1000
+        }
         this.apiGetGameState(true);
     }
 
