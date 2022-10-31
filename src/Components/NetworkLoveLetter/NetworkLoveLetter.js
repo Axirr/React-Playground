@@ -26,7 +26,7 @@ class NetworkLoveLetter extends Game {
     hostname = 'www.scottsherlock.one';
     withDebug = false
     waitTime = 1000
-    hostname = '44.230.70.0';
+    // hostname = '44.230.70.0';
 
     // CHANGE IN COMPONENT DID MOUNT
     // portNumber = 8000;
