@@ -20,19 +20,19 @@ class NetworkLoveLetter extends Game {
     //
     // CHANGE THESE FOR PRODUCTION 
 
-    // portnumber ='';
-    // hostname = 'www.scottsherlock.one';
-    // withDebug = false
-    // waitTime = 1000
+    appUrl = (process.env.NODE_ENV === 'development') ? 'development' : 'production';
 
-    portNumber = 8000;
-    hostname = '0.0.0.0';
-    withDebug = true
+    portnumber ='';
+    hostname = 'www.scottsherlock.one';
+    withDebug = false
     waitTime = 1000
+    hostname = '44.230.70.0';
 
-    // hostname = '44.230.70.0';
-
-
+    // CHANGE IN COMPONENT DID MOUNT
+    // portNumber = 8000;
+    // hostname = '0.0.0.0';
+    // withDebug = true
+    // waitTime = 1000
 
     // END CHANGE FOR PRODUCTION
     //
@@ -120,6 +120,12 @@ class NetworkLoveLetter extends Game {
     
 
     componentDidMount() {
+        if (this.appUrl === 'development') {
+            this.portNumber = 8000;
+            this.hostname = '0.0.0.0';
+            this.withDebug = true
+            this.waitTime = 1000
+        }
         // this.deal(4)
 
         // Pre-load card images

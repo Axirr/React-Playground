@@ -1,0 +1,112 @@
+Local:
+isAI
+playerNumber
+    Assuming that's local active player
+displayHands
+defaultDeck
+    No need to store this for every game
+
+Game:
+gameId
+    key
+isGameOver?
+    Seems like game data
+    But only used locally?
+messageLogId
+gameType?
+    Tell us which game table to join with
+
+LoveLetterGame:
+gameID
+    key
+drawCard
+currentTurn
+deckID
+setAsideCard
+useDefaultDeck?
+    Remove
+totalNumberPlayers
+
+Message:
+gameId, messageString
+
+CardCollection:
+gameID, deckId
+    Could be both Deck and Played Cards
+
+Card:
+deckId, cardValue, isPlayed
+    To get deck:
+        select cardValue from Deck where deckId=Game.deckId
+Maybe only use card, not Deck? Add gameID?
+
+
+Player:
+gameId, playerNumber
+    key
+hand
+    Would be a card?
+inGame: bool
+isHandmaiden: bool
+isDisplayed: bool
+
+
+Format seems workable, but also kind of terrible
+    Everytime I want to get the gameState, I have to look through
+        All the games, to find the loveletter games
+        All the players, to find ones for the loveletter game
+        All the cards, to find cards in players hand, deck, etc. for this game
+Seems ludicrous at any scale
+    E.g. ~20 cards per game
+Plus, games have no overlap
+    Players only in one game
+        Not even named, numbered, repetitively
+    Cards used in one don't affect others, etc.
+    I guess this document based way would affect the efficiency of certain queries
+        E.g. get me every player who is currently holding a 'guard'
+            gamedId, playerNum
+        But those are not currently done
+        And the huge inefficiency for the common operation of getting a single game gamestate is unworkable
+Able to mix SQL elements with lump sum data forms?
+    Currently fully lump sum
+    Maybe make the game/lovelettergame level SQL
+        For learning rather than necessity/good use of relational model
+    And then the other stuff can be document based
+As stated above, even that would be educational only
+    Seems bad for scale again
+Honestly, seems wasteful
+Don't even think I should switch from MariaDB to MySQL if I'm not using the relational database aspect
+    Will have to get MariaDB working locally again, at least in an alternate environment
+    Hopefully not too bad
+Optimization of subtables by ordering over gameId?
+    Then don't have to search through whole table, just get the page with them
+    Using an index
+        Is this automatic or needs to be specified?
+
+    
+Current format:
+    isAI = false
+    isGameOver = false
+    gameId = 1;
+    playerNumber = 0;
+    displayHands = true;
+    defaultDeck = ["guard", "guard", "guard", "guard", "guard", "priest", "priest", "baron", "baron", "handmaiden","handmaiden",
+        "prince", "prince", "king", "countess", "princess"]
+
+    localState = {
+        hands: ["none", "none", "none", "none"],
+        drawCard: "none",
+        currentTurn: 1,
+        deck: ["guard", "guard", "guard", "guard", "guard", "priest", "priest", "baron", "baron", "handmaiden",
+        "handmaiden", "prince", "prince", "king", "countess", "princess"],
+        playersInGame: [1, 2, 3, 4],
+        isHandMaiden: [false, false, false, false],
+        message: ["none", "none", "none", "none", "none", "none"],
+        setAsideCard: "none",
+        isDisplayed: [false, false, false, false, false, false],
+        useDefaultDeck: true,
+        defaultDeck: ["guard", "guard", "guard", "guard", "guard", "priest", "priest", "baron", "baron", "handmaiden",
+        "handmaiden", "prince", "prince", "king", "countess", "princess"],
+        totalNumberOfPlayers: 4,
+        playedCards: []
+    }
