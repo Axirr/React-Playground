@@ -556,7 +556,7 @@ class NetworkLoveLetter extends Game {
             return
         }
         if (parsedInt <= 0 || parsedInt > this.localState.totalNumberOfPlayers) {
-            window.alert("Player number must within player range.");
+            window.alert("Player number must be within player range.");
             return
         }
         this.playerNumber = parsedInt;
@@ -907,12 +907,18 @@ class NetworkLoveLetter extends Game {
                     <div className="col col-sm-8 col-12">
                         <div className={classes.gamestate}>
                     <div>Current Player Id: {this.playerNumber}</div>
+                    {this.playerNumber === 0 ? <div className={classes.blink_me}>Need to Set Player Number</div> : null}
+                    <div>Current Player Id: {this.playerNumber}</div>
                     <div>
                         Player Number
                         <input className={classes.styledTextInput} type="text" id="playerArea"></input>
                         <button className={classes.tanStyledButton} id="playerAreaButton" onClick={() => this.setPlayerNumber(document.getElementById("playerArea").value)}>Set Player Number</button>
                     </div>
-                    <button className={classes.tanStyledButton} id="playAiTurn" onClick={() => {this.playTurn(this.localState.currentTurn)}}>Play AI Turn</button>
+                    {this.playerNumber !== this.localState.currentTurn ?
+                    <button className={classes.tanStyledButton + " " + classes.blink_me} id="playAiTurn" onClick={() => {this.playTurn(this.localState.currentTurn)}}>Play AI Turn</button>
+                    :
+                    <button className={classes.tanStyledButton} id="playAiTurn" onClick={() => {this.playTurn(this.localState.currentTurn)}} disabled>Play AI Turn</button>
+                    }
                     <div>Current Turn: Player {this.state.currentTurn}</div>
                     <div>Cards Left in the Deck: {this.state.deck.length}</div>
                     <Row className="border">
