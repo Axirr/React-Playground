@@ -1,3 +1,10 @@
+/*
+BOOTSTRAP STYLING NOT WORKING RIGHT
+    BUTTONS THAT SHOULD JUST BE COLOURED NEED A SECOND CLASS 'BTN'
+    GRID NOT WORKING IN MANY PLACES
+        E.G. CARD BUYING, BUY SHOULD BE TO THE RIGHT OF THE CARD
+    DEPLOYED VERSION IS STILL DISPLAYING AS INTENDED
+*/
 import '../../App.css';
 import { Container, Col, Row} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -1041,7 +1048,7 @@ class NetworkShogun extends Game {
                     </Col>
                     {this.localState.deck[cardNumber] ? 
                     <div className="col my-auto">
-                    <button id={"buy" + cardNumber} class={((this.localState.buttonPhase === 2 && this.localState.deck[cardNumber] && this.getCostForCard(this.localState.currentTurn, cardNumber) <= this.localState.energy[this.localState.currentTurn - 1]) && this.currentPlayerNumber === this.localState.currentTurn && !this.localState.isGameOver) ? "btn-success" : "btn-danger"} onClick={() => {this.apiBuy(cardNumber)}}>Buy</button>
+                    <button id={"buy" + cardNumber} class={((this.localState.buttonPhase === 2 && this.localState.deck[cardNumber] && this.getCostForCard(this.localState.currentTurn, cardNumber) <= this.localState.energy[this.localState.currentTurn - 1]) && this.currentPlayerNumber === this.localState.currentTurn && !this.localState.isGameOver) ? "btn btn-success" : "btn btn-danger"} onClick={() => {this.apiBuy(cardNumber)}}>Buy</button>
                     </div> : null}
 
                 </Row>
@@ -1066,6 +1073,14 @@ class NetworkShogun extends Game {
         return false
     }
 
+    debugButtons() {
+        return (
+            <div>
+                <button className={classes.tanStyledButton} onClick={() => {this.withDebug = !this.withDebug; this.render(); }}>Toggle Debug Buttons On/Off To Play All Players</button>
+            </div>
+        )
+    }
+
 
     // ACTUAL RENDER START
 
@@ -1078,13 +1093,13 @@ class NetworkShogun extends Game {
                             <div className={this.phaseColorToggle ? classes.phasemessage : classes.secondphasemessage}>Current Phase Is <span className={classes.red}>{this.getCurrentPhaseName()}</span> For <span className={classes.blue}>Player {this.getCurrentPlayerForUpdateMessage()}</span>.</div>
                             <Row>
                                 <Col>
-                                {(this.currentPlayerNumber === this.state.currentTurn) ? <div className={classes.blink_me}>Your Turn</div> : <div className={classes.hidden}>Your turn.</div>}
+                                {(this.currentPlayerNumber === this.state.currentTurn) ? <div className={classes.blink_me + " " + classes.largeFont}>Your Turn</div> : <div className={classes.hidden}>Your turn.</div>}
                                 </Col>
                                 <Col>
                             <h1 className={classes.gametitle}>Shogun of Edo</h1>
                                 </Col>
                                 <Col>
-                                {(this.currentPlayerNumber === this.state.edo && this.state.buttonPhase === 1) ? <div className={classes.blink_me}>Yielding?</div> : <div className={classes.hidden}>Decide On Yielding Edo.</div>}
+                                {(this.currentPlayerNumber === this.state.edo && this.state.buttonPhase === 1) ? <div className={classes.blink_me + " " + classes.largeFont}>Yielding?</div> : <div className={classes.hidden}>Decide On Yielding Edo.</div>}
                                 </Col>
                             </Row>
                                 <div className={classes.gamestate}>
@@ -1092,54 +1107,40 @@ class NetworkShogun extends Game {
                                 <Col>
                                 <div>
                                     <h4><u>Dice</u></h4>
-                            <button id="dice0" className={this.state.saved[0] ? "btn-secondary" : "btn-warning"} onClick={() => {this.apiToggleDiceSave(0)}}>{this.state.dice[0]}</button>
-                            <button id="dice1" class={this.state.saved[1] ? "btn-secondary" : "btn-warning"} onClick={() => {this.apiToggleDiceSave(1)}}>{this.state.dice[1]}</button>
-                            <button id="dice2" class={this.state.saved[2] ? "btn-secondary" : "btn-warning"} onClick={() => {this.apiToggleDiceSave(2)}}>{this.state.dice[2]}</button>
-                            <button id="dice3" class={this.state.saved[3] ? "btn-secondary" : "btn-warning"} onClick={() => {this.apiToggleDiceSave(3)}}>{this.state.dice[3]}</button>
-                            <button id="dice4" class={this.state.saved[4] ? "btn-secondary" : "btn-warning"} onClick={() => {this.apiToggleDiceSave(4)}}>{this.state.dice[4]}</button>
-                            <button id="dice5" class={this.state.saved[5] ? "btn-secondary" : "btn-warning"} onClick={() => {this.apiToggleDiceSave(5)}}>{this.state.dice[5]}</button>
+                            <button id="dice0" className={this.state.saved[0] ? "btn btn-secondary" : "btn btn-warning"} onClick={() => {this.apiToggleDiceSave(0)}}>{this.state.dice[0]}</button>
+                            <button id="dice1" class={this.state.saved[1] ? "btn btn-secondary" : "btn btn-warning"} onClick={() => {this.apiToggleDiceSave(1)}}>{this.state.dice[1]}</button>
+                            <button id="dice2" class={this.state.saved[2] ? "btn btn-secondary" : "btn btn-warning"} onClick={() => {this.apiToggleDiceSave(2)}}>{this.state.dice[2]}</button>
+                            <button id="dice3" class={this.state.saved[3] ? "btn btn-secondary" : "btn btn-warning"} onClick={() => {this.apiToggleDiceSave(3)}}>{this.state.dice[3]}</button>
+                            <button id="dice4" class={this.state.saved[4] ? "btn btn-secondary" : "btn btn-warning"} onClick={() => {this.apiToggleDiceSave(4)}}>{this.state.dice[4]}</button>
+                            <button id="dice5" class={this.state.saved[5] ? "btn btn-secondary" : "btn btn-warning"} onClick={() => {this.apiToggleDiceSave(5)}}>{this.state.dice[5]}</button>
                                 </div>
                                 <div>
                             <div>Remaining Rolls: {this.state.remainingRolls}</div>
                                 </div>
                             <div>
-                                <button id="roll" class={(this.localState.buttonPhase === 0 && this.state.remainingRolls > 0 && this.currentPlayerNumber === this.localState.currentTurn && !this.localState.isGameOver) ? "btn-success" : "btn-danger"} onClick={() => {this.apiRoll()}}>Roll</button>
+                                <button id="roll" class={(this.localState.buttonPhase === 0 && this.state.remainingRolls > 0 && this.currentPlayerNumber === this.localState.currentTurn && !this.localState.isGameOver) ? "btn btn-success" : "btn btn-danger"} onClick={() => {this.apiRoll()}}>Roll</button>
                             </div>
                             <div>
-                            <button id="resolveRoll" class={(this.localState.buttonPhase === 0 && this.currentPlayerNumber === this.localState.currentTurn && !this.localState.isGameOver) ? "btn-success" : "btn-danger"} onClick={() => {this.apiResolveRoll()}}>Lock-in Roll</button>
+                            <button id="resolveRoll" class={(this.localState.buttonPhase === 0 && this.currentPlayerNumber === this.localState.currentTurn && !this.localState.isGameOver) ? "btn btn-success" : "btn btn-danger"} onClick={() => {this.apiResolveRoll()}}>Lock-in Roll</button>
                             </div>
                             <div>
-                                {this.withDebug && 
+                                {this.withDebug ?
                                 <div>
-                                    <button className={classes.tanStyledButton} id="advancePlayerNumber" onClick={() => this.advancePlayerNumber()}>Advance Player Number</button>
-                                    <button className={classes.tanStyledButton} id="setEdo" onClick={() => {this.setEdoPlayer()}}>Set Edo Player</button>
-                                    <button className={classes.tanStyledButton} id= "setCurrent" onClick={() => {this.setCurrentTurnPlayer()}}>Set Current Player</button>
-                                    <button className={classes.tanStyledButton} onClick={() => {this.apiResetGame(0)}}>Reset Game</button>
-                                    <p>Change player numbers and restart game.</p>
-                                    <div>
-                                        <button className={classes.tanStyledButton} onClick={() => {this.apiResetGame(2)}}>Reset to 2 Players</button>
-                                        <button className={classes.tanStyledButton} onClick={() => {this.apiResetGame(4)}}>Reset to 4 Players</button>
-                                        {/* <button onClick={() => {this.apiResetGame(5)}}>Reset to 5 Players</button> */}
-                                    </div>
-                                    <div>
-                                        <button className={classes.tanStyledButton} onClick={() => {this.printState()}}>Print State</button>
-                                        <button className={classes.tanStyledButton} onClick={() => this.printLocalState()}>Print Local State</button>
-                                        <button className={classes.tanStyledButton} id="resetTests" onClick={() => this.apiResetTests()}>Reset Tests</button>
-                                    </div>
-                                    <div>
-                                        <button className={classes.tanStyledButton} id="spoof3" onClick={() => this.spoofDice(["3","3","3","1","2","2"])}>Spoof Dice 333</button>
-                                        <button className={classes.tanStyledButton} id="spoofClaw" onClick={() => this.spoofDice(["claw","3","3","1","2","2"])}>Spoof Dice One Claw</button>
-                                        <button className={classes.tanStyledButton} id="spoofNone" onClick={() => this.spoofDice(["1","1","2","2","3","3"])}>Spoof None</button>
-                                        <button className={classes.tanStyledButton} id="spoof6Claw" onClick={() => this.spoofDice(["claw","claw","claw","claw","claw","claw"])}>Spoof Six Claw</button>
-                                        <button className={classes.tanStyledButton} id="spoofHeart" onClick={() => this.spoofDice(["heart","1","1","2","2","3"])}>Spoof Heart</button>
-                                        <button className={classes.tanStyledButton} id="spoof6Energy" onClick={() => this.spoofDice(["energy","energy","energy","energy","energy","energy"])}>Spoof 6 Energy</button>
-                                        <button className={classes.tanStyledButton} id="spoofCompleteDestruction" onClick={() => this.spoofDice(["energy","claw","heart","1","2","3"])}>Spoof Complete Destruction</button>
-                                        <button className={classes.tanStyledButton} id="spoof3Points3Energy" onClick={() => this.spoofDice(["energy","energy","energy","3","3","3"])}>Spoof 3 Energy, 3 Points</button>
-                                        <button className={classes.tanStyledButton} id="spoof2Energy" onClick={() => this.spoofDice(["energy","energy","1","1","3","3"])}>Spoof 2 Energy</button>
-                                        <button className={classes.tanStyledButton} id="spoof5Energy1Claw" onClick={() => this.spoofDice(["energy","energy","energy","energy","energy","claw"])}>Spoof 5 Energy, 1 Claw</button>
-                                        <button className={classes.tanStyledButton} id="spoof2Claw" onClick={() => this.spoofDice(["claw","claw","1","1","2","2"])}>Spoof 2 Claw</button>
-                                    </div>
+                                    {/* <button className={classes.tanStyledButton} id="advancePlayerNumber" onClick={() => this.advancePlayerNumber()}>Advance Player Number</button> */}
+                                    { this.localState.buttonPhase !== 1 ? 
+                                        <button className={classes.tanStyledButton + " " + classes.blink_me} id= "setCurrent" onClick={() => {this.setCurrentTurnPlayer()}}>Set Current Player</button>
+                                        : 
+                                        <button className={classes.tanStyledButton} id= "setCurrent" onClick={() => {this.setCurrentTurnPlayer()}}>Set Current Player</button>
+                                    }
+                                    { this.localState.buttonPhase === 1 ?
+                                        <button className={classes.tanStyledButton + " " + classes.blink_me} id="setEdo" onClick={() => {this.setEdoPlayer()}}>Set Edo Player</button>
+                                        :
+                                        <button className={classes.tanStyledButton} id="setEdo" onClick={() => {this.setEdoPlayer()}}>Set Edo Player</button>
+                                    }
+                                    {this.debugButtons()}
                                 </div>
+                                :
+                                this.debugButtons()
                                 }
                             </div>
                             </Col>
@@ -1161,13 +1162,13 @@ class NetworkShogun extends Game {
                             {/* <div className={classes.gamestate + " col-3"}> */}
                             <div>
                                 {this.localState.buttonPhase === 1 ? <div>Waiting for player to yield or not.</div> : <div className={classes.hidden}>Waiting for player to yield or not.</div>}
-                                <button id="yieldEdo" class={(this.localState.buttonPhase === 1 && this.currentPlayerNumber === this.localState.edo && !this.localState.isGameOver) ? "btn-success" : "btn-danger"} onClick={() => {this.apiYieldEdo('edo')}}>Yield Edo</button>
-                                {/* {(this.state.playersInGame.length > 4) && <button id="yieldBay" class={(this.localState.buttonPhase === 1) ? "btn-success" : "btn-danger"} onClick={() => {this.apiYieldEdo('bay')}}>Yield Edo Bay</button>} */}
-                                <button id="doneYielding" class={(this.localState.buttonPhase === 1 && this.currentPlayerNumber === this.localState.edo && !this.localState.isGameOver) ? "btn-success" : "btn-danger"} onClick={() => {this.apiDoneYielding()}}>Don't Yield</button>
+                                <button id="yieldEdo" class={(this.localState.buttonPhase === 1 && this.currentPlayerNumber === this.localState.edo && !this.localState.isGameOver) ? "btn btn-success" : "btn btn-danger"} onClick={() => {this.apiYieldEdo('edo')}}>Yield Edo</button>
+                                {/* {(this.state.playersInGame.length > 4) && <button id="yieldBay" class={(this.localState.buttonPhase === 1) ? "btn btn-success" : "btn btn-danger"} onClick={() => {this.apiYieldEdo('bay')}}>Yield Edo Bay</button>} */}
+                                <button id="doneYielding" class={(this.localState.buttonPhase === 1 && this.currentPlayerNumber === this.localState.edo && !this.localState.isGameOver) ? "btn btn-success" : "btn btn-danger"} onClick={() => {this.apiDoneYielding()}}>Don't Yield</button>
                             </div>
                             <div>
-                                <button id="clearBuy" class={(this.localState.buttonPhase === 2 && this.localState.energy[this.localState.currentTurn - 1] > 2 && this.currentPlayerNumber === this.localState.currentTurn && !this.localState.isGameOver) ? "btn-success" : "btn-danger"} onClick={() => {this.apiClearBuy()}}>Pay 2 to Clear Buy Cards</button>
-                                <button id="doneBuying" class={(this.localState.buttonPhase === 2 && this.currentPlayerNumber === this.localState.currentTurn && !this.localState.isGameOver) ? "btn-success" : "btn-danger"} onClick={() => {this.apiBuy(10)}}>Done Buying</button>
+                                <button id="clearBuy" class={(this.localState.buttonPhase === 2 && this.localState.energy[this.localState.currentTurn - 1] > 2 && this.currentPlayerNumber === this.localState.currentTurn && !this.localState.isGameOver) ? "btn btn-success" : "btn btn-danger"} onClick={() => {this.apiClearBuy()}}>Pay 2 to Clear Buy Cards</button>
+                                <button id="doneBuying" class={(this.localState.buttonPhase === 2 && this.currentPlayerNumber === this.localState.currentTurn && !this.localState.isGameOver) ? "btn btn-success" : "btn btn-danger"} onClick={() => {this.apiBuy(10)}}>Done Buying</button>
                                 <div className={classes.gamestate}>
                                 <h5><u>Cards Available For Purchase</u></h5>
                                 {this.renderBuyCard(0)}
@@ -1222,6 +1223,31 @@ class NetworkShogun extends Game {
                                     <div>
                                         <button className={classes.tanStyledButton} onClick={() => {this.apiResetGame(0)}}>Reset Current Game</button>
                                     </div>
+                                    <p>Change player numbers and restart game.</p>
+                                    <div>
+                                        <button className={classes.tanStyledButton} onClick={() => {this.apiResetGame(2)}}>Reset to 2 Players</button>
+                                        <button className={classes.tanStyledButton} onClick={() => {this.apiResetGame(4)}}>Reset to 4 Players</button>
+                                        {/* <button onClick={() => {this.apiResetGame(5)}}>Reset to 5 Players</button> */}
+                                    </div>
+                                    <div>
+                                        <button className={classes.tanStyledButton} onClick={() => {this.printState()}}>Print State</button>
+                                        <button className={classes.tanStyledButton} onClick={() => this.printLocalState()}>Print Local State</button>
+                                        <button className={classes.tanStyledButton} id="resetTests" onClick={() => this.apiResetTests()}>Reset Tests</button>
+                                    </div>
+                                    <div>
+                                        <button className={classes.tanStyledButton} onClick={() => {this.apiResetGame(0)}}>Reset Game</button>
+                                        <button className={classes.tanStyledButton} id="spoof3" onClick={() => this.spoofDice(["3","3","3","1","2","2"])}>Spoof Dice 333</button>
+                                        <button className={classes.tanStyledButton} id="spoofClaw" onClick={() => this.spoofDice(["claw","3","3","1","2","2"])}>Spoof Dice One Claw</button>
+                                        <button className={classes.tanStyledButton} id="spoofNone" onClick={() => this.spoofDice(["1","1","2","2","3","3"])}>Spoof None</button>
+                                        <button className={classes.tanStyledButton} id="spoof6Claw" onClick={() => this.spoofDice(["claw","claw","claw","claw","claw","claw"])}>Spoof Six Claw</button>
+                                        <button className={classes.tanStyledButton} id="spoofHeart" onClick={() => this.spoofDice(["heart","1","1","2","2","3"])}>Spoof Heart</button>
+                                        <button className={classes.tanStyledButton} id="spoof6Energy" onClick={() => this.spoofDice(["energy","energy","energy","energy","energy","energy"])}>Spoof 6 Energy</button>
+                                        <button className={classes.tanStyledButton} id="spoofCompleteDestruction" onClick={() => this.spoofDice(["energy","claw","heart","1","2","3"])}>Spoof Complete Destruction</button>
+                                        <button className={classes.tanStyledButton} id="spoof3Points3Energy" onClick={() => this.spoofDice(["energy","energy","energy","3","3","3"])}>Spoof 3 Energy, 3 Points</button>
+                                        <button className={classes.tanStyledButton} id="spoof2Energy" onClick={() => this.spoofDice(["energy","energy","1","1","3","3"])}>Spoof 2 Energy</button>
+                                        <button className={classes.tanStyledButton} id="spoof5Energy1Claw" onClick={() => this.spoofDice(["energy","energy","energy","energy","energy","claw"])}>Spoof 5 Energy, 1 Claw</button>
+                                        <button className={classes.tanStyledButton} id="spoof2Claw" onClick={() => this.spoofDice(["claw","claw","1","1","2","2"])}>Spoof 2 Claw</button>
+                                    </div>
                             </Col>
                             <Col>
                                 <div>
@@ -1248,9 +1274,7 @@ class NetworkShogun extends Game {
                                 <div>
                                     <button className={classes.tanStyledButton} onClick={() => {this.setup(this.maxPlayers)}}>Restart Game With New Settings</button>
                                 </div>
-                                <div>
-                                    <button className={classes.tanStyledButton} onClick={() => {this.withDebug = !this.withDebug}}>Toggle Debug Buttons</button>
-                                </div>
+                                {this.debugButtons()}
                             </div>
                         </Col>
                             <Col>
@@ -1258,7 +1282,7 @@ class NetworkShogun extends Game {
                                 <a className={"App-link"} href={TokyoRules}>King of Tokyo Full Rules</a>
                                 <h3>Short Rules</h3>
                                 <div>First to <b><u>{this.localState.winPoints} points</u></b> or last player alive wins!</div>
-                                <div>Roll dice up 3 (default) times, and then resolve when done. Dice can be saved between rolls.</div>
+                                <div>Roll dice up to 3 (default) times, and then resolve when done. Dice can be saved between rolls.</div>
                                 <div>Triple+ # dice get you points (diceValue + # over triple). Claws attack the area you're not in (Edo vs Outside) and put you in Edo if unoccupied or occupant yields to you.</div>
                                 <div>Hearts heal, but not in Edo. Energy is money to buy cards.</div>
                                 <div>If attacked in Edo, have the option to yield.</div>

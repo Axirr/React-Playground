@@ -63,6 +63,10 @@
     animation: blinker 1s linear infinite;
     color: red;
     font-weight: bold;
+    /* font-size: xx-large; */
+}
+
+.largeFont {
     font-size: xx-large;
 }
 
@@ -157,8 +161,12 @@
 }
 
 .gamebody {
-    background-color: tan;
+    height: 100%;
+    /* min-height: 100vh; */
+    background-attachment: scroll;
     background-image: url('woodGrain.jpg');
+    background-repeat: repeat;
+    background-color: tan;
 }
 
 .hands {
