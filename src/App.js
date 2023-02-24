@@ -11,6 +11,8 @@ import DeepSeaDiving from './Components/DeepSeaDiving/DeepSeaDiving';
 import NetworkLoveLetter from './Components/NetworkLoveLetter/NetworkLoveLetter'
 import NetworkShogun from './Components/Shogun/NetworkShogun'
 import Home from './Components/Home/Home'
+import DataVisualizer from './Components/DataVisualizer/DataVisualizer';
+import TestingStuff from './Components/TestingStuff/TestingStuff';
 
 class App extends Component {
 
@@ -22,6 +24,12 @@ class App extends Component {
           <Switch>
             <Route exact path="/">
               <Home />
+            </Route>
+            <Route path="/datavisualizer">
+              <DataVisualizer />
+            </Route>
+            <Route path="/testingstuff">
+              <TestingStuff />
             </Route>
             <Route path="/rps">
               <RPS />
