@@ -19,7 +19,8 @@ class NetworkShogun extends Game {
     //
     // CHANGE THESE FOR PRODUCTION 
 
-    appUrl = (process.env.NODE_ENV === 'development') ? 'development' : 'production';
+    // appUrl = (process.env.NODE_ENV === 'development') ? 'development' : 'production';
+    appUrl = "production"
 
     portnumber ='';
     hostname = 'www.scottsherlock.one';
