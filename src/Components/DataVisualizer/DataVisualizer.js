@@ -9,8 +9,8 @@ class DataVisualizer extends Component {
 
     useHttp = false;
     withDebug = false;
-    portNumber = 8000
-    hostName = '0.0.0.0'
+    portNumber = ""
+    hostName = 'www.scottsherlock.one'
 
     dataNames = [
         'programmingMinutes', 
