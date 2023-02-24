@@ -5,6 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 class DataVisualizer extends Component {
     appUrl = (process.env.NODE_ENV === 'development') ? 'development' : 'production';
+    appUrl = "production"
 
     useHttp = false;
     withDebug = false;
