@@ -12,6 +12,11 @@ class DataVisualizer extends Component {
     portNumber = ""
     hostName = 'www.scottsherlock.one'
 
+    // useHttp = true;
+    // withDebug = true;
+    // portNumber = 8000
+    // hostName = 'localhost'
+
     dataNames = [
         'programmingMinutes', 
         'insomniaRating',
@@ -48,7 +53,7 @@ class DataVisualizer extends Component {
     }
 
     apiRefreshGraph(name) {
-        const https = require('http')
+        const https = require('https')
 
         let timeGroup = document.getElementById('timeGroup').value
         let noWeekend = document.getElementById('noWeekend').value === "weekend" ? "IncludeWeekends" : "NoWeekend"
@@ -87,7 +92,7 @@ class DataVisualizer extends Component {
     }
 
     makeStaticUrl(resourceName) {
-        let httpPrefix = "http://";
+        let httpPrefix = "https://";
         let portNumber = "";
 
         // BUG initial image load will use default value regardless
@@ -95,7 +100,8 @@ class DataVisualizer extends Component {
         // if (!this.useHttp)  httpPrefix = "https://"
         if (this.portNumber !== "")  portNumber = ":" + this.portNumber;
 
-        return httpPrefix + this.hostName + portNumber + "/static/" + resourceName
+        let fullAddress = httpPrefix + this.hostName + portNumber + "/static/" + resourceName
+        return fullAddress
     }
 
     renderDataFieldNames() {
@@ -156,7 +162,7 @@ class DataVisualizer extends Component {
                         </div>
                     </Row>
                     <Row>
-                        <Col>
+                        <Col className="col-sm-4 col-12">
                             <div className={classes.gamestate}>
                                 <h2>Select Options</h2>
                                 {this.renderDataFieldNames()}
@@ -180,8 +186,8 @@ class DataVisualizer extends Component {
                                 <button className="btn btn-success" onClick={() => { this.apiRefreshGraph(document.getElementById("dataFieldName").value)}}>Render Graph</button>
                             </div>
                         </Col>
-                        <Col>
-                            <img id="graphImage" src={this.makeStaticUrl("defaultImage.png")} alt="ERROR RENDERING"></img>
+                        <Col className="col-sm-8 col-12">
+                            <img id="graphImage" src={this.makeStaticUrl("defaultImage.png")} alt="ERROR RENDERING GRAPH" className={classes.fitimage}></img>
                         </Col>
                     </Row>
                 </Container>
