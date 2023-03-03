@@ -97,16 +97,13 @@ class Game extends Component {
 
     apiGetGameState(isRefresh=false) {
         const https = require('http')
-        const cors = require('cors')
-
         const options = {
         hostname: this.hostname,
         port: this.portNumber,
         path: '/' + this.gameName + '/gamestate/' + this.gameId + "/",
-        method: 'GET',
-        accept: '*/*',
+        method: 'GET'
         }
-        
+
         const req = https.request(options, res => {
             console.log(`statusCode: ${res.statusCode}`)
             var body = '';

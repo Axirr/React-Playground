@@ -906,6 +906,7 @@ class NetworkLoveLetter extends Game {
                 <Row>
                     <div className="col col-sm-8 col-12">
                         <div className={classes.gamestate}>
+                    <div>Current Player Id: {this.playerNumber}</div>
                     {this.playerNumber === 0 ? <div className={classes.blink_me}>Need to Set Player Number</div> : null}
                     <div>Current Player Id: {this.playerNumber}</div>
                     <div>
