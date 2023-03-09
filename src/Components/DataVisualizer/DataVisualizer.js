@@ -370,7 +370,7 @@ class DataVisualizer extends Component {
                         </Col>
                         <Col className="col-sm-8 col-12">
                             <div className={classes.gamestate}>
-                                <img id="graphImage" alt="LOADING" className={classes.fitimage + classes.marginClass}></img>
+                                <img id="graphImage" alt="LOADING" src={this.makeStaticUrl("defaultImage.png")} className={classes.fitimage + classes.marginClass}></img>
                             </div>
                         </Col>
                     </Row>
