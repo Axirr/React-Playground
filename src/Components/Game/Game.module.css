@@ -238,3 +238,14 @@
     max-height: 90%;
     margin: 20px auto;
 }
+
+.marginClass {
+    margin: 10px auto;
+}
+
+.tanBackground {
+    background-color: tan;
+    border-radius: 25px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
