@@ -84,13 +84,13 @@ class DataVisualizer extends Component {
         // console.log("CHANGE BACK FOR PRODUCTION. SWITCHING SEEMS BUGGY. POSSIBLY BROWSER OR SOMETHING CACHING HTTPS.")
         // let httpProtocol = require('http');
 
-        let https;
+        let httpProtocol;
         if (this.appUrl === "development") {
             console.log("Using HTTP")
-            https = require('http')
+            httpProtocol = require('http')
         } else {
             console.log("Using HTTPS")
-            https = require('https')
+            httpProtocol = require('https')
         }
 
         // let tabId = document.getElementsByClassName(['tab-pane active'])[0].getAttribute('id')
