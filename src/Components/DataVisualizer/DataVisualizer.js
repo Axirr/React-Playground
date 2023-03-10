@@ -21,6 +21,7 @@ class DataVisualizer extends Component {
             displayModal: false,
             errorModalText: "",
             currentGraphType: "Line",
+            currentImageUrl: this.makeStaticUrl("defaultImage.png")
         }
 
         // Binding tab handler to this
@@ -132,7 +133,10 @@ class DataVisualizer extends Component {
             res.on('end', () => {
                 if (res.statusCode === 200) {
                     let newUrl = this.makeStaticUrl(body)
-                    document.getElementById("graphImage").setAttribute('src', newUrl)
+                    // document.getElementById("graphImage").setAttribute('src', newUrl)
+                    this.setState({
+                        currentImageUrl: newUrl
+                    })
                 }
             })
 
@@ -348,6 +352,16 @@ class DataVisualizer extends Component {
         )
     }
 
+    renderGraphImage(filename) {
+        return(
+            <div>
+                <div className={classes.gamestate}>
+                    <img id="graphImage" alt="LOADING" src={this.state.currentImageUrl} className={classes.fitimage + classes.marginClass}></img>
+                </div>
+            </div>
+        )
+    }
+
     handleSelectTab(key) {
         this.setState({activeOptionsTab: key})
     }
@@ -414,9 +428,7 @@ class DataVisualizer extends Component {
                             </div>
                         </Col>
                         <Col className="col-sm-8 col-12">
-                            <div className={classes.gamestate}>
-                                <img id="graphImage" alt="LOADING" src={this.makeStaticUrl("defaultImage.png")} className={classes.fitimage + classes.marginClass}></img>
-                            </div>
+                            {this.renderGraphImage(this.state.currentImageUrl)}
                         </Col>
                     </Row>
                 </Container>
