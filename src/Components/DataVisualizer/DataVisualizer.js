@@ -322,7 +322,7 @@ class DataVisualizer extends Component {
         return (
             <div>
                 <input type="checkbox" id="normalizeSelect" name="normalizeSelect"></input>
-                <label htmlFor="normalizeSelect">Normalize Data (Good for Graphing Multiple Data Sets)</label>
+                <label htmlFor="normalizeSelect">Normalize Data for same axis size</label>
             </div>
         )
     }
@@ -356,7 +356,7 @@ class DataVisualizer extends Component {
         return(
             <div>
                 <div className={classes.gamestate}>
-                    <img id="graphImage" alt="LOADING" src={this.state.currentImageUrl} className={classes.fitimage + classes.marginClass}></img>
+                    <img id="graphImage" alt="LOADING" src={this.state.currentImageUrl} className={classes.fitimage + " " + classes.marginClass}></img>
                 </div>
             </div>
         )

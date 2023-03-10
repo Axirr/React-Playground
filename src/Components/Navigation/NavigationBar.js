@@ -25,7 +25,7 @@ class NavigationBar extends Component {
                     <NavDropdown.Item href="/shogun"><b>OLD</b> Shogun of Edo</NavDropdown.Item>
                   </NavDropdown>
                   <NavDropdown title="Data Visualization">
-                    <NavDropdown.Item href="/datavisualizer">*IN PROGRESS* Personal Data Visualizer</NavDropdown.Item>
+                    <NavDropdown.Item href="/datavisualizer">Personal Data Visualizer</NavDropdown.Item>
                   </NavDropdown>
                 </Nav>
               </Navbar.Collapse>
