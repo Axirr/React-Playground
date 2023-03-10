@@ -5,8 +5,8 @@ import classes from './../Game/Game.module.css'
 import { Container, Col, Row, Modal } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/js/dist/tab'
-import Tab from 'react-bootstrap/Tab';
-import Tabs from 'react-bootstrap/Tabs';
+// import Tab from 'react-bootstrap/Tab';
+// import Tabs from 'react-bootstrap/Tabs';
 // import from 'bootstrap.js'
 
 class DataVisualizer extends Component {
@@ -20,6 +20,7 @@ class DataVisualizer extends Component {
             ],
             displayModal: false,
             errorModalText: "",
+            currentGraphType: "Line",
         }
 
         // Binding tab handler to this
@@ -28,12 +29,17 @@ class DataVisualizer extends Component {
         this.setModalMessageAndDisplay = this.setModalMessageAndDisplay.bind(this);
         this.handleDismissModal = this.handleDismissModal.bind(this);
         this.deleteDataItem = this.deleteDataItem.bind(this);
+        this.handleGraphTypeChange = this.handleGraphTypeChange.bind(this);
     }
 
     appUrl = (process.env.NODE_ENV === 'development') ? 'development' : 'production';
-    appUrl = "production"
+    // appUrl = "production"
 
-    useHttp = false;
+    // http is set as the default so that first image loads correctly before componentDidMount
+    useHttp = true;
+    httpNode = require('http')
+
+    httpPrefix = "http://"
     withDebug = false;
     portNumber = ""
     hostName = 'www.scottsherlock.one'
@@ -63,9 +69,9 @@ class DataVisualizer extends Component {
     ]
 
     graphType = [
-        "Bar",
-        "BoxPlot",
         "Line",
+        "BoxPlot",
+        "Bar",
     ]
 
     componentDidMount() {
@@ -77,50 +83,34 @@ class DataVisualizer extends Component {
             this.hostName = '0.0.0.0';
             document.getElementById('graphImage').setAttribute('src', this.makeStaticUrl("defaultImage.png"))
             // <img id="graphImage" src={this.makeStaticUrl("defaultImage.png")} alt="ERROR RENDERING GRAPH" className={classes.fitimage + classes.marginClass}></img>
+        } else {
+            this.useHttp = false;
+            this.httpNode = require('https');
+            this.httpPrefix = "https://"
         }
     }
 
     apiRefreshGraph() {
-        // console.log("CHANGE BACK FOR PRODUCTION. SWITCHING SEEMS BUGGY. POSSIBLY BROWSER OR SOMETHING CACHING HTTPS.")
-        // let httpProtocol = require('http');
+        let httpProtocol = this.httpNode;
 
-        let httpProtocol;
-        if (this.appUrl === "development") {
-            console.log("Using HTTP")
-            httpProtocol = require('http')
-        } else {
-            console.log("Using HTTPS")
-            httpProtocol = require('https')
-        }
-
-        // let tabId = document.getElementsByClassName(['tab-pane active'])[0].getAttribute('id')
         let dataNamesArray = this.state.dataToGraph;
         if (dataNamesArray.length === 0) {
             this.setModalMessageAndDisplay("No data selected to graph!")
             return;
         }
         let name = dataNamesArray.toString();
-        let tabId = this.state.activeOptionsTab;
-        let timeGroup;
-        let noWeekend;
-        let minZero;
-        let isBoxPlot;
-        let normalizeData = document.getElementById('normalizeSelect').value === "Normalize Data" ? "NormalizeData" : "NoNorm"
+        // let tabId = this.state.activeOptionsTab;
+        let timeGroup = document.getElementById('timeGroup').value
+        let noWeekend = document.getElementById('noWeekend').checked ? "NoWeekend" : "IncludeWeekends";
+        let minZero = "AutomaticZeroMin";
+        let isBoxPlot = this.state.currentGraphType;
+        let normalizeData = document.getElementById('normalizeSelect').checked ? "NormalizeData" : "NoNorm"
 
-        if (tabId === 'boxPlotOptions') {
-            timeGroup = document.getElementById('timeGroup').value
-            noWeekend = "IncludeWeekends"
-            minZero = "AutomaticZeroMin"
-            isBoxPlot = "BoxPlot";
-
-        } else if (tabId === "lineGraphOptions") {
-            isBoxPlot = "NoBoxPlot";
-            timeGroup = document.getElementById('timeGroup').value
-            noWeekend = document.getElementById('noWeekend').value === "weekend" ? "IncludeWeekends" : "NoWeekend"
-            minZero = document.getElementById('minRange').value === "minZero"? "YZeroMin" : "AutomaticZeroMin"
-        } else {
-            console.log(`Unrecognized tab key '${tabId}'. API call cancelled.`)
-            return;
+        if (this.state.currentGraphType === "BoxPlot" && this.state.dataToGraph.length > 1) {
+            this.setModalMessageAndDisplay("Multiple data not currently supported for Box Plot. Please choose other option.");
+            return
+        } else if (this.state.currentGraphType === "Line") {
+            minZero = document.getElementById('minRange').checked ? "YZeroMin" : "AutomaticZeroMin"
         }
 
         const options = {
@@ -159,7 +149,7 @@ class DataVisualizer extends Component {
         // console.log("CHANGE BACK FOR PRODUCTION. SWITCHING SEEMS BUGGY. POSSIBLY BROWSER OR SOMETHING CACHING HTTPS.")
         // let httpPrefix = "http://"
 
-        let httpPrefix = "https://";
+        // let httpPrefix = "https://";
         // if (this.appUrl === "development")  httpPrefix = "http://"
         let portNumber = "";
 
@@ -168,13 +158,13 @@ class DataVisualizer extends Component {
         // if (!this.useHttp)  httpPrefix = "https://"
         if (this.portNumber !== "")  portNumber = ":" + this.portNumber;
 
-        let fullAddress = httpPrefix + this.hostName + portNumber + "/static/" + resourceName
+        let fullAddress = this.httpPrefix + this.hostName + portNumber + "/static/" + resourceName
         return fullAddress
     }
 
     renderDataFieldNames() {
         return(
-            <div className={classes.tanBackground}>
+            <div >
                 <div className={'form-floating ' + classes.marginClass}>
                     <select className="form-select" name="dataFieldName" id="dataFieldName">
                         {this.dataNames.map( element => {
@@ -185,7 +175,6 @@ class DataVisualizer extends Component {
                     </select>
                     <label htmlFor="dataFieldName">Data Name</label>
                     <button onClick={this.addDataForGraph}>Add</button>
-                    {this.currentDataForGraph()}
                 </div>
             </div>
         )
@@ -215,26 +204,31 @@ class DataVisualizer extends Component {
 
     currentDataForGraph() {
         return(
-            this.state.dataToGraph === undefined || this.state.dataToGraph.length === 0 ?
-            <div>
-                <h6>No data selected to graph!</h6>
-            </div>
-            :
-            <div>
-                {this.state.dataToGraph.map((dataName, myIndex) => {
-                    return(
-                        <div key={dataName}>
-                            <Row>
-                                <Col>
-                                    <p>{dataName}</p>
-                                </Col>
-                                <Col>
-                                    <button onClick={() => {this.deleteDataItem(myIndex)} }>Delete</button>
-                                </Col>
-                            </Row>
-                        </div>
-                    )
-                })}
+            <div className={classes.tanBackground}>
+                <h4><u>Current Data Series To Be Graphed</u></h4>
+                {this.state.dataToGraph === undefined || this.state.dataToGraph.length === 0 ?
+                <div>
+                    <h6>No data selected to graph!</h6>
+                </div>
+                :
+                // <div className={classes.tanBackground}>
+                <div>
+                    {this.state.dataToGraph.map((dataName, myIndex) => {
+                        return(
+                            <div key={dataName}>
+                                <Row>
+                                    <Col>
+                                        <p>{dataName}</p>
+                                    </Col>
+                                    <Col>
+                                        <button onClick={() => {this.deleteDataItem(myIndex)} }>Delete</button>
+                                    </Col>
+                                </Row>
+                            </div>
+                        )
+                    })}
+                </div>
+                }
             </div>
         )
     }
@@ -260,26 +254,14 @@ class DataVisualizer extends Component {
         )
     }
 
-    renderNormalizeDropdown() {
-        return (
-            <div className={'form-floating ' + classes.marginClass}>
-                <select className='form-select' name='normalizeSelect' id='normalizeSelect'>
-                    {["Normalize Data", "Don't Normalize Data"].map((prompt) => {
-                        return (
-                            <option value={prompt} key={prompt}>{prompt}</option>
-                        )
-                    })}
-                </select>
-                <label htmlFor='normalizeSelect'>Normalize Data (Good For Graphing Multiple Series at Once)</label>
-            </div>
-        )
-    }
-
     renderGraphType() {
         return(
             <div>
                 <label htmlFor="typeOfGraph">Type of Graph</label>
-                <select name="typeOfGraph" id="typeOfGraph">
+                <select name="typeOfGraph" id="typeOfGraph" onChange={() => {
+                    let myValue = document.getElementById("typeOfGraph").value;
+                    this.handleGraphTypeChange(myValue);
+                }}>
                     {this.graphType.map((element) => {
                         return(
                             <option value={element} key={element}>{element}</option>
@@ -290,23 +272,62 @@ class DataVisualizer extends Component {
         )
     }
 
+    handleGraphTypeChange(graphType) {
+        this.setState({currentGraphType: graphType});
+    }
+
+    renderCurrentGraphOption(currentGraphName) {
+        let internalHtml;
+        if (currentGraphName === "Line") {
+            internalHtml = this.renderLineGraphOptions();
+        } else if (currentGraphName === "BoxPlot") {
+            internalHtml = this.renderBoxPlotOptions();
+        } else if (currentGraphName === "Bar") {
+            internalHtml = this.renderBarPlotOptions();
+        }
+
+        return(
+        <div>
+            {internalHtml}
+        </div>
+        )
+    }
+
     renderLineGraphOptions() {
         return(
-            <div id="normalOptions">
-                <div className={'form-floating ' + classes.marginClass}>
-                    <select className="form-select" name="noWeekend" id="noWeekend">
-                        <option value="weekend">Yes</option>
-                        <option value="noWeekend">No</option>
-                    </select>
-                    <label htmlFor="noWeekend">Include Weekends</label>
+            <div>
+                <input type="checkbox" id="minRange" name="minRange" />
+                <label htmlFor="minRange">Set minimum Y axis to 0?</label>
+            </div>
+        )
+    }
+
+    renderExcludeDataOptions() {
+        return(
+            <div className={classes.tanBackground}>
+                <div>
+                    <h6>Data Filtering</h6>
                 </div>
-                <div className={'form-floating ' + classes.marginClass}>
-                    <select className="form-select" name="minRange" id="minRange">
-                        <option value="automatic">No</option>
-                        <option value="minZero">Yes</option>
-                    </select>
-                    <label htmlFor="minRange">Set minimum Y scale to 0</label>
-                </div>
+                {this.renderIncludeWeekendsCheckbox()}
+                {this.renderNormalizeDropdown()}
+            </div>
+        )
+    }
+
+    renderNormalizeDropdown() {
+        return (
+            <div>
+                <input type="checkbox" id="normalizeSelect" name="normalizeSelect"></input>
+                <label htmlFor="normalizeSelect">Normalize Data (Good for Graphing Multiple Data Sets)</label>
+            </div>
+        )
+    }
+
+    renderIncludeWeekendsCheckbox() {
+        return(
+            <div>
+                <input type="checkbox" id="noWeekend" name="noWeekend" />
+                <label htmlFor="noWeekend">Exclude weekends?</label>
             </div>
         )
     }
@@ -314,6 +335,15 @@ class DataVisualizer extends Component {
     renderBoxPlotOptions() {
         return(
             <div id="boxOptions">
+                <h6>No Specific Options For Box Plot</h6>
+            </div>
+        )
+    }
+
+    renderBarPlotOptions() {
+        return(
+            <div id="barOptions">
+                <h6>No Specific Options for Bar Plot</h6>
             </div>
         )
     }
@@ -346,8 +376,26 @@ class DataVisualizer extends Component {
                     <Row>
                         <Col className="col-sm-4 col-12">
                             <div className={classes.gamestate}>
-                                <h2>Select Options</h2>
-                                <Tabs 
+                                <Row>
+                                    <h2>Select Options</h2>
+                                </Row>
+                                <Row>
+                                {this.currentDataForGraph()}
+                                </Row>
+                                <Row>
+                                {this.renderDataFieldNames()}
+                                </Row>
+                                <Row>
+                                {this.renderTimeGroups()} 
+                                </Row>
+                                <Row>
+                                {this.renderExcludeDataOptions()}
+                                </Row>
+                                <Row>
+                                    {this.renderGraphType()}
+                                    {this.renderCurrentGraphOption(this.state.currentGraphType)} 
+                                </Row>
+                                {/* <Tabs 
                                     defaultActiveKey='lineGraphOptions' 
                                     id='optionTabs' 
                                     onSelect={this.handleSelectTab}
@@ -359,10 +407,7 @@ class DataVisualizer extends Component {
                                     <Tab eventKey={'boxPlotOptions'} title="Box Plot Options">
                                         {this.renderBoxPlotOptions()}
                                     </Tab>
-                                </Tabs>
-                                {this.renderDataFieldNames()}
-                                {this.renderTimeGroups()} 
-                                {this.renderNormalizeDropdown()}
+                                </Tabs> */}
                             </div>
                             <div className={classes.gamestate}>
                                 <button className="btn btn-success" onClick={() => { this.apiRefreshGraph()}}>Render Graph</button>
