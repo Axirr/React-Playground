@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import 'bootstrap';
 import Badge from 'react-bootstrap/Badge';
+import Button from 'react-bootstrap/Button';
 
 import princessCard from '../LoveLetter/CardImages/princess.png';
 import kingTokyo from '../Shogun/kingOfTokyo.png';
@@ -96,6 +97,8 @@ class Home extends Component {
                                     <li>Line Graph</li>
                                     <li>Bar Graph</li>
                                     <li>Boxplot</li>
+                                    <li>Histogram</li>
+                                    <li>Linear Regression</li>
                                 </ul>
                             </div>
                             <div className='col'>
@@ -109,9 +112,7 @@ class Home extends Component {
                                 </ul>
                             </div>
                         </Row>
-                            <div className={"row btn btn-primary " +  classes.limitButtonWidth} href='/datavisualizer'>
-                                Try It Out
-                            </div>
+                                <Button variant="primary" className={classes.limitButtonWidth} href='/datavisualizer'>Try It Out</Button>
                     </div>
                 </Row>
                 <Row>
@@ -124,9 +125,7 @@ class Home extends Component {
                     </div>
                     <div className='col-sm-8 col-xs-10 my-auto'>
                         <p>Play the card game 'Love Letter' against computer opponents.</p>
-                        <div className={"btn btn-primary " +  classes.limitButtonWidth} href='/netloveletter'>
-                            Try It Out
-                        </div>
+                        <Button variant="primary" className={classes.limitButtonWidth} href='/loveletter'>Try It Out</Button>
                     </div>
                 </Row>
                 <Row>
@@ -139,9 +138,7 @@ class Home extends Component {
                     </div>
                     <div className='col-sm-8 col-xs-10 my-auto'>
                         <p>Play the board game 'King of Tokyo' against other people (or test it out on your own).</p>
-                        <div className={"btn btn-primary " +  classes.limitButtonWidth} href='/netshogun'>
-                            Try It Out
-                        </div>
+                        <Button variant="primary" className={classes.limitButtonWidth} href='/netshogun'>Try It Out</Button>
                     </div>
                 </Row>
                 <Row>

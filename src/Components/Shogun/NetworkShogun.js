@@ -1,10 +1,3 @@
-/*
-BOOTSTRAP STYLING NOT WORKING RIGHT
-    BUTTONS THAT SHOULD JUST BE COLOURED NEED A SECOND CLASS 'BTN'
-    GRID NOT WORKING IN MANY PLACES
-        E.G. CARD BUYING, BUY SHOULD BE TO THE RIGHT OF THE CARD
-    DEPLOYED VERSION IS STILL DISPLAYING AS INTENDED
-*/
 import '../../App.css';
 import { Container, Col, Row} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -15,30 +8,12 @@ import 'react-perfect-scrollbar/dist/css/styles.css';
 import PerfectScrollbar from 'react-perfect-scrollbar'
 
 class NetworkShogun extends Game {
-    //
-    //
-    // CHANGE THESE FOR PRODUCTION 
-
-    // appUrl = (process.env.NODE_ENV === 'development') ? 'development' : 'production';
-    appUrl = "production"
+    appUrl = (process.env.NODE_ENV === 'development') ? 'development' : 'production';
 
     portnumber ='';
     hostname = 'www.scottsherlock.one';
     withDebug = false
     waitTime = 1000
-    // hostname = '44.230.70.0';
-
-    // portNumber = 8000;
-    // hostname = '0.0.0.0';
-    // withDebug = true
-    // waitTime = 1000
-
-
-
-
-    // END CHANGE FOR PRODUCTION
-    //
-    //
 
     isAI = false
     gameId = 1
