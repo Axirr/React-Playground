@@ -12,10 +12,17 @@ import Button from 'react-bootstrap/Button'
 class DataVisualizer extends Component {
     constructor(props) {
         super(props);
+
+        for (let i = 0; i < this.prettyDataNames.length; i++) {
+            this.nameMap.set(this.prettyDataNames[i], this.dataNames[i])
+        }
+
+        this.prettyDataNames = this.prettyDataNames.sort(this.stringSortFunction)
+
+        let defaultData = "Programming Minutes";
+
         this.state = {
-            dataToGraph: [
-                "programmingMinutes",
-            ],
+            prettyDataToGraph: [defaultData],
             displayModal: false,
             errorModalText: "",
             currentGraphType: "Line",
@@ -37,10 +44,10 @@ class DataVisualizer extends Component {
         this.graphNameMapping.set(this.BOXPLOT_NAME, this.BOXPLOT_NAME);
         this.graphNameMapping.set(this.HISTOGRAM_NAME, this.HISTOGRAM_NAME);
         this.graphNameMapping.set(this.REGRESSION_NAME, this.API_REGRESSION_ARG);
+
     }
 
     appUrl = (process.env.NODE_ENV === 'development') ? 'development' : 'production';
-    // appUrl = "production"
 
     // http is set as the default so that first image loads correctly before componentDidMount
     // But should change this
@@ -65,7 +72,53 @@ class DataVisualizer extends Component {
         'recreationMinutes',
         'gameMinutes',
         'productiveMinutes',
+        'fitbitSleepMinutes',
+        'estimatedSleepMinutes',
+        'wakeupRestednessRating',
+        'screenIntensiveMinutes',
+        'readingMinutes',
+        'activeMinutes',
+        'clarityRating',
+        'productivityRating',
+        'exerciseMinutesNonWalking',
+        'eveningStretchRating',
+        'EBreathingQualityRating',
+        'EPostHR',
+        'ESleepyEyesRating',
+        'MBreathingQualityRating',
+        'MPostHR',
+        'MSleepyEyesRating',
+        'socialMinutes',
     ]
+
+    prettyDataNames = [
+        'Programming Minutes', 
+        'Insomnia Rating',
+        'Walking Minutes',
+        'TV Minutes',
+        'Recreation Minutes',
+        'Game Minutes',
+        'Productive Minutes',
+        'Sleep Minutes, Fitbit',
+        'Sleep Minutes, Subjective',
+        'Wakeup Restedness Rating',
+        'Screen Intensive Minutes',
+        'Reading Minutes',
+        'Active Minutes',
+        'Clarity Rating',
+        'Productivity Rating',
+        'Exercise Minutes Non-Walking',
+        'Evening Stretch Rating',
+        'Evening Breathing Quality Rating',
+        'Evening Breathing Heartrate',
+        'Evening Post-Breathing Sleepiness',
+        'Morning Breathing Quality Rating',
+        'Morning Breathing Heartrate',
+        'Morning Post-Breathing Sleepiness',
+        'Social Minutes',
+    ]
+
+    nameMap = new Map()
 
     timeGroups = [
         "Weekly",
@@ -114,7 +167,7 @@ class DataVisualizer extends Component {
             this.withDebug = true;
             this.useHttp = true;
             this.portNumber = 8000;
-            this.hostName = '0.0.0.0';
+            this.hostName = 'localhost';
             document.getElementById('graphImage').setAttribute('src', this.makeStaticUrl("defaultImage.png"))
         } else {
             this.useHttp = false;
@@ -123,17 +176,22 @@ class DataVisualizer extends Component {
         }
     }
 
+    stringSortFunction(string1, string2) {
+        if (string1 === string2)  return 0;
+        if (string1 < string2) return -1;
+        return 1
+        // (string1, string2) => string1 === string2 ? 0 : (string1 < string2 ? -1 : 1))
+    }
+
     apiRefreshGraph() {
         let httpProtocol = this.httpNode;
 
-        let dataNamesArray = this.state.dataToGraph;
+        let dataNamesArray = this.state.prettyDataToGraph;
         if (dataNamesArray.length === 0) {
             this.setModalMessageAndDisplay("No data selected to graph!")
             return;
         }
 
-
-        let name = dataNamesArray.toString();
         let timeGroup = document.getElementById('timeGroup').value
         let noWeekend = document.getElementById('noWeekend').checked ? this.API_NO_WEEKEND_ARG : this.API_INCLUDE_WEEKEND_ARG;
         let minZero = this.API_AUTOMATIC_Y_MIN_ARG;
@@ -142,15 +200,20 @@ class DataVisualizer extends Component {
         let disableLegend = document.getElementById('legendSelect').checked ? this.API_DISABLE_LEGEND_ARG : this.API_RENDER_LEGEND_ARG;
         let fromFirstValidDate = document.getElementById('startAtFirstValidDate').checked ? this.API_START_FIRST_VALID_DATE_ARG : this.API_AUTOMATIC_START_DATE_ARG;
 
-        if ((this.state.currentGraphType === this.BOXPLOT_NAME || this.state.currentGraphType === this.HISTOGRAM_NAME) && this.state.dataToGraph.length > 1) {
+        if ((this.state.currentGraphType === this.BOXPLOT_NAME || this.state.currentGraphType === this.HISTOGRAM_NAME) && this.state.prettyDataToGraph.length > 1) {
             this.setModalMessageAndDisplay(`Multiple data not currently supported for ${this.state.currentGraphType}. Please choose other option.`);
             return
-        } else if (this.state.currentGraphType === this.REGRESSION_NAME && this.state.dataToGraph.length !== 2) {
+        } else if (this.state.currentGraphType === this.REGRESSION_NAME && this.state.prettyDataToGraph.length !== 2) {
             this.setModalMessageAndDisplay(`Must have selected exactly 2 series for ${this.state.currentGraphType}. Please choose other option.`);
             return
         } else if (this.state.currentGraphType === this.LINE_NAME) {
             minZero = document.getElementById('minRange').checked ? this.API_Y_MIN_ZERO_ARG : this.API_AUTOMATIC_Y_MIN_ARG;
         }
+
+        let tempDataNamesArray = []
+        for (const dataName of dataNamesArray)  tempDataNamesArray.push(this.nameMap.get(dataName))
+        dataNamesArray = tempDataNamesArray
+        let name = dataNamesArray.toString();
 
         const options = {
             hostname: this.hostName,
@@ -216,7 +279,7 @@ class DataVisualizer extends Component {
                 {/* <div className={'form-floating ' + classes.marginClass}> */}
                 <div className='form-floating'>
                     <select className="form-select" name="dataFieldName" id="dataFieldName">
-                        {this.dataNames.map( element => {
+                        {this.prettyDataNames.map( element => {
                             return(
                                 <option value={element} key={element}>{element}</option>
                             )
@@ -230,11 +293,15 @@ class DataVisualizer extends Component {
     }
     
     addDataForGraph() {
-        let currentDataArray = [...this.state['dataToGraph']];
+        let currentDataArray = [...this.state.prettyDataToGraph];
         let dataNameToAdd = document.getElementById('dataFieldName').value;
+
         if (!currentDataArray.includes(dataNameToAdd)) {
             currentDataArray.push(dataNameToAdd);
-            this.setState({dataToGraph: currentDataArray});
+            currentDataArray.sort(this.stringSortFunction);
+            this.setState({
+                prettyDataToGraph: currentDataArray,
+            });
         } else {
             this.setModalMessageAndDisplay("Can't add data twice.");
         }
@@ -255,13 +322,13 @@ class DataVisualizer extends Component {
         return(
             <div>
                 <h4><u>Current Selected Data</u></h4>
-                {this.state.dataToGraph === undefined || this.state.dataToGraph.length === 0 ?
+                {this.state.prettyDataToGraph === undefined || this.state.prettyDataToGraph.length === 0 ?
                 <div>
                     <h6>No data selected to graph!</h6>
                 </div>
                 :
                 <div>
-                    {this.state.dataToGraph.map((dataName, myIndex) => {
+                    {this.state.prettyDataToGraph.map((dataName, myIndex) => {
                         return(
                             <div key={dataName}>
                                 <Row>
@@ -283,9 +350,9 @@ class DataVisualizer extends Component {
     }
 
     deleteDataItem(itemIndex) {
-        let arrayCopy = [...this.state.dataToGraph];
+        let arrayCopy = [...this.state.prettyDataToGraph];
         arrayCopy.splice(itemIndex, 1);
-        this.setState({dataToGraph: arrayCopy})
+        this.setState({prettyDataToGraph: arrayCopy})
     }
     
     renderTimeGroups() {
@@ -471,8 +538,8 @@ class DataVisualizer extends Component {
                                 <h2>Data to Graph</h2>
                                 {this.currentDataForGraph()}
                                 {this.renderDataFieldNames()}
-                                <Button variant="success" className={classes.topbottommargin} onClick={() => this.setState({dataToGraph: this.dataNames})}>Add All Data</Button>
-                                <Button variant="danger" className={classes.topbottommargin} onClick={() => this.setState({dataToGraph: []})}>Remove All Data</Button>
+                                <Button variant="success" className={classes.topbottommargin} onClick={() => this.setState({prettyDataToGraph: this.prettyDataNames})}>Add All Data</Button>
+                                <Button variant="danger" className={classes.topbottommargin} onClick={() => this.setState({prettyDataToGraph: []})}>Remove All Data</Button>
                             </Row>
                             <Row>
                                 <button className={"btn btn-success " + classes.limitButtonWidth} onClick={() => { this.apiRefreshGraph()}}>Render Graph
