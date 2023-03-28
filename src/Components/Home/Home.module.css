@@ -160,3 +160,62 @@ li {
     margin-top: 3px;
     margin-bottom: 3px;
 }
+
+.overflowhiddenandheight {
+    overflow: hidden;
+}
+
+.overflowscroll {
+    overflow-y: scroll;
+    height: 200px;
+    max-height: 200px;
+}
+
+/* Warning: webkit scrollbar is non-standard and may not be supported in all browsers */
+::-webkit-scrollbar {
+   width: 10px;
+ }
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 5px;
+  } 
+ 
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+} 
+
+.force100percentwidth {
+   width: 100%;
+}
+
+.force90percentwidth {
+   width: 90%;
+}
+
+.nohorizontalmargins {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+.truetopbottommargin {
+    margin-top:3px;
+    margin-bottom:3px;
+}
+
+.fixedbutton {
+    position: fixed;
+    bottom: 0px;
+    right: 0px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    width: 50px;
+    z-index: 1;
+}
+
+/* html { scroll-behavior: smooth;} */
